@@ -9,6 +9,6 @@ public class InMemoryUtenteRepository
 
     @Override
     protected String getId(Utente utente) {
-        return utente.getNome(); // o getId()
+        return utente.getUsername(); // o getId()
     }
 }

@@ -18,62 +18,62 @@ public class CreazioneHackathonHandler {
         this.utenteRepo = uRepo;
     }
 
-    /**
-     * Passo 1: Inizio creazione e assegnazione Organizzatore
-     */
-    public void iniziaCreazione(String nome, String nomeOrganizzatore) {
-        // Recuperiamo l'Utente dalla repository tramite ID (email)
-        Utente u = utenteRepo.findById(nomeOrganizzatore)
-                .orElseThrow(() -> new IllegalArgumentException("Utente organizzatore non trovato."));
+    // --- STEP 4: Verifica unicità del nome ---
+    public boolean hackathonExists(String nome) {
+        return hackathonRepo.findAll().stream()
+                .anyMatch(h -> h.getNome().equalsIgnoreCase(nome));
+    }
 
-        // Creiamo il ruolo specifico (Associazione MembroStaff -> Utente)
-        Organizzatore org = new Organizzatore(u);
+    // --- STEP 5: Crea Hackathon e associa l'Organizzatore ---
+    public void creaHackathonBase(Utente organizzatore, String nome, String regolamento, 
+                                  LocalDate scadenza, LocalDate inizio, LocalDate fine, 
+                                  String luogo, Integer maxTeam, BigDecimal premio) {
+        
+        if (hackathonExists(nome)) {
+            throw new IllegalArgumentException("Hackathon con questo nome già esistente.");
+        }
 
-        // Inizializziamo il builder
+        Organizzatore org = new Organizzatore(organizzatore);
+
         this.currentBuilder = new HackathonBuilder()
                 .assegnaNome(nome)
+                .assegnaRegolamento(regolamento)
+                .assegnaScadenza(scadenza)
+                .assegnaDataInizio(inizio)
+                .assegnaDataFine(fine)
+                .assegnaLuogo(luogo)
+                .assegnaDimMaxTeam(maxTeam)
+                .assegnaPremioImporto(premio)
                 .assegnaOrganizzatore(org);
     }
 
-    /**
-     * Passo 2: Definizione delle date del caso d'uso
-     */
-    public void impostaDate(LocalDate inizio, LocalDate fine, LocalDate scadenza) {
+    // --- STEP 8: Associa il Giudice ---
+    public void assegnaGiudice(String idGiudice) {
         checkBuilder();
-        currentBuilder.assegnaDataInizio(inizio)
-                .assegnaDataFine(fine)
-                .assegnaScadenza(scadenza);
+        Utente u = utenteRepo.findById(idGiudice)
+                .orElseThrow(() -> new IllegalArgumentException("Utente giudice non trovato."));
+        currentBuilder.assegnaGiudice(new Giudice(u));
     }
 
-    /**
-     * Passo 3: Dettagli logistici e premio
-     */
-    public void impostaDettagli(String luogo, Integer maxTeam, BigDecimal premio) {
+    // --- STEP 11: Associa i Mentori ---
+    public void assegnaMentore(String idMentore) {
         checkBuilder();
-        currentBuilder.assegnaLuogo(luogo)
-                .assegnaDimMaxTeam(maxTeam)
-                .assegnaPremioImporto(premio);
+        Utente u = utenteRepo.findById(idMentore)
+                .orElseThrow(() -> new IllegalArgumentException("Utente mentore non trovato."));
+        currentBuilder.assegnaMentore(new Mentore(u));
     }
 
-    /**
-     * Passo Finale: Conferma e salvataggio
-     */
+    // --- STEP 12: Salva nel DB ---
     public void confermaCreazione() {
         checkBuilder();
-
-        // Il builder genera l'entità Hackathon
         Hackathon nuovoHackathon = currentBuilder.build();
-
-        // La repository specifica lo salva in memoria
         hackathonRepo.save(nuovoHackathon);
-
-        // Reset della sessione di creazione
-        this.currentBuilder = null;
+        this.currentBuilder = null; // Pulisce la memoria
     }
 
     private void checkBuilder() {
         if (currentBuilder == null) {
-            throw new IllegalStateException("Nessuna creazione in corso. Chiama prima iniziaCreazione().");
+            throw new IllegalStateException("Nessuna creazione in corso.");
         }
     }
 }
