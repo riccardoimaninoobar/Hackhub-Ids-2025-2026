@@ -14,7 +14,7 @@ public class HackathonBuilder {
     private String luogo;
     private Integer dimMaxTeam;
     private Organizzatore organizzatore;
-    private List<Mentore> mentori = new ArrayList<>();;
+    private List<Mentore> mentori = new ArrayList<>();
     private Giudice giudice;
     private BigDecimal premioImporto;
 
@@ -62,6 +62,10 @@ public class HackathonBuilder {
         this.mentori.add(mentore);
         return this;
     }
+    public HackathonBuilder assegnaPremioImporto(BigDecimal premioImporto) {
+        this.premioImporto = premioImporto;
+        return this;
+    }
     public Hackathon build() {
         if (nome == null || nome.isEmpty()) {
             throw new IllegalStateException("Il nome dell'Hackathon è obbligatorio.");
@@ -74,7 +78,7 @@ public class HackathonBuilder {
         }
         return new Hackathon(
                 nome, regolamento, scadenzaIscrizioni, dataInizio,
-                dataFine, luogo, dimMaxTeam, organizzatore, mentori, giudice
+                dataFine, luogo, dimMaxTeam, organizzatore, giudice, mentori, premioImporto
         );
     }
 }

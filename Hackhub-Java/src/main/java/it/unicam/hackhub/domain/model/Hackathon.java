@@ -19,7 +19,7 @@ public class Hackathon {
     private BigDecimal premioImporto;
 
     Hackathon(String nome, String regolamento, LocalDate scadenzaIscrizioni, LocalDate dataInizio,
-              LocalDate dataFine, String luogo, Integer dimMaxTeam, Organizzatore o, List<Mentore> m, Giudice g) {
+              LocalDate dataFine, String luogo, Integer dimMaxTeam, Organizzatore o, Giudice g, List<Mentore> m, BigDecimal premioImporto) {
         this.nome = nome;
         this.regolamento = regolamento;
         this.scadenzaIscrizioni = scadenzaIscrizioni;
@@ -28,16 +28,24 @@ public class Hackathon {
         this.luogo = luogo;
         this.dimMaxTeam = dimMaxTeam;
         this.organizzatore = o;
+        this.giudice = g;
         if (m != null) {
             this.mentori.addAll(m);
         }
-        this.giudice = g;
         this.stato = "In iscrizione";
+        this.premioImporto = premioImporto;
     }
     public void aggiungiMentore(Mentore m) {
         if (m != null) {
             this.mentori.add(m);
         }
+    }
+    public String getNome() {
+        return nome;
+    }
+
+    public Organizzatore getOrganizzatore() {
+        return organizzatore;
     }
 }
 
