@@ -4,44 +4,53 @@ import it.unicam.hackhub.domain.model.User;
 import it.unicam.hackhub.presentation.controllers.CreazioneTeamCLI;
 import it.unicam.hackhub.service.CreazioneTeamHandler;
 
+import java.util.Scanner;
+
 public class Main {
     public static void main(String[] args) {
-        CreazioneTeamHandler handler = new CreazioneTeamHandler();
-        User mario = new User("mario", "m@test");
-        User luigi = new User("luigi", "l@test");
+        // Inizializziamo l'Handler che manterrà in memoria i team creati durante la sessione
+        CreazioneTeamHandler teamHandler = new CreazioneTeamHandler();
 
-        System.out.println("--- AUTO TEST (VERIFICA LOGICA) ---");
+        // Simuliamo un utente che ha appena fatto il login nell'app
+        User currentUser = new User("MarioRossi", "mario@hack.it");
 
-        // 1. Mario crea TeamAlpha (Deve funzionare)
-        try {
-            handler.createTeam("TeamAlpha", mario);
-            System.out.println("Test 1: OK");
-        } catch (Exception e) { System.out.println("Test 1: FALLITO " + e.getMessage()); }
+        Scanner scanner = new Scanner(System.in);
+        boolean appInEsecuzione = true;
 
-        // 2. Luigi crea TeamAlpha (Deve dare errore)
-        try {
-            handler.createTeam("TeamAlpha", luigi);
-            System.out.println("Test 2: FALLITO (Doveva dare errore)");
-        } catch (Exception e) { System.out.println("Test 2: OK (Errore catturato)"); }
+        System.out.println("=====================================================");
+        System.out.println("                 BENVENUTO IN HACKHUB                ");
+        System.out.println("=====================================================");
+        System.out.println("👤 Utente loggato: " + currentUser.getUsername());
 
-        // 3. Mario crea altro team (Deve dare errore)
-        try {
-            handler.createTeam("TeamBeta", mario);
-            System.out.println("Test 3: FALLITO (Mario ha gia' un team)");
-        } catch (Exception e) { System.out.println("Test 3: OK (Errore catturato)"); }
+        // Menu Interattivo dell'applicazione
+        while (appInEsecuzione) {
+            System.out.println("\n-----------------------------------------------------");
+            System.out.println("HackHub, cosa vuoi fare?");
+            System.out.println("Premi 1 per andare al caso d'uso: Crea Team");
+            System.out.println("Premi 0 per uscire dall'applicazione");
+            System.out.print("👉 Scelta: ");
 
-        
-        System.out.println("\n--- TEST MANUALE (VERIFICA FLUSSO CLI) ---");
-        CreazioneTeamCLI cli = new CreazioneTeamCLI(handler);
+            String scelta = scanner.nextLine();
 
-        // TEST CLI A: Flusso standard e controllo nome duplicato (Step 2, 3, 5, 6)
-        System.out.println("\n>>> PROVA 1 (Utente nuovo):");
-        System.out.println("Istruzioni: Inserisci 'TeamAlpha' (darà errore), poi 'TeamGamma' (ok).");
-        cli.createTeam(new User("anna", "a@test"));
+            switch (scelta) {
+                case "1":
+                    System.out.println("\n>>> AVVIO FLUSSO: CREA TEAM <<<");
+                    // Avviamo la CLI specifica per la creazione del team
+                    CreazioneTeamCLI teamCli = new CreazioneTeamCLI(teamHandler);
+                    teamCli.createTeam(currentUser);
+                    break;
 
-        // TEST CLI B: Controllo utente già in un team (Step 4)
-        System.out.println("\n>>> PROVA 2 (Utente già in un team):");
-        System.out.println("Istruzioni: Inserisci 'TeamZeta'. Il sistema lo accetterà, ma poi ti bloccherà perché Mario ha già un team.");
-        cli.createTeam(mario); // Mario ha già creato TeamAlpha nel Test 1 automatico
+                case "0":
+                    System.out.println("\nChiusura di HackHub in corso... Arrivederci!");
+                    appInEsecuzione = false; // Ferma il ciclo e chiude l'app
+                    break;
+
+                default:
+                    System.out.println("\n❌ Scelta non valida. Per favore, premi 1 o 0.");
+                    break;
+            }
+        }
+
+        scanner.close();
     }
 }
