@@ -10,20 +10,31 @@ public class CreazioneTeamHandler {
 
     private Set<Team> teams = new HashSet<>();
 
-    public boolean teamExists(String teamName) {
-        return teams.stream().anyMatch(team -> team.getName().equalsIgnoreCase(teamName));
+    // +CreazioneTeamHandler()
+    public CreazioneTeamHandler() {
     }
 
-    public Team createTeam(String teamName, User creator) {
-        if (creator.getTeam() != null) {
-            throw new IllegalStateException("User is already in a team.");
+    // +verificaTeamEsistente(nomeTeam : String)
+    public boolean verificaTeamEsistente(String nomeTeam) {
+        return teams.stream().anyMatch(team -> team.getName().equalsIgnoreCase(nomeTeam));
+    }
+
+    // +verificaUtenteInTeam(u : Utente)
+    public boolean verificaUtenteInTeam(User u) {
+        return u.getTeam() != null;
+    }
+
+    // +creaTeam(nomeTeam : String, u : Utente)
+    public Team creaTeam(String nomeTeam, User u) {
+        if (verificaUtenteInTeam(u)) {
+            throw new IllegalStateException("L'utente è già in un team.");
         }
-        if (teamExists(teamName)) {
-            throw new IllegalArgumentException("Team with this name already exists.");
+        if (verificaTeamEsistente(nomeTeam)) {
+            throw new IllegalArgumentException("Esiste già un team con questo nome.");
         }
 
-        Team newTeam = new Team(teamName);
-        newTeam.addMember(creator);
+        Team newTeam = new Team(nomeTeam);
+        newTeam.addMember(u);
         teams.add(newTeam);
         return newTeam;
     }
