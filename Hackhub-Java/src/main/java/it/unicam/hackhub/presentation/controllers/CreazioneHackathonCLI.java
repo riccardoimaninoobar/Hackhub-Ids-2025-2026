@@ -1,4 +1,4 @@
-package it.unicam.hackhub.presentation;
+package it.unicam.hackhub.presentation.controllers;
 
 import it.unicam.hackhub.application.controller.CreazioneHackathonHandler;
 import it.unicam.hackhub.domain.model.Utente;
@@ -16,7 +16,7 @@ public class CreazioneHackathonCLI {
     }
 
     public void run(Utente currentUtente) {
-        System.out.println("[1] L'Organizzatore richiede di creare un Hackathon...");
+        System.out.println("L'Organizzatore richiede di creare un Hackathon...");
 
         String nome, regolamento, luogo;
         LocalDate scadenzaIscrizioni, dataInizio, dataFine;
@@ -25,11 +25,17 @@ public class CreazioneHackathonCLI {
 
         while (true) {
             // STEP 2: Richiesta ESPLICITA di tutti i campi previsti dal diagramma
-            System.out.println("\n[2] Inserisci i dati per il nuovo Hackathon:");
+            System.out.println("\nInserisci i dati per il nuovo Hackathon:");
             
             System.out.print(" -> Nome Hackathon: ");
             nome = scanner.nextLine();
-            
+            // STEP 3: Controllo che il nome non esista
+            System.out.println("\nSYSTEM verifica l'unicità del nome...");
+            if (handler.hackathonExists(nome)) {
+                System.out.println("Errore: Un Hackathon con questo nome esiste già!");
+                System.out.println("Il flusso riparte dal punto 2 (reinserimento dati).");
+                continue;
+            }
             System.out.print(" -> Regolamento: ");
             regolamento = scanner.nextLine();
             
@@ -51,53 +57,46 @@ public class CreazioneHackathonCLI {
             System.out.print(" -> Premio in denaro (es. 1500.00): ");
             premio = new BigDecimal(scanner.nextLine());
 
-            // STEP 4: Controllo che il nome non esista
-            System.out.println("\n[4] SYSTEM verifica l'unicità del nome...");
-            if (handler.hackathonExists(nome)) {
-                System.out.println("[4.a.1] ❌ Errore: Un Hackathon con questo nome esiste già!");
-                System.out.println("[4.a.2] Il flusso riparte dal punto 2 (reinserimento dati).");
-                continue; 
-            }
             break; // Se non esiste, il ciclo si rompe e si va avanti
         }
 
-        // STEP 5: Creazione dell'oggetto e associazione organizzatore
-        System.out.println("[5] SYSTEM crea l'Hackathon in memoria e vi associa l'Organizzatore.");
+        // STEP 4: Creazione dell'oggetto e associazione organizzatore
+        System.out.println("SYSTEM crea l'Organizzatore e inizializza Hackathon builder");
         handler.creaHackathonBase(currentUtente, nome, regolamento, scadenzaIscrizioni, dataInizio, dataFine, luogo, dimMaxTeam, premio);
 
         // STEP 6 & 7: Richiesta e Inserimento Giudice
-        System.out.print("\n[6] SYSTEM richiede un Giudice.\n[7] Inserisci l'ID del Giudice (es. AnnaGiudice): ");
+        System.out.print("\nSYSTEM richiede un Giudice.\n[7] Inserisci l'ID del Giudice (es. AnnaGiudice): ");
         String idGiudice = scanner.nextLine();
         
         // STEP 8
-        System.out.println("[8] SYSTEM associa il Giudice all'Hackathon.");
+        System.out.println("SYSTEM associa il Giudice all'Hackathon.");
         handler.assegnaGiudice(idGiudice);
 
         // STEP 9 & 10: Richiesta e Inserimento Mentori (con obbligo di almeno 1)
-        System.out.println("\n[9] SYSTEM richiede di assegnare uno o più Mentori.");
+        System.out.println("\nSYSTEM richiede di assegnare uno o più Mentori.");
         int mentoriAggiunti = 0;
         
         while (true) {
-            System.out.print("[10] Inserisci ID del Mentore (premi Invio a vuoto per terminare la lista): ");
+            System.out.print("Inserisci ID del Mentore (premi Invio a vuoto per terminare la lista): ");
             String idMentore = scanner.nextLine();
             
             if (idMentore.trim().isEmpty()) {
                 if (mentoriAggiunti >= 1) {
                     break; // Condizione di "almeno uno" rispettata
                 } else {
-                    System.out.println(" ❌ Errore: Devi inserire ALMENO UN Mentore prima di proseguire!");
+                    System.out.println("Errore: Devi inserire ALMENO un Mentore prima di proseguire!");
                     continue;
                 }
             }
             
             // STEP 11
-            System.out.println("[11] SYSTEM associa il Mentore '" + idMentore + "' all'Hackathon.");
+            System.out.println("SYSTEM associa il Mentore '" + idMentore + "' all'Hackathon.");
             handler.assegnaMentore(idMentore);
             mentoriAggiunti++;
         }
 
         // STEP 12
         handler.confermaCreazione();
-        System.out.println("\n[12] ✅ SYSTEM salva i dati. Il caso d'uso termina con successo!");
+        System.out.println("\nSYSTEM salva i dati. Il caso d'uso termina con successo!");
     }
 }
