@@ -13,7 +13,7 @@ public class Main {
         CreazioneTeamHandler teamHandler = new CreazioneTeamHandler();
 
         // Simuliamo un utente che ha appena fatto il login nell'app
-        Utente currentUtente = new Utente("MarioRossi", "mario@hack.it");
+        Utente currentUtente = new Utente("MarioRossi", "mario@hack.it","a1234");
 
         Scanner scanner = new Scanner(System.in);
         boolean appInEsecuzione = true;

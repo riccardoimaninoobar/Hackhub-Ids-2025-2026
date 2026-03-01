@@ -5,12 +5,13 @@ import java.util.Objects;
 public class Utente {
     private String username;
     private String email;
-    private String password;
     private Team team;
+    private String password;
 
-    public Utente(String username, String email) {
+    public Utente(String username, String email,  String password) {
         this.username = username;
         this.email = email;
+        this.password = password;
     }
 
     public String getUsername() {
