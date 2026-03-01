@@ -1,15 +1,14 @@
 package it.unicam.hackhub.domain.model;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
-public class User {
+public class Utente {
     private String username;
     private String email;
+    private String password;
     private Team team;
 
-    public User(String username, String email) {
+    public Utente(String username, String email) {
         this.username = username;
         this.email = email;
     }
@@ -42,7 +41,7 @@ public class User {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
+        Utente user = (Utente) o;
         return Objects.equals(username, user.username);
     }
 

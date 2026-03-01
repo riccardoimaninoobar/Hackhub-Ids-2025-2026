@@ -1,7 +1,7 @@
 package it.unicam.hackhub.service;
 
 import it.unicam.hackhub.domain.model.Team;
-import it.unicam.hackhub.domain.model.User;
+import it.unicam.hackhub.domain.model.Utente;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -20,12 +20,12 @@ public class CreazioneTeamHandler {
     }
 
     // +verificaUtenteInTeam(u : Utente)
-    public boolean verificaUtenteInTeam(User u) {
+    public boolean verificaUtenteInTeam(Utente u) {
         return u.getTeam() != null;
     }
 
     // +creaTeam(nomeTeam : String, u : Utente)
-    public Team creaTeam(String nomeTeam, User u) {
+    public Team creaTeam(String nomeTeam, Utente u) {
         if (verificaUtenteInTeam(u)) {
             throw new IllegalStateException("L'utente è già in un team.");
         }

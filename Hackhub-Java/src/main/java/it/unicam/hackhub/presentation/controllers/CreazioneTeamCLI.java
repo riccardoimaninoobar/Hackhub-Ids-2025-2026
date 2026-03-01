@@ -1,7 +1,7 @@
 package it.unicam.hackhub.presentation.controllers;
 
 import it.unicam.hackhub.domain.model.Team;
-import it.unicam.hackhub.domain.model.User;
+import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.service.CreazioneTeamHandler;
 
 import java.util.Scanner;
@@ -16,7 +16,7 @@ public class CreazioneTeamCLI {
         this.scanner = new Scanner(System.in);
     }
 
-    public void createTeam(User currentUser) {
+    public void createTeam(Utente currentUtente) {
         System.out.println("[1] L'Utente richiede di creare un nuovo team...");
 
         String teamName;
@@ -37,7 +37,7 @@ public class CreazioneTeamCLI {
 
         System.out.println("\n[4] SYSTEM verifica che l'Utente non sia già Membro di un altro Team...");
         // MODIFICA: Uso il metodo dell'Handler come richiesto dal diagramma delle classi!
-        if (creazioneTeamHandler.verificaUtenteInTeam(currentUser)) {
+        if (creazioneTeamHandler.verificaUtenteInTeam(currentUtente)) {
             System.out.println("[4.a.1] ❌ Errore: Sei già membro di un altro team.");
             System.out.println("[4.a.2] Creazione team terminata con fallimento.");
             return;
@@ -47,7 +47,7 @@ public class CreazioneTeamCLI {
         System.out.println("[6] SYSTEM assegna l'utente corrente al team.");
         try {
             // MODIFICA: Uso il nuovo nome del metodo
-            Team newTeam = creazioneTeamHandler.creaTeam(teamName, currentUser);
+            Team newTeam = creazioneTeamHandler.creaTeam(teamName, currentUtente);
             System.out.println(" ✅ Team '" + newTeam.getName() + "' creato con successo!");
             System.out.println(" ✅ Sei stato aggiunto come creatore/membro del team.");
         } catch (IllegalArgumentException | IllegalStateException e) {

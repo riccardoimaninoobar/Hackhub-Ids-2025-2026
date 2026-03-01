@@ -1,8 +1,9 @@
 package it.unicam.hackhub.presentation;
 
-import it.unicam.hackhub.domain.model.User;
+import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.presentation.controllers.CreazioneTeamCLI;
 import it.unicam.hackhub.service.CreazioneTeamHandler;
+
 
 import java.util.Scanner;
 
@@ -12,7 +13,7 @@ public class Main {
         CreazioneTeamHandler teamHandler = new CreazioneTeamHandler();
 
         // Simuliamo un utente che ha appena fatto il login nell'app
-        User currentUser = new User("MarioRossi", "mario@hack.it");
+        Utente currentUtente = new Utente("MarioRossi", "mario@hack.it");
 
         Scanner scanner = new Scanner(System.in);
         boolean appInEsecuzione = true;
@@ -20,7 +21,7 @@ public class Main {
         System.out.println("=====================================================");
         System.out.println("                 BENVENUTO IN HACKHUB                ");
         System.out.println("=====================================================");
-        System.out.println("👤 Utente loggato: " + currentUser.getUsername());
+        System.out.println("👤 Utente loggato: " + currentUtente.getUsername());
 
         // Menu Interattivo dell'applicazione
         while (appInEsecuzione) {
@@ -37,7 +38,7 @@ public class Main {
                     System.out.println("\n>>> AVVIO FLUSSO: CREA TEAM <<<");
                     // Avviamo la CLI specifica per la creazione del team
                     CreazioneTeamCLI teamCli = new CreazioneTeamCLI(teamHandler);
-                    teamCli.createTeam(currentUser);
+                    teamCli.createTeam(currentUtente);
                     break;
 
                 case "0":

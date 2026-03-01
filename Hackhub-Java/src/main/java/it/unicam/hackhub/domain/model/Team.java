@@ -6,7 +6,7 @@ import java.util.Objects;
 
 public class Team {
     private String name;
-    private List<User> members;
+    private List<Utente> members;
 
     public Team(String name) {
         this.name = name;
@@ -21,11 +21,11 @@ public class Team {
         this.name = name;
     }
 
-    public List<User> getMembers() {
+    public List<Utente> getMembers() {
         return members;
     }
 
-    public void addMember(User member) {
+    public void addMember(Utente member) {
         if (!this.members.contains(member)) {
             this.members.add(member);
             member.setTeam(this);
