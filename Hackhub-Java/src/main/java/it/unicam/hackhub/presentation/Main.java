@@ -1,14 +1,16 @@
 package it.unicam.hackhub.presentation;
 
 import it.unicam.hackhub.application.controller.CreazioneHackathonHandler;
+import it.unicam.hackhub.application.controller.CreazioneTeamHandler;
+import it.unicam.hackhub.application.controller.RegistrazioneHandler;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
 import it.unicam.hackhub.infrastructure.persistence.InMemoryHackathonRepository;
 import it.unicam.hackhub.infrastructure.persistence.InMemoryUtenteRepository;
-import it.unicam.hackhub.presentation.controllers.CreazioneHackathonCLI;
-import it.unicam.hackhub.presentation.controllers.CreazioneTeamCLI;
-import it.unicam.hackhub.service.CreazioneTeamHandler;
+import it.unicam.hackhub.presentation.cli.CreazioneHackathonCLI;
+import it.unicam.hackhub.presentation.cli.CreazioneTeamCLI;
+import it.unicam.hackhub.presentation.cli.RegistrazioneCLI;
 
 import java.util.Scanner;
 
@@ -28,6 +30,9 @@ public class Main {
         UtenteRepository utenteRepo = new InMemoryUtenteRepository();
         CreazioneHackathonHandler hackathonHandler = new CreazioneHackathonHandler(hackathonRepo, utenteRepo);
         CreazioneHackathonCLI hackathonCli = new CreazioneHackathonCLI(hackathonHandler);
+
+        // UC: Registrazione Visitatore
+        RegistrazioneHandler registrazioneHandler = new RegistrazioneHandler(utenteRepo);
 
         // ===============================
         // Seed utenti (per UC Crea Hackathon)
@@ -55,7 +60,7 @@ public class Main {
         System.out.println("=====================================================");
         System.out.println("                 BENVENUTO IN HACKHUB                ");
         System.out.println("=====================================================");
-        System.out.println("👤 Utente loggato: " + currentUtente.getUsername());
+        System.out.println(" Utente loggato: " + currentUtente.getUsername());
         System.out.println("\nPromemoria ID Utenti registrati nel sistema:");
         System.out.println("- Giudice da poter assegnare: AnnaGiudice");
         System.out.println("- Mentore da poter assegnare: LuigiMentore");
@@ -65,8 +70,9 @@ public class Main {
             System.out.println("HackHub, cosa vuoi fare?");
             System.out.println("Premi 1 per andare al caso d'uso: Crea Team");
             System.out.println("Premi 2 per andare al caso d'uso: Crea Hackathon");
+            System.out.println("Premi 3 per andare al caso d'uso: Registrazione Visitatore");
             System.out.println("Premi 0 per uscire dall'applicazione");
-            System.out.print("👉 Scelta: ");
+            System.out.print(" Scelta: ");
 
             String scelta = scanner.nextLine();
 
@@ -89,13 +95,24 @@ public class Main {
                     }
                     break;
 
+                case "3":
+                    System.out.println("\n>>> AVVIO FLUSSO: REGISTRAZIONE <<<");
+                    try {
+                        RegistrazioneCLI regCli = new RegistrazioneCLI(registrazioneHandler);
+                        Utente utenteAppenaRegistrato = regCli.run();
+                        currentUtente = utenteAppenaRegistrato;
+                    } catch (Exception e) {
+                        System.err.println("\nErrore durante l'esecuzione del caso d'uso Registrazione: " + e.getMessage());
+                    }
+                    break;
+
                 case "0":
                     System.out.println("\nChiusura di HackHub in corso... Arrivederci!");
                     appInEsecuzione = false;
                     break;
 
                 default:
-                    System.out.println("\n❌ Scelta non valida. Per favore, premi 1, 2 o 0.");
+                    System.out.println("\n Scelta non valida. Per favore, premi 1, 2 o 0.");
                     break;
             }
         }
