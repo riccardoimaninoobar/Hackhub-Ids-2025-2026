@@ -3,6 +3,7 @@ package it.unicam.hackhub.presentation;
 import it.unicam.hackhub.application.controller.CreazioneHackathonHandler;
 import it.unicam.hackhub.application.controller.CreazioneTeamHandler;
 import it.unicam.hackhub.application.controller.RegistrazioneHandler;
+import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
@@ -40,6 +41,9 @@ public class Main {
 
         // Utente loggato (simulazione login)
         Utente currentUtente = new Utente("MarioRossi", "mario@hack.it", "a1234");
+        Team teamProva = new Team("teamProva");
+        teamProva.addMember(currentUtente);
+        currentUtente.setTeam(teamProva);
 
         // Utenti disponibili per assegnazione (giudice/mentore)
         Utente giudice = new Utente("AnnaGiudice", "anna@hack.it", "pass123");
