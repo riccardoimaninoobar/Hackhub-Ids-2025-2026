@@ -6,8 +6,10 @@ import it.unicam.hackhub.application.controller.RegistrazioneHandler;
 import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
+import it.unicam.hackhub.domain.repository.TeamRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
 import it.unicam.hackhub.infrastructure.persistence.InMemoryHackathonRepository;
+import it.unicam.hackhub.infrastructure.persistence.InMemoryTeamRepository;
 import it.unicam.hackhub.infrastructure.persistence.InMemoryUtenteRepository;
 import it.unicam.hackhub.presentation.cli.CreazioneHackathonCLI;
 import it.unicam.hackhub.presentation.cli.CreazioneTeamCLI;
@@ -23,7 +25,8 @@ public class Main {
         // ===============================
 
         // UC: Crea Team (in memoria, solo runtime)
-        CreazioneTeamHandler teamHandler = new CreazioneTeamHandler();
+        TeamRepository teamRepo = new InMemoryTeamRepository();
+        CreazioneTeamHandler teamHandler = new CreazioneTeamHandler(teamRepo);
         CreazioneTeamCLI teamCli = new CreazioneTeamCLI(teamHandler);
 
         // UC: Crea Hackathon (repository in memoria)
@@ -41,10 +44,11 @@ public class Main {
 
         // Utente loggato (simulazione login)
         Utente currentUtente = new Utente("MarioRossi", "mario@hack.it", "a1234");
+        /* 
         Team teamProva = new Team("teamProva");
         teamProva.addMember(currentUtente);
         currentUtente.setTeam(teamProva);
-
+        */
         // Utenti disponibili per assegnazione (giudice/mentore)
         Utente giudice = new Utente("AnnaGiudice", "anna@hack.it", "pass123");
         Utente mentore = new Utente("LuigiMentore", "luigi@hack.it", "pass123");

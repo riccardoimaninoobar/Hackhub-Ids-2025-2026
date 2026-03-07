@@ -2,21 +2,20 @@ package it.unicam.hackhub.application.controller;
 
 import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
+import it.unicam.hackhub.domain.repository.TeamRepository;
 
-import java.util.HashSet;
-import java.util.Set;
+public class CreazioneTeamHandler { 
 
-public class CreazioneTeamHandler {
-
-    private Set<Team> teams = new HashSet<>();
+    private final TeamRepository teamRepository;
 
     // +CreazioneTeamHandler()
-    public CreazioneTeamHandler() {
+    public CreazioneTeamHandler(TeamRepository teamRepository) {
+        this.teamRepository = teamRepository;
     }
 
     // +verificaTeamEsistente(nomeTeam : String)
     public boolean verificaTeamEsistente(String nomeTeam) {
-        return teams.stream().anyMatch(team -> team.getName().equalsIgnoreCase(nomeTeam));
+        return teamRepository.existsById(nomeTeam);
     }
 
     // +verificaUtenteInTeam(u : Utente)
@@ -35,7 +34,7 @@ public class CreazioneTeamHandler {
 
         Team newTeam = new Team(nomeTeam);
         newTeam.addMember(u);
-        teams.add(newTeam);
+        teamRepository.save(newTeam);
         return newTeam;
     }
 }
