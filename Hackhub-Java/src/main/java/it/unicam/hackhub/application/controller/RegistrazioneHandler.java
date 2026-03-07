@@ -17,9 +17,9 @@ public class RegistrazioneHandler {
     }
 
     // --- STEP 3: Valida i dati inseriti ---
-    public void validaDati(String nickname, String email, String password) throws IllegalArgumentException {
-        if (nickname == null || nickname.trim().isEmpty()) {
-            throw new IllegalArgumentException("Il nickname non può essere vuoto.");
+    public void validaDati(String username, String email, String password) throws IllegalArgumentException {
+        if (username == null || username.trim().isEmpty()) {
+            throw new IllegalArgumentException("Il username non può essere vuoto.");
         }
         validaEmail(email);
         if (password == null || password.length() < 4) {
@@ -28,14 +28,14 @@ public class RegistrazioneHandler {
     }
 
     // --- STEP 4: Verifica che non esista già un utente ---
-    public boolean verificaUtenteEsistente(String nickname, String email) {
+    public boolean verificaUtenteEsistente(String username, String email) {
         return utenteRepository.findAll().stream()
-                .anyMatch(u -> u.getUsername().equalsIgnoreCase(nickname) || u.getEmail().equalsIgnoreCase(email));
+                .anyMatch(u -> u.getUsername().equalsIgnoreCase(username) || u.getEmail().equalsIgnoreCase(email));
     }
 
     // --- STEP 5: Crea il nuovo utente ---
-    public Utente registraUtente(String nickname, String email, String password) {
-        Utente nuovoUtente = new Utente(nickname, email, password);
+    public Utente registraUtente(String username, String email, String password) {
+        Utente nuovoUtente = new Utente(username, email, password);
         utenteRepository.save(nuovoUtente);
         return nuovoUtente;
     }

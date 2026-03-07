@@ -20,8 +20,7 @@ public class CreazioneHackathonHandler {
 
     // --- STEP 4: Verifica unicità del nome ---
     public boolean hackathonExists(String nome) {
-        return hackathonRepo.findAll().stream()
-                .anyMatch(h -> h.getNome().equalsIgnoreCase(nome));
+        return hackathonRepo.findById(nome).isPresent();
     }
 
     // --- STEP 5: Crea Hackathon e associa l'Organizzatore ---
@@ -48,19 +47,28 @@ public class CreazioneHackathonHandler {
     }
 
     // --- STEP 8: Associa il Giudice ---
-    public void assegnaGiudice(String idGiudice) {
+    public boolean assegnaGiudice(String idGiudice) {
         checkBuilder();
-        Utente u = utenteRepo.findById(idGiudice)
-                .orElseThrow(() -> new IllegalArgumentException("Utente giudice non trovato."));
+        var optUtente = utenteRepo.findById(idGiudice);
+        if(optUtente.isEmpty()) {
+            return false;
+        }
+        Utente u = optUtente.get();
         currentBuilder.assegnaGiudice(new Giudice(u));
+        return true;
     }
 
     // --- STEP 11: Associa i Mentori ---
-    public void assegnaMentore(String idMentore) {
+    public boolean assegnaMentore(String idMentore) {
         checkBuilder();
-        Utente u = utenteRepo.findById(idMentore)
-                .orElseThrow(() -> new IllegalArgumentException("Utente mentore non trovato."));
+        var optUtente = utenteRepo.findById(idMentore);
+
+        if (optUtente.isEmpty()) {
+            return false; // il chiamante può chiedere di reinserire l'ID
+        }
+        Utente u = optUtente.get();
         currentBuilder.assegnaMentore(new Mentore(u));
+        return true;
     }
 
     // --- STEP 12: Salva nel DB ---

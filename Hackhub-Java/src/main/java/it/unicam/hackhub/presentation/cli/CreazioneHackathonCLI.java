@@ -70,7 +70,16 @@ public class CreazioneHackathonCLI {
         
         // STEP 8
         System.out.println("SYSTEM associa il Giudice all'Hackathon.");
-        handler.assegnaGiudice(idGiudice);
+        boolean ok;
+        do {
+            ok = handler.assegnaGiudice(idGiudice);
+
+            if (!ok) {
+                System.out.println("Utente non trovato, inserire id utente: ");
+                idGiudice = scanner.nextLine();
+            }
+
+        } while (!ok);
 
         // STEP 9 & 10: Richiesta e Inserimento Mentori (con obbligo di almeno 1)
         System.out.println("\nSYSTEM richiede di assegnare uno o più Mentori.");
@@ -91,8 +100,10 @@ public class CreazioneHackathonCLI {
             
             // STEP 11
             System.out.println("SYSTEM associa il Mentore '" + idMentore + "' all'Hackathon.");
-            handler.assegnaMentore(idMentore);
-            mentoriAggiunti++;
+            ok = handler.assegnaMentore(idMentore);
+            if (ok) {
+                mentoriAggiunti++;
+            } else System.out.println("Utente non trovato, inserire username corretto");
         }
 
         // STEP 12
