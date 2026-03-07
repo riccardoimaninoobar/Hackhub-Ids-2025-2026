@@ -10,31 +10,31 @@ public class RegistrazioneHandler {
         this.utenteRepository = utenteRepository;
     }
 
-    public void validaEmail(String email) {
+    // --- STEP 3: Valida i dati inseriti ---
+    private void validaDati(String username, String email, String password) {
+        if (username == null || username.trim().isEmpty()) {
+            throw new IllegalArgumentException("Lo username non può essere vuoto.");
+        }
         if (email == null || !email.contains("@")) {
             throw new IllegalArgumentException("L'e-mail inserita non è in un formato valido.");
         }
-    }
-
-    // --- STEP 3: Valida i dati inseriti ---
-    public void validaDati(String username, String email, String password) throws IllegalArgumentException {
-        if (username == null || username.trim().isEmpty()) {
-            throw new IllegalArgumentException("Il username non può essere vuoto.");
-        }
-        validaEmail(email);
         if (password == null || password.length() < 4) {
             throw new IllegalArgumentException("La password deve contenere almeno 4 caratteri.");
         }
     }
 
     // --- STEP 4: Verifica che non esista già un utente ---
-    public boolean verificaUtenteEsistente(String username, String email) {
-        return utenteRepository.findAll().stream()
-                .anyMatch(u -> u.getUsername().equalsIgnoreCase(username) || u.getEmail().equalsIgnoreCase(email));
+    private boolean verificaUtenteEsistente(String username) {
+        return utenteRepository.existsById(username);
     }
 
     // --- STEP 5: Crea il nuovo utente ---
-    public Utente registraUtente(String username, String email, String password) {
+    public Utente elaboraRegistrazione(String username, String email, String password) {
+        validaDati(username, email, password);
+
+        if (verificaUtenteEsistente(username)) {
+            throw new IllegalArgumentException("Esiste già un utente con lo stesso username o e-mail.");
+        }
         Utente nuovoUtente = new Utente(username, email, password);
         utenteRepository.save(nuovoUtente);
         return nuovoUtente;
