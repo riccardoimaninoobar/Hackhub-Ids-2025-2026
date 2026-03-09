@@ -88,7 +88,7 @@ public class Main {
                 case "1":
                     System.out.println("\n>>> AVVIO FLUSSO: CREA TEAM <<<");
                     try {
-                        teamCli.createTeam(currentUtente);
+                        teamCli.run(currentUtente);
                     } catch (Exception e) {
                         System.err.println("\nErrore durante l'esecuzione del caso d'uso Crea Team: " + e.getMessage());
                     }
