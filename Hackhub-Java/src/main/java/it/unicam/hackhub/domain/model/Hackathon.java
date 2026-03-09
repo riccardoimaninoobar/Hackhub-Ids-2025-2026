@@ -12,14 +12,14 @@ public class Hackathon {
     private final LocalDate dataFine;
     private final String luogo;
     private final Integer dimMaxTeam;
-    private final Organizzatore organizzatore;
-    private final List<Mentore> mentori = new ArrayList<>();;
-    private final Giudice giudice;
+    private final Utente organizzatore;
+    private final List<Utente> mentori = new ArrayList<>();;
+    private final Utente giudice;
     private String stato;
     private BigDecimal premioImporto;
 
     Hackathon(String nome, String regolamento, LocalDate scadenzaIscrizioni, LocalDate dataInizio,
-              LocalDate dataFine, String luogo, Integer dimMaxTeam, Organizzatore o, Giudice g, List<Mentore> m, BigDecimal premioImporto) {
+              LocalDate dataFine, String luogo, Integer dimMaxTeam, Utente o, Utente g, List<Utente> m, BigDecimal premioImporto) {
         this.nome = nome;
         this.regolamento = regolamento;
         this.scadenzaIscrizioni = scadenzaIscrizioni;
@@ -35,7 +35,7 @@ public class Hackathon {
         this.stato = "In iscrizione";
         this.premioImporto = premioImporto;
     }
-    public void aggiungiMentore(Mentore m) {
+    public void aggiungiMentore(Utente m) {
         if (m != null) {
             this.mentori.add(m);
         }
@@ -44,7 +44,7 @@ public class Hackathon {
         return nome;
     }
 
-    public Organizzatore getOrganizzatore() {
+    public Utente getOrganizzatore() {
         return organizzatore;
     }
 }

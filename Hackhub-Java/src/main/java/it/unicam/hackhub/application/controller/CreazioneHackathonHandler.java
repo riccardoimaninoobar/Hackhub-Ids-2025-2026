@@ -32,7 +32,7 @@ public class CreazioneHackathonHandler {
             throw new IllegalArgumentException("Hackathon con questo nome già esistente.");
         }
 
-        Organizzatore org = new Organizzatore(organizzatore);
+
 
         this.currentBuilder = new HackathonBuilder()
                 .assegnaNome(nome)
@@ -43,7 +43,7 @@ public class CreazioneHackathonHandler {
                 .assegnaLuogo(luogo)
                 .assegnaDimMaxTeam(maxTeam)
                 .assegnaPremioImporto(premio)
-                .assegnaOrganizzatore(org);
+                .assegnaOrganizzatore(organizzatore);
     }
 
     // --- STEP 8: Associa il Giudice ---
@@ -54,7 +54,7 @@ public class CreazioneHackathonHandler {
             return false;
         }
         Utente u = optUtente.get();
-        currentBuilder.assegnaGiudice(new Giudice(u));
+        currentBuilder.assegnaGiudice(u);
         return true;
     }
 
@@ -67,7 +67,7 @@ public class CreazioneHackathonHandler {
             return false; // il chiamante può chiedere di reinserire l'ID
         }
         Utente u = optUtente.get();
-        currentBuilder.assegnaMentore(new Mentore(u));
+        currentBuilder.assegnaMentore(u);
         return true;
     }
 

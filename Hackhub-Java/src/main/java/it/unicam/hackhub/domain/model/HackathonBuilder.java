@@ -13,9 +13,9 @@ public class HackathonBuilder {
     private LocalDate dataFine;
     private String luogo;
     private Integer dimMaxTeam;
-    private Organizzatore organizzatore;
-    private List<Mentore> mentori = new ArrayList<>();
-    private Giudice giudice;
+    private Utente organizzatore;
+    private List<Utente> mentori = new ArrayList<>();
+    private Utente giudice;
     private BigDecimal premioImporto;
 
     public HackathonBuilder() {
@@ -50,15 +50,15 @@ public class HackathonBuilder {
         this.dimMaxTeam = dimMaxTeam;
         return this;
     }
-    public HackathonBuilder assegnaOrganizzatore(Organizzatore organizzatore) {
+    public HackathonBuilder assegnaOrganizzatore(Utente organizzatore) {
         this.organizzatore = organizzatore;
         return this;
     }
-    public HackathonBuilder assegnaGiudice(Giudice giudice) {
+    public HackathonBuilder assegnaGiudice(Utente giudice) {
         this.giudice = giudice;
         return this;
     }
-    public HackathonBuilder assegnaMentore(Mentore mentore) {
+    public HackathonBuilder assegnaMentore(Utente mentore) {
         this.mentori.add(mentore);
         return this;
     }
