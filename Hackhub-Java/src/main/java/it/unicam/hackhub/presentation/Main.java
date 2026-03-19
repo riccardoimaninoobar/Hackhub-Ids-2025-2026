@@ -1,8 +1,6 @@
 package it.unicam.hackhub.presentation;
 
-import it.unicam.hackhub.application.controller.CreazioneHackathonHandler;
-import it.unicam.hackhub.application.controller.CreazioneTeamHandler;
-import it.unicam.hackhub.application.controller.RegistrazioneHandler;
+import it.unicam.hackhub.application.controller.*;
 import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
@@ -11,9 +9,7 @@ import it.unicam.hackhub.domain.repository.UtenteRepository;
 import it.unicam.hackhub.infrastructure.persistence.InMemoryHackathonRepository;
 import it.unicam.hackhub.infrastructure.persistence.InMemoryTeamRepository;
 import it.unicam.hackhub.infrastructure.persistence.InMemoryUtenteRepository;
-import it.unicam.hackhub.presentation.cli.CreazioneHackathonCLI;
-import it.unicam.hackhub.presentation.cli.CreazioneTeamCLI;
-import it.unicam.hackhub.presentation.cli.RegistrazioneCLI;
+import it.unicam.hackhub.presentation.cli.*;
 
 import java.util.Scanner;
 
@@ -23,41 +19,42 @@ public class Main {
         // ===============================
         // Inizializzazione dipendenze
         // ===============================
-
-        // UC: Crea Team (in memoria, solo runtime)
-        TeamRepository teamRepo = new InMemoryTeamRepository();
-        CreazioneTeamHandler teamHandler = new CreazioneTeamHandler(teamRepo);
-        CreazioneTeamCLI teamCli = new CreazioneTeamCLI(teamHandler);
-
-        // UC: Crea Hackathon (repository in memoria)
-        HackathonRepository hackathonRepo = new InMemoryHackathonRepository();
-        UtenteRepository utenteRepo = new InMemoryUtenteRepository();
-        CreazioneHackathonHandler hackathonHandler = new CreazioneHackathonHandler(hackathonRepo, utenteRepo);
-        CreazioneHackathonCLI hackathonCli = new CreazioneHackathonCLI(hackathonHandler);
-
-        // UC: Registrazione Visitatore
-        RegistrazioneHandler registrazioneHandler = new RegistrazioneHandler(utenteRepo);
-
         // ===============================
         // Seed utenti (per UC Crea Hackathon)
         // ===============================
 
+        // UC: Crea Hackathon (repository in memoria)
+        HackathonRepository hackathonRepo = new InMemoryHackathonRepository();
+        UtenteRepository utenteRepo = new InMemoryUtenteRepository();
         // Utente loggato (simulazione login)
-        Utente currentUtente = new Utente("MarioRossi", "mario@hack.it", "a1234");
-        /* 
-        Team teamProva = new Team("teamProva");
-        teamProva.addMember(currentUtente);
-        currentUtente.setTeam(teamProva);
-        */
+
+
         // Utenti disponibili per assegnazione (giudice/mentore)
         Utente giudice = new Utente("AnnaGiudice", "anna@hack.it", "pass123");
         Utente mentore = new Utente("LuigiMentore", "luigi@hack.it", "pass123");
+        Utente mentore2 = new Utente("GianniManni", "gianbigman@hack.it", "pass123");
+        Utente currentUtente = new Utente("rizzler","therizzlerking@hack.it", "42069");
 
         // Salvo nel repository utenti così la CLI dell'Hackathon può trovarli per ID
         utenteRepo.save(currentUtente);
         utenteRepo.save(giudice);
         utenteRepo.save(mentore);
+        utenteRepo.save(mentore2);
+        // UC: Crea Team (in memoria, solo runtime)
+        TeamRepository teamRepo = new InMemoryTeamRepository();
+        CreazioneTeamHandler teamHandler = new CreazioneTeamHandler(teamRepo);
+        CreazioneTeamCLI teamCli = new CreazioneTeamCLI(teamHandler);
 
+
+        AggiungiMentoreHandler aggiungiMentoreHandler = new AggiungiMentoreHandler(hackathonRepo, utenteRepo);
+        CreazioneHackathonHandler hackathonHandler = new CreazioneHackathonHandler(hackathonRepo, utenteRepo, aggiungiMentoreHandler);
+        CreazioneHackathonCLI hackathonCli = new CreazioneHackathonCLI(hackathonHandler);
+
+        // UC: Registrazione Visitatore
+        RegistrazioneHandler registrazioneHandler = new RegistrazioneHandler(utenteRepo);
+
+        // UC: Aggiungere Mentore
+        AggiungiMentoreHandler aggMentoreHandler = new AggiungiMentoreHandler(hackathonRepo, utenteRepo);
         // ===============================
         // Menu applicazione
         // ===============================
@@ -68,7 +65,8 @@ public class Main {
         System.out.println("=====================================================");
         System.out.println("                 BENVENUTO IN HACKHUB                ");
         System.out.println("=====================================================");
-        System.out.println(" Utente loggato: " + currentUtente.getUsername());
+//        System.out.println(" Utente loggato: " + currentUtente.getUsername());
+        currentUtente = null;
         System.out.println("\nPromemoria ID Utenti registrati nel sistema:");
         System.out.println("- Giudice da poter assegnare: AnnaGiudice");
         System.out.println("- Mentore da poter assegnare: LuigiMentore");
@@ -76,9 +74,11 @@ public class Main {
         while (appInEsecuzione) {
             System.out.println("\n-----------------------------------------------------");
             System.out.println("HackHub, cosa vuoi fare?");
-            System.out.println("Premi 1 per andare al caso d'uso: Crea Team");
-            System.out.println("Premi 2 per andare al caso d'uso: Crea Hackathon");
+            System.out.println("Premi 1 per andare al caso d'uso: Creare Team");
+            System.out.println("Premi 2 per andare al caso d'uso: Creare Hackathon");
             System.out.println("Premi 3 per andare al caso d'uso: Registrazione Visitatore");
+            System.out.println("Premi 4 per andare al caso d'uso: Aggiungere Mentore");
+            System.out.println("Premi 5 per andare al caso d'uso: Effettuare login");
             System.out.println("Premi 0 per uscire dall'applicazione");
             System.out.print(" Scelta: ");
 
@@ -113,14 +113,33 @@ public class Main {
                         System.err.println("\nErrore durante l'esecuzione del caso d'uso Registrazione: " + e.getMessage());
                     }
                     break;
+                case "4":
+                    System.out.println("\n>>> AVVIO FLUSSO: AGGIUNGERE MENTORE <<<");
+                    try {
+                        AggiungiMentoreCLI aggMentoreCli = new AggiungiMentoreCLI(aggMentoreHandler);
+                        aggMentoreCli.run(currentUtente);
 
+                    } catch (Exception e) {
+                        System.err.println("Errore durante l'esecuzione del caso d'uso Aggiungere Mentore: " + e.getMessage());
+                    }
+                    break;
+                case "5":
+                    System.out.println("\n>>> AVVIO FLUSSO: EFFETTUARE LOGIN <<<");
+                    try {
+                        LoginHandler loginHandler = new LoginHandler(utenteRepo);
+                        LoginCLI loginCli = new LoginCLI(loginHandler);
+                        currentUtente = loginCli.run();
+                    } catch (Exception e) {
+                        System.err.println("Errore durante l'esecuzione del caso d'uso Effettuare Login: " + e.getMessage());
+                    }
+                    break;
                 case "0":
                     System.out.println("\nChiusura di HackHub in corso... Arrivederci!");
                     appInEsecuzione = false;
                     break;
 
                 default:
-                    System.out.println("\n Scelta non valida. Per favore, premi 1, 2 o 0.");
+                    System.out.println("\n Scelta non valida.");
                     break;
             }
         }

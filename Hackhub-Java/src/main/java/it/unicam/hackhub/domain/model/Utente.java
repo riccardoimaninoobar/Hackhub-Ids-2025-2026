@@ -52,4 +52,7 @@ public class Utente {
     public int hashCode() {
         return Objects.hash(username);
     }
+    public boolean verificaPassword(String password) {
+        return this.password.equals(password);
+    }
 }

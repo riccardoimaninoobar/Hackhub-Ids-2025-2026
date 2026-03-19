@@ -12,10 +12,14 @@ public class CreazioneHackathonHandler {
     private final HackathonRepository hackathonRepo;
     private final UtenteRepository utenteRepo;
     private HackathonBuilder currentBuilder;
-
-    public CreazioneHackathonHandler(HackathonRepository hRepo, UtenteRepository uRepo) {
+    private AggiungiMentoreHandler aggiungiMentoreHandler;
+    private Hackathon hackathon;
+    public CreazioneHackathonHandler(HackathonRepository hRepo,
+                                     UtenteRepository uRepo,
+                                     AggiungiMentoreHandler aggMentoreHandler) {
         this.hackathonRepo = hRepo;
         this.utenteRepo = uRepo;
+        this.aggiungiMentoreHandler = aggMentoreHandler;
     }
 
     // --- STEP 4: Verifica unicità del nome ---
@@ -55,28 +59,15 @@ public class CreazioneHackathonHandler {
         }
         Utente u = optUtente.get();
         currentBuilder.assegnaGiudice(u);
-        return true;
-    }
-
-    // --- STEP 11: Associa i Mentori ---
-    public boolean assegnaMentore(String idMentore) {
-        checkBuilder();
-        var optUtente = utenteRepo.findById(idMentore);
-
-        if (optUtente.isEmpty()) {
-            return false; // il chiamante può chiedere di reinserire l'ID
-        }
-        Utente u = optUtente.get();
-        currentBuilder.assegnaMentore(u);
-        return true;
-    }
-
-    // --- STEP 12: Salva nel DB ---
-    public void confermaCreazione() {
-        checkBuilder();
-        Hackathon nuovoHackathon = currentBuilder.build();
-        hackathonRepo.save(nuovoHackathon);
+        this.hackathon = currentBuilder.build();
+        hackathonRepo.save(hackathon);
         this.currentBuilder = null; // Pulisce la memoria
+        return true;
+    }
+
+    public void assegnaMentore(String idMentore) {
+        aggiungiMentoreHandler.checkOrg(hackathon.getOrganizzatore(), hackathon.getNome());
+        aggiungiMentoreHandler.aggiungiMentore(idMentore);
     }
 
     private void checkBuilder() {

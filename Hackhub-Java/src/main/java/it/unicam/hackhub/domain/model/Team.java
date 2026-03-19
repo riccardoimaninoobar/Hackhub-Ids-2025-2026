@@ -1,16 +1,18 @@
 package it.unicam.hackhub.domain.model;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Objects;
 
 public class Team {
     private String name;
-    private List<Utente> members;
+    private final Set<Utente> members;
 
     public Team(String name) {
         this.name = name;
-        this.members = new ArrayList<>();
+        this.members = new HashSet<>();
     }
 
     public String getName() {
@@ -21,7 +23,7 @@ public class Team {
         this.name = name;
     }
 
-    public List<Utente> getMembers() {
+    public Set<Utente> getMembers() {
         return members;
     }
 
@@ -43,5 +45,9 @@ public class Team {
     @Override
     public int hashCode() {
         return Objects.hash(name);
+    }
+
+    public boolean isMembro(Utente u) {
+        return this.members.contains(u);
     }
 }

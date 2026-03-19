@@ -54,6 +54,9 @@ public class CreazioneTeamCLI {
      * Metodo principale che orchestra il flusso del caso d'uso.
      */
     public void run(Utente currentUtente) {
+        if(currentUtente == null) {
+            throw new IllegalArgumentException("Utente non loggato");
+        }
         System.out.println("[1] L'Utente richiede di creare un nuovo team...");
 
         // 1. Richiesta ed estrazione del nome del team (gestisce in automatico il ciclo di validazione)

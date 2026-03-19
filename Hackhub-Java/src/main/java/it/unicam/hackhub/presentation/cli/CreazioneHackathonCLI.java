@@ -14,10 +14,9 @@ public class CreazioneHackathonCLI {
     public CreazioneHackathonCLI(CreazioneHackathonHandler handler) {
         this.handler = handler;
     }
-    public void inserisciGiudice(){
+    public void inserisciGiudice(String idGiudice) {
         System.out.println("SYSTEM associa il Giudice all'Hackathon.");
         boolean ok;
-        String idGiudice = "";
         do {
             ok = handler.assegnaGiudice(idGiudice);
                 
@@ -28,30 +27,19 @@ public class CreazioneHackathonCLI {
 
         } while (!ok);
     }
-
-    public void inserisciMentore(){System.out.println("\nSYSTEM richiede di assegnare uno o più Mentori.");
-        int mentoriAggiunti = 0;
-        boolean ok;
-        while (true) {
-            System.out.print("Inserisci ID del Mentore (premi Invio a vuoto per terminare la lista): ");
-            String idMentore = scanner.nextLine();
-            
-            if (idMentore.trim().isEmpty()) {
-                if (mentoriAggiunti >= 1) {
-                    break; // Condizione di "almeno uno" rispettata
-                } else {
-                    System.out.println("Errore: Devi inserire ALMENO un Mentore prima di proseguire!");
-                    continue;
-                }
+    public void inserisciMentore(String idMentore) {
+        boolean ok = false;
+        do {
+            try {
+                handler.assegnaMentore(idMentore);
+                ok = true;   // successo
+            } catch (IllegalArgumentException e) {
+                System.out.println(e.getMessage());
+                System.out.print("Inserisci id utente: ");
+                idMentore = scanner.nextLine();
             }
-            
-            // STEP 11
-            System.out.println("SYSTEM associa il Mentore '" + idMentore + "' all'Hackathon.");
-            ok = handler.assegnaMentore(idMentore);
-            if (ok) {
-                mentoriAggiunti++;
-            } else System.out.println("Utente non trovato, inserire username corretto");
-        }
+
+        } while (!ok);
     }
 
     public void run(Utente currentUtente) {
@@ -106,17 +94,12 @@ public class CreazioneHackathonCLI {
         // STEP 6 & 7: Richiesta e Inserimento Giudice
         System.out.print("\nSYSTEM richiede un Giudice.\n[7] Inserisci l'ID del Giudice (es. AnnaGiudice): ");
         String idGiudice = scanner.nextLine();
-        
-        // STEP 8
-        this.inserisciGiudice();
+        this.inserisciGiudice(idGiudice);
 
         // STEP 9 & 10: Richiesta e Inserimento Mentori (con obbligo di almeno 1)
-        this.inserisciMentore();
-        
-        // STEP 11
-
-        // STEP 12
-        handler.confermaCreazione();
+        System.out.println("\n SYSTEM richiede un mentore");
+        String idMentore = scanner.nextLine();
+        this.inserisciMentore(idMentore);
         System.out.println("\nSYSTEM salva i dati. Il caso d'uso termina con successo!");
     }
 }

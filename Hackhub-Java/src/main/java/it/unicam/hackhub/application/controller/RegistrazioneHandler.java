@@ -30,7 +30,12 @@ public class RegistrazioneHandler {
 
     // --- STEP 5: Crea il nuovo utente ---
     public Utente elaboraRegistrazione(String username, String email, String password) {
-        validaDati(username, email, password);
+        try {
+            validaDati(username, email, password);
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
 
         if (verificaUtenteEsistente(username)) {
             throw new IllegalArgumentException("Esiste già un utente con lo stesso username o e-mail.");

@@ -3,7 +3,9 @@ package it.unicam.hackhub.domain.model;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class HackathonBuilder {
     private String nome;
@@ -14,12 +16,12 @@ public class HackathonBuilder {
     private String luogo;
     private Integer dimMaxTeam;
     private Utente organizzatore;
-    private List<Utente> mentori = new ArrayList<>();
+    private Set<Utente> mentori = new HashSet<>();
     private Utente giudice;
     private BigDecimal premioImporto;
 
     public HackathonBuilder() {
-        this.mentori = new ArrayList<>();
+        this.mentori = new HashSet<>();
     }
 
     public HackathonBuilder assegnaNome(String nome) {
