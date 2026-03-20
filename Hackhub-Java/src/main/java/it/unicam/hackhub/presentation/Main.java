@@ -28,6 +28,14 @@ public class Main {
         UtenteRepository utenteRepo = new InMemoryUtenteRepository();
         // Utente loggato (simulazione login)
 
+        // UC: Consultare Hackathon
+        ConsultareHackathonHandler consultareHackathonHandler = new ConsultareHackathonHandler(hackathonRepo);
+        ConsultareHackathonCLI consultareHackathonCLI = new ConsultareHackathonCLI(consultareHackathonHandler);
+
+        //UC: Carica Sottomissione
+        CaricaSottomissioneHandler caricaSottomissioneHandler = new CaricaSottomissioneHandler(hackathonRepo);
+        CaricaSottomissioneCLI caricaSottomissioneCLI = new CaricaSottomissioneCLI(caricaSottomissioneHandler);
+
 
         // Utenti disponibili per assegnazione (giudice/mentore)
         Utente giudice = new Utente("AnnaGiudice", "anna@hack.it", "pass123");
@@ -44,6 +52,9 @@ public class Main {
         TeamRepository teamRepo = new InMemoryTeamRepository();
         CreazioneTeamHandler teamHandler = new CreazioneTeamHandler(teamRepo);
         CreazioneTeamCLI teamCli = new CreazioneTeamCLI(teamHandler);
+
+        IscrizioneTeamHandler iscrizioneTeamHandler = new IscrizioneTeamHandler(hackathonRepo, teamRepo);
+        IscrizioneTeamCLI iscrizioneTeamCLI = new IscrizioneTeamCLI(iscrizioneTeamHandler);
 
 
         AggiungiMentoreHandler aggiungiMentoreHandler = new AggiungiMentoreHandler(hackathonRepo, utenteRepo);
@@ -79,6 +90,9 @@ public class Main {
             System.out.println("Premi 3 per andare al caso d'uso: Registrazione Visitatore");
             System.out.println("Premi 4 per andare al caso d'uso: Aggiungere Mentore");
             System.out.println("Premi 5 per andare al caso d'uso: Effettuare login");
+            System.out.println("Premi 6 per andare al caso d'uso: Consultare Hackathon");
+            System.out.println("Premi 7 per andare al caso d'uso: Iscrivere Team ad Hackathon");
+            System.out.println("Premi 8 per andare al caso d'uso: Caricare Sottomissione");
             System.out.println("Premi 0 per uscire dall'applicazione");
             System.out.print(" Scelta: ");
 
@@ -131,6 +145,44 @@ public class Main {
                         currentUtente = loginCli.run();
                     } catch (Exception e) {
                         System.err.println("Errore durante l'esecuzione del caso d'uso Effettuare Login: " + e.getMessage());
+                    }
+                    break;
+                case "6":
+                    System.out.println("\n>>> AVVIO FLUSSO: CONSULTARE HACKATHON <<<");
+                    try {
+                        consultareHackathonCLI.consultaHackathon();
+                    } catch (Exception e) {
+                        System.err.println(
+                         "\nErrore durante l'esecuzione del caso d'uso Consultare Hackathon: "
+                        + e.getMessage()
+                         );
+                    }
+                    break;
+                case "7":
+                    System.out.println("\n>>> AVVIO FLUSSO: ISCRIVERE TEAM AD HACKATHON <<<");
+                    try {
+                         if (currentUtente == null || currentUtente.getTeam() == null) {
+                            System.out.println("Devi essere autenticato e avere un team per iscriverti.");
+                         } else {
+                                    String teamId = currentUtente.getTeam().getName(); // TeamRepository usa il nome come ID
+                                    iscrizioneTeamCLI.iscriviTeam(teamId);
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Errore durante l'esecuzione del caso d'uso Iscrivere Team ad Hackathon: "
+                        + e.getMessage());
+                    }
+                    break;
+                case "8":
+                    System.out.println("\n>>> AVVIO FLUSSO: CARICARE SOTTOMISSIONE <<<");
+                    try {
+                        if (currentUtente == null || currentUtente.getTeam() == null) {
+                            System.out.println("Devi essere autenticato e avere un team per caricare una sottomissione.");
+                        } else {
+                            caricaSottomissioneCLI.caricaSottomissione(currentUtente.getTeam());
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Errore durante l'esecuzione del caso d'uso Caricare Sottomissione: "
+                        + e.getMessage());
                     }
                     break;
                 case "0":

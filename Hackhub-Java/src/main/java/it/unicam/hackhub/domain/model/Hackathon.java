@@ -18,6 +18,7 @@ public class Hackathon {
     private String stato;
     private BigDecimal premioImporto;
     private Set<Team> teamPartecipanti = new HashSet<>();
+    private final Set<Sottomissione> sottomissioni = new HashSet<>();
 
     Hackathon(String nome, String regolamento, LocalDate scadenzaIscrizioni, LocalDate dataInizio,
               LocalDate dataFine, String luogo, Integer dimMaxTeam, Utente o, Utente g, Set<Utente> m, BigDecimal premioImporto) {
@@ -49,6 +50,10 @@ public class Hackathon {
         return organizzatore;
     }
 
+    public Set<Sottomissione> getSottomissioni() {
+    return new HashSet<>(sottomissioni); // copia difensiva
+    }
+
     public boolean isOrganizzatore(Utente u) {
         if(u == null) {
             throw new IllegalArgumentException("utente nullo");
@@ -78,6 +83,24 @@ public class Hackathon {
             }
         }
         return false;
+    }
+
+    public String getStato() {
+    return stato;
+    }
+
+    public void aggiungiTeam(Team team) {
+        if (team == null) {
+            throw new IllegalArgumentException("team nullo");
+        }
+        this.teamPartecipanti.add(team);
+    }
+
+    public void aggiungiSottomissione(Sottomissione sottomissione) {
+        if (sottomissione == null || utentePartecipante(sottomissione.getTeam().getMembers().iterator().next())) {
+        throw new IllegalArgumentException("Sottomissione non valida per questo hackathon");
+        }
+        this.sottomissioni.add(sottomissione);
     }
 }
 
