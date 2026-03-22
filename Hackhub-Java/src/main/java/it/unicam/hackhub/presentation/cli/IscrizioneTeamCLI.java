@@ -1,47 +1,34 @@
 package it.unicam.hackhub.presentation.cli;
 
+import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.application.controller.IscrizioneTeamHandler;
-
 import java.util.Scanner;
 
 public class IscrizioneTeamCLI {
-
     private final IscrizioneTeamHandler handler;
-    private final Scanner scanner;
+    private final Sessione sessione;
+    private final Scanner scanner = new Scanner(System.in);
 
-    public IscrizioneTeamCLI(IscrizioneTeamHandler handler) {
+    public IscrizioneTeamCLI(IscrizioneTeamHandler handler, Sessione sessione) {
         this.handler = handler;
-        this.scanner = new Scanner(System.in);
+        this.sessione = sessione;
     }
 
-    // entry point dal menu: l'utente richiede iscriviTeam(teamId)
-    public void iscriviTeam(String teamId) {
-        System.out.println("\n>>> ISCRIVI TEAM AD HACKATHON <<<");
+    public void iscriviTeam() {
+        if (sessione.getUtenteCorrente() == null || sessione.getUtenteCorrente().getTeam() == null) {
+            System.out.println("Errore: Devi essere loggato e far parte di un team per iscriverti.");
+            return;
+        }
 
-        // "Inserisci nome dell'Hackathon"
+        System.out.println("\n>>> ISCRIVI TEAM AD HACKATHON <<<");
         System.out.print("Inserisci nome dell'Hackathon: ");
         String nomeHackathon = scanner.nextLine();
 
         try {
-            // se la verifica va a buon fine, avvia effettiva iscrizione
-            handler.iscriviTeamHandler(nomeHackathon, teamId);
-
-            // mostra "Iscrizione avvenuta con successo"
+            handler.iscriviTeamHandler(nomeHackathon);
             System.out.println("Iscrizione avvenuta con successo.");
-        } catch (IllegalArgumentException e) {
-            // Hackathon inesistente, Team inesistente, ecc.
-            if ("Hackathon inesistente".equals(e.getMessage())) {
-                System.out.println("Hackathon inesistente.");
-            } else {
-                mostraErrore(e.getMessage());
-            }
-        } catch (IllegalStateException e) {
-            // Eccezione("Non puoi iscriverti a questo Hackathon")
-            mostraErrore(e.getMessage());
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            System.out.println("Errore: " + e.getMessage());
         }
-    }
-
-    private void mostraErrore(String message) {
-        System.out.println("Errore: " + message);
     }
 }

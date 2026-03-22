@@ -1,16 +1,19 @@
 package it.unicam.hackhub.application.controller;
+
+import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
 
 public class RegistrazioneHandler {
 
     private final UtenteRepository utenteRepository;
+    private final Sessione sessione; // AGGIUNTA
 
-    public RegistrazioneHandler(UtenteRepository utenteRepository) {
+    public RegistrazioneHandler(UtenteRepository utenteRepository, Sessione sessione) {
         this.utenteRepository = utenteRepository;
+        this.sessione = sessione;
     }
 
-    // --- STEP 3: Valida i dati inseriti ---
     private void validaDati(String username, String email, String password) {
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("Lo username non può essere vuoto.");
@@ -23,25 +26,26 @@ public class RegistrazioneHandler {
         }
     }
 
-    // --- STEP 4: Verifica che non esista già un utente ---
     private boolean verificaUtenteEsistente(String username) {
         return utenteRepository.existsById(username);
     }
 
-    // --- STEP 5: Crea il nuovo utente ---
-    public Utente elaboraRegistrazione(String username, String email, String password) {
+    public void elaboraRegistrazione(String username, String email, String password) {
         try {
             validaDati(username, email, password);
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
-            return null;
         }
 
         if (verificaUtenteEsistente(username)) {
             throw new IllegalArgumentException("Esiste già un utente con lo stesso username o e-mail.");
         }
+
         Utente nuovoUtente = new Utente(username, email, password);
         utenteRepository.save(nuovoUtente);
-        return nuovoUtente;
+
+        // AUTO-LOGIN: l'utente appena registrato diventa quello loggato
+        sessione.setUtenteCorrente(nuovoUtente);
+
     }
 }

@@ -1,46 +1,46 @@
 package it.unicam.hackhub.presentation.cli;
 
+import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.application.controller.AggiungiMentoreHandler;
-import it.unicam.hackhub.domain.model.Utente;
-
 import java.util.Scanner;
 
 public class AggiungiMentoreCLI {
-     private final AggiungiMentoreHandler handler;
-     private final Scanner scanner = new Scanner(System.in);
+    private final AggiungiMentoreHandler handler;
+    private final Sessione sessione;
+    private final Scanner scanner = new Scanner(System.in);
 
-     public AggiungiMentoreCLI(AggiungiMentoreHandler handler) {
-         this.handler = handler;
-     }
+    public AggiungiMentoreCLI(AggiungiMentoreHandler handler, Sessione sessione) {
+        this.handler = handler;
+        this.sessione = sessione;
+    }
 
+    public void run() {
+        if (sessione.getUtenteCorrente() == null) {
+            System.out.println("Errore: Devi effettuare il login.");
+            return;
+        }
 
-     public void run(Utente currentUtente) {
-          System.out.println("Inserisci nome dell'hackathon:");
-          String nomeHackathon = scanner.nextLine();
-          richiediInserimentoMentore(currentUtente, nomeHackathon);
-         boolean ok = false;
-         while (!ok) {
-             System.out.println("Inserire username per mentore");
-             String username = scanner.nextLine();
-             try {
-                 inserisciMentore(username);
-                 ok = true;
-             } catch (IllegalArgumentException e) {
-                 System.out.println(e.getMessage());
-             }
-         }
-     }
+        System.out.println("\n>>> AGGIUNGI MENTORE <<<");
+        System.out.print("Inserisci nome dell'hackathon: ");
+        String nomeHackathon = scanner.nextLine();
 
-     public void richiediInserimentoMentore(Utente utente, String nomeHackathon) {
-         try {
-             handler.checkOrg(utente, nomeHackathon);
-         } catch (Exception e) {
-             System.out.println(e.getMessage());
-         }
-     }
-     public void inserisciMentore(String username){
-         handler.aggiungiMentore(username);
+        try {
+            handler.checkOrg(nomeHackathon);
+        } catch (Exception e) {
+            System.out.println("Errore Autorizzazione: " + e.getMessage());
+            return;
+        }
 
-     }
-
+        while (true) {
+            System.out.print("Inserire username del mentore da aggiungere: ");
+            String username = scanner.nextLine();
+            try {
+                handler.aggiungiMentore(username);
+                System.out.println("Mentore aggiunto correttamente!");
+                break;
+            } catch (IllegalArgumentException e) {
+                System.out.println("Errore: " + e.getMessage());
+            }
+        }
+    }
 }

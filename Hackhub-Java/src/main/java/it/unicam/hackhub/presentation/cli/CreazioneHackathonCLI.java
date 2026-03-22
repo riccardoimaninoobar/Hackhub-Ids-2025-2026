@@ -1,8 +1,6 @@
 package it.unicam.hackhub.presentation.cli;
 
 import it.unicam.hackhub.application.controller.CreazioneHackathonHandler;
-import it.unicam.hackhub.domain.model.Utente;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Scanner;
@@ -14,92 +12,105 @@ public class CreazioneHackathonCLI {
     public CreazioneHackathonCLI(CreazioneHackathonHandler handler) {
         this.handler = handler;
     }
-    public void inserisciGiudice(String idGiudice) {
-        System.out.println("SYSTEM associa il Giudice all'Hackathon.");
-        boolean ok;
-        do {
-            ok = handler.assegnaGiudice(idGiudice);
-                
-            if (!ok) {
-                System.out.println("Utente non trovato, inserire id utente: ");
-                idGiudice = scanner.nextLine();
-            }
 
-        } while (!ok);
-    }
-    public void inserisciMentore(String idMentore) {
-        boolean ok = false;
-        do {
-            try {
-                handler.assegnaMentore(idMentore);
-                ok = true;   // successo
-            } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage());
-                System.out.print("Inserisci id utente: ");
-                idMentore = scanner.nextLine();
-            }
+    // Il metodo run() simula le azioni umane (l'Organizzatore che legge lo schermo e digita)
+    public void run() {
+        try {
+            // 1. L'Organizzatore richiede di iniziare
+            richiediInserimentoHackathon();
+        } catch (IllegalStateException e) {
+            System.out.println("Errore: " + e.getMessage());
+            return; // Early Exit (Fragment break)
+        }
 
-        } while (!ok);
-    }
-
-    public void run(Utente currentUtente) {
-        System.out.println("L'Organizzatore richiede di creare un Hackathon...");
-
+        System.out.println("\n>>> CREA HACKATHON <<<");
         String nome, regolamento, luogo;
         LocalDate scadenzaIscrizioni, dataInizio, dataFine;
         Integer dimMaxTeam;
         BigDecimal premio;
 
         while (true) {
-            // STEP 2: Richiesta ESPLICITA di tutti i campi previsti dal diagramma
-            System.out.println("\nInserisci i dati per il nuovo Hackathon:");
-            
             System.out.print(" -> Nome Hackathon: ");
             nome = scanner.nextLine();
-            // STEP 3: Controllo che il nome non esista
-            System.out.println("\nSYSTEM verifica l'unicità del nome...");
-            if (handler.hackathonExists(nome)) {
+
+            // 2. L'Organizzatore inserisce il nome
+            boolean esiste = inserisciNomeHackathon(nome);
+            if (esiste) {
                 System.out.println("Errore: Un Hackathon con questo nome esiste già!");
-                System.out.println("Il flusso riparte dal punto 2 (reinserimento dati).");
                 continue;
             }
+
             System.out.print(" -> Regolamento: ");
             regolamento = scanner.nextLine();
-            
             System.out.print(" -> Data scadenza iscrizioni (es. 2025-05-01): ");
             scadenzaIscrizioni = LocalDate.parse(scanner.nextLine());
-            
             System.out.print(" -> Data inizio (es. 2025-06-01): ");
             dataInizio = LocalDate.parse(scanner.nextLine());
-            
             System.out.print(" -> Data fine (es. 2025-06-03): ");
             dataFine = LocalDate.parse(scanner.nextLine());
-            
             System.out.print(" -> Luogo: ");
             luogo = scanner.nextLine();
-            
             System.out.print(" -> Dimensione massima del team (es. 5): ");
             dimMaxTeam = Integer.valueOf(scanner.nextLine());
-            
             System.out.print(" -> Premio in denaro (es. 1500.00): ");
             premio = new BigDecimal(scanner.nextLine());
-
-            break; // Se non esiste, il ciclo si rompe e si va avanti
+            break;
         }
 
-        // STEP 4: Creazione dell'oggetto e associazione organizzatore
-        System.out.println("SYSTEM crea l'Organizzatore e inizializza Hackathon builder");
-        handler.creaHackathonBase(currentUtente, nome, regolamento, scadenzaIscrizioni, dataInizio, dataFine, luogo, dimMaxTeam, premio);
+        // 3. L'Organizzatore inserisce il resto dei dati
+        inserisciAltriDati(nome, regolamento, scadenzaIscrizioni, dataInizio, dataFine, luogo, dimMaxTeam, premio);
 
-        // STEP 6 & 7: Richiesta e Inserimento Giudice
-        System.out.print("\nSYSTEM richiede un Giudice.\n[7] Inserisci l'ID del Giudice (es. AnnaGiudice): ");
-        String idGiudice = scanner.nextLine();
-        this.inserisciGiudice(idGiudice);
+        boolean okGiudice = false;
+        while (!okGiudice) {
+            System.out.print("\nInserisci l'ID del Giudice (es. AnnaGiudice): ");
+            String idGiudice = scanner.nextLine();
 
-        // STEP 9 & 10: Richiesta e Inserimento Mentori (con obbligo di almeno 1)
-        System.out.println("\n SYSTEM richiede un mentore");
-        String idMentore = scanner.nextLine();
-        this.inserisciMentore(idMentore);
-        System.out.println("\nSYSTEM salva i dati. Il caso d'uso termina con successo!");
+            // 4. L'Organizzatore inserisce il giudice
+            okGiudice = inserisciGiudice(idGiudice);
+            if (!okGiudice) System.out.println("Giudice non trovato, riprova.");
+        }
+
+        // 5. Blocco "Aggiungere Mentore Sequence Diagram"
+        boolean okMentore = false;
+        while (!okMentore) {
+            System.out.print("\nInserisci l'ID di un Mentore (es. LuigiMentore): ");
+            try {
+                inserisciMentore(scanner.nextLine());
+                okMentore = true;
+            } catch (Exception e) {
+                System.out.println("Errore Mentore: " + e.getMessage());
+            }
+        }
+        System.out.println("\nHackathon creato e salvato con successo!");
+    }
+
+    // =====================================================================
+    // METODI MAPPATI ESATTAMENTE SUL SEQUENCE DIAGRAM (Frecce in entrata)
+    // =====================================================================
+
+    public void richiediInserimentoHackathon() {
+        handler.checkPrerequisiti();
+    }
+
+    public boolean inserisciNomeHackathon(String nome) {
+        // Corrisponde alla freccia "hackathonPresente(nome)" verso l'Handler
+        return handler.hackathonExists(nome);
+    }
+
+    public void inserisciAltriDati(String nome, String regolamento, LocalDate scadenzaIscrizioni,
+                                   LocalDate dataInizio, LocalDate dataFine, String luogo,
+                                   Integer dimMaxTeam, BigDecimal premio) {
+        // Corrisponde alla freccia "creaHackathon(dati)" verso l'Handler
+        handler.creaHackathonBase(nome, regolamento, scadenzaIscrizioni, dataInizio, dataFine, luogo, dimMaxTeam, premio);
+    }
+
+    public boolean inserisciGiudice(String username) {
+        // Corrisponde alla freccia "assegnaGiudice(username)" verso l'Handler
+        return handler.assegnaGiudice(username);
+    }
+
+    // Per gestire il Fragment "Ref" dell'aggiunta mentore
+    public void inserisciMentore(String username) {
+        handler.assegnaMentore(username);
     }
 }

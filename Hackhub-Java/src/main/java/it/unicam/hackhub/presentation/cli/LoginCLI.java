@@ -1,8 +1,6 @@
 package it.unicam.hackhub.presentation.cli;
 
 import it.unicam.hackhub.application.controller.LoginHandler;
-import it.unicam.hackhub.domain.model.Utente;
-
 import java.util.Scanner;
 
 public class LoginCLI {
@@ -13,23 +11,21 @@ public class LoginCLI {
         this.handler = handler;
     }
 
-    public Utente run() {
+    public void run() {
+        System.out.println("\n>>> EFFETTUA LOGIN <<<");
         System.out.println("Inserire username:");
         String username = scanner.nextLine();
         System.out.println("Inserire password:");
         String password = scanner.nextLine();
-        Utente utente = effettuaLogin(username, password);
-        if(utente != null) {
-            System.out.println("Utente loggato");
-        }
-        return utente;
-    }
-    public Utente effettuaLogin(String username, String password) {
+
         try {
-            return handler.elaboraLogin(username, password);
+            effettuaLogin(username, password);
+            System.out.println("Login effettuato correttamente!");
         } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
-            return null;
+            System.out.println("Errore: " + e.getMessage());
         }
+    }
+    public void effettuaLogin(String username, String password) {
+        handler.elaboraLogin(username, password);
     }
 }

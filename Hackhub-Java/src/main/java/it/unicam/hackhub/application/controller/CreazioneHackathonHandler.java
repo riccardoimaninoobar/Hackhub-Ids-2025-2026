@@ -1,5 +1,6 @@
 package it.unicam.hackhub.application.controller;
 
+import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.*;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
@@ -14,29 +15,43 @@ public class CreazioneHackathonHandler {
     private HackathonBuilder currentBuilder;
     private AggiungiMentoreHandler aggiungiMentoreHandler;
     private Hackathon hackathon;
+
+    private final Sessione sessione; // AGGIUNTA
+
     public CreazioneHackathonHandler(HackathonRepository hRepo,
                                      UtenteRepository uRepo,
-                                     AggiungiMentoreHandler aggMentoreHandler) {
+                                     AggiungiMentoreHandler aggMentoreHandler,
+                                     Sessione sessione) {
         this.hackathonRepo = hRepo;
         this.utenteRepo = uRepo;
         this.aggiungiMentoreHandler = aggMentoreHandler;
+        this.sessione = sessione;
     }
 
-    // --- STEP 4: Verifica unicità del nome ---
+    public void checkPrerequisiti() {
+        if (sessione.getUtenteCorrente() == null) {
+            throw new IllegalStateException("Devi effettuare il login per poter creare un Hackathon.");
+        }
+    }
+
     public boolean hackathonExists(String nome) {
         return hackathonRepo.findById(nome).isPresent();
     }
 
-    // --- STEP 5: Crea Hackathon e associa l'Organizzatore ---
-    public void creaHackathonBase(Utente organizzatore, String nome, String regolamento, 
-                                  LocalDate scadenza, LocalDate inizio, LocalDate fine, 
+    // RIMOSSO: il parametro "Utente organizzatore" non è più passato dalla CLI
+    public void creaHackathonBase(String nome, String regolamento,
+                                  LocalDate scadenza, LocalDate inizio, LocalDate fine,
                                   String luogo, Integer maxTeam, BigDecimal premio) {
-        
+
+        // L'organizzatore è colui che sta effettuando l'operazione in sessione
+        Utente organizzatore = sessione.getUtenteCorrente();
+        if (organizzatore == null) {
+            throw new IllegalStateException("Devi effettuare il login per creare un Hackathon.");
+        }
+
         if (hackathonExists(nome)) {
             throw new IllegalArgumentException("Hackathon con questo nome già esistente.");
         }
-
-
 
         this.currentBuilder = new HackathonBuilder()
                 .assegnaNome(nome)
@@ -50,7 +65,6 @@ public class CreazioneHackathonHandler {
                 .assegnaOrganizzatore(organizzatore);
     }
 
-    // --- STEP 8: Associa il Giudice ---
     public boolean assegnaGiudice(String idGiudice) {
         checkBuilder();
         var optUtente = utenteRepo.findById(idGiudice);
@@ -61,12 +75,12 @@ public class CreazioneHackathonHandler {
         currentBuilder.assegnaGiudice(u);
         this.hackathon = currentBuilder.build();
         hackathonRepo.save(hackathon);
-        this.currentBuilder = null; // Pulisce la memoria
+        this.currentBuilder = null;
         return true;
     }
 
     public void assegnaMentore(String idMentore) {
-        aggiungiMentoreHandler.checkOrg(hackathon.getOrganizzatore(), hackathon.getNome());
+        aggiungiMentoreHandler.checkOrg(hackathon.getNome()); // Aggiornato secondo il tuo refactoring di AggiungiMentoreHandler
         aggiungiMentoreHandler.aggiungiMentore(idMentore);
     }
 

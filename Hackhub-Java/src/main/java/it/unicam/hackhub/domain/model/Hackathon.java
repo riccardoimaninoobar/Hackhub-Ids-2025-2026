@@ -97,7 +97,7 @@ public class Hackathon {
     }
 
     public void aggiungiSottomissione(Sottomissione sottomissione) {
-        if (sottomissione == null || utentePartecipante(sottomissione.getTeam().getMembers().iterator().next())) {
+        if (sottomissione == null || !utentePartecipante(sottomissione.getTeam().getMembers().iterator().next())) {
         throw new IllegalArgumentException("Sottomissione non valida per questo hackathon");
         }
         this.sottomissioni.add(sottomissione);

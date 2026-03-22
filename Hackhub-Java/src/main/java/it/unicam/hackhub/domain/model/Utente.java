@@ -55,4 +55,7 @@ public class Utente {
     public boolean verificaPassword(String password) {
         return this.password.equals(password);
     }
+    public boolean hasTeam() {
+        return this.team != null;
+    }
 }

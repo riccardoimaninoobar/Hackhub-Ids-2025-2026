@@ -1,201 +1,164 @@
 package it.unicam.hackhub.presentation;
 
+import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.application.controller.*;
-import it.unicam.hackhub.domain.model.Team;
+import it.unicam.hackhub.domain.model.Hackathon;
+import it.unicam.hackhub.domain.model.HackathonBuilder;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
+import it.unicam.hackhub.domain.repository.InvitoRepository;
 import it.unicam.hackhub.domain.repository.TeamRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
 import it.unicam.hackhub.infrastructure.persistence.InMemoryHackathonRepository;
+import it.unicam.hackhub.infrastructure.persistence.InMemoryInvitoRepository;
 import it.unicam.hackhub.infrastructure.persistence.InMemoryTeamRepository;
 import it.unicam.hackhub.infrastructure.persistence.InMemoryUtenteRepository;
 import it.unicam.hackhub.presentation.cli.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) {
         // ===============================
-        // Inizializzazione dipendenze
+        // 1. Inizializzazione Sessione
         // ===============================
-        // ===============================
-        // Seed utenti (per UC Crea Hackathon)
-        // ===============================
+        Sessione sessioneApp = new Sessione(null);
 
-        // UC: Crea Hackathon (repository in memoria)
+        // ===============================
+        // 2. Inizializzazione Repository
+        // ===============================
         HackathonRepository hackathonRepo = new InMemoryHackathonRepository();
         UtenteRepository utenteRepo = new InMemoryUtenteRepository();
-        // Utente loggato (simulazione login)
-
-        // UC: Consultare Hackathon
-        ConsultareHackathonHandler consultareHackathonHandler = new ConsultareHackathonHandler(hackathonRepo);
-        ConsultareHackathonCLI consultareHackathonCLI = new ConsultareHackathonCLI(consultareHackathonHandler);
-
-        //UC: Carica Sottomissione
-        CaricaSottomissioneHandler caricaSottomissioneHandler = new CaricaSottomissioneHandler(hackathonRepo);
-        CaricaSottomissioneCLI caricaSottomissioneCLI = new CaricaSottomissioneCLI(caricaSottomissioneHandler);
-
-
-        // Utenti disponibili per assegnazione (giudice/mentore)
-        Utente giudice = new Utente("AnnaGiudice", "anna@hack.it", "pass123");
-        Utente mentore = new Utente("LuigiMentore", "luigi@hack.it", "pass123");
-        Utente mentore2 = new Utente("GianniManni", "gianbigman@hack.it", "pass123");
-        Utente currentUtente = new Utente("rizzler","therizzlerking@hack.it", "42069");
-
-        // Salvo nel repository utenti così la CLI dell'Hackathon può trovarli per ID
-        utenteRepo.save(currentUtente);
-        utenteRepo.save(giudice);
-        utenteRepo.save(mentore);
-        utenteRepo.save(mentore2);
-        // UC: Crea Team (in memoria, solo runtime)
         TeamRepository teamRepo = new InMemoryTeamRepository();
-        CreazioneTeamHandler teamHandler = new CreazioneTeamHandler(teamRepo);
-        CreazioneTeamCLI teamCli = new CreazioneTeamCLI(teamHandler);
+        InvitoRepository invitoRepo = new InMemoryInvitoRepository();
 
-        IscrizioneTeamHandler iscrizioneTeamHandler = new IscrizioneTeamHandler(hackathonRepo, teamRepo);
-        IscrizioneTeamCLI iscrizioneTeamCLI = new IscrizioneTeamCLI(iscrizioneTeamHandler);
+        // ===============================
+        // 3. Seed utenti iniziali
+        // ===============================
+        Utente o = new Utente("mock_organizzatore", "org@hack.it", "pass123");
+        Utente g = new Utente("AnnaGiudice", "anna@hack.it", "pass123");
+        Utente m = new Utente("LuigiMentore", "luigi@hack.it", "pass123");
+        Utente mentore2 = new Utente("GianniManni", "gianbigman@hack.it", "pass123");
+        Utente rizzler = new Utente("rizzler","therizzlerking@hack.it", "42069");
 
+        utenteRepo.save(rizzler);
+        utenteRepo.save(o);
+        utenteRepo.save(g);
+        utenteRepo.save(m);
+        utenteRepo.save(mentore2);
 
-        AggiungiMentoreHandler aggiungiMentoreHandler = new AggiungiMentoreHandler(hackathonRepo, utenteRepo);
-        CreazioneHackathonHandler hackathonHandler = new CreazioneHackathonHandler(hackathonRepo, utenteRepo, aggiungiMentoreHandler);
+        // ===============================
+        // 4. Seed hackathon
+        // ===============================
+        HackathonBuilder hBuilder = new HackathonBuilder()
+                .assegnaNome("hackProva")
+                .assegnaRegolamento("non uccidere")
+                .assegnaScadenza(LocalDate.parse("2026-01-01"))
+                .assegnaDataInizio(LocalDate.parse("2026-01-10"))
+                .assegnaDataFine(LocalDate.parse("2026-03-01"))
+                .assegnaLuogo("Camerino")
+                .assegnaDimMaxTeam(5)
+                .assegnaPremioImporto(new BigDecimal(1000))
+                .assegnaOrganizzatore(o)
+                .assegnaGiudice(g)
+                .assegnaMentore(m);
+        hackathonRepo.save(hBuilder.build());
+
+        // ===============================
+        // 5. Inizializzazione Handler
+        // ===============================
+        LoginHandler loginHandler = new LoginHandler(utenteRepo, sessioneApp);
+        RegistrazioneHandler registrazioneHandler = new RegistrazioneHandler(utenteRepo, sessioneApp);
+        CreazioneTeamHandler teamHandler = new CreazioneTeamHandler(teamRepo, sessioneApp);
+        AggiungiMentoreHandler aggMentoreHandler = new AggiungiMentoreHandler(hackathonRepo, utenteRepo, sessioneApp);
+        CreazioneHackathonHandler hackathonHandler = new CreazioneHackathonHandler(hackathonRepo, utenteRepo, aggMentoreHandler, sessioneApp);
+        ConsultareHackathonHandler consultareHackathonHandler = new ConsultareHackathonHandler(hackathonRepo);
+        IscrizioneTeamHandler iscrizioneTeamHandler = new IscrizioneTeamHandler(hackathonRepo, teamRepo, sessioneApp);
+        CaricaSottomissioneHandler caricaSottomissioneHandler = new CaricaSottomissioneHandler(hackathonRepo, sessioneApp);
+        GestioneInvitiHandler invitiHandler = new GestioneInvitiHandler(utenteRepo, invitoRepo, sessioneApp);
+
+        // NUOVO HANDLER (Caso d'uso Accettare Invito)
+        AccettazioneInvitoHandler accettazioneInvitoHandler = new AccettazioneInvitoHandler(invitoRepo, sessioneApp);
+
+        // ===============================
+        // 6. Inizializzazione CLI
+        // ===============================
+        LoginCLI loginCli = new LoginCLI(loginHandler);
+        RegistrazioneCLI regCli = new RegistrazioneCLI(registrazioneHandler);
+        ConsultareHackathonCLI consultareHackathonCLI = new ConsultareHackathonCLI(consultareHackathonHandler);
+        CreazioneTeamCLI teamCli = new CreazioneTeamCLI(teamHandler, sessioneApp);
         CreazioneHackathonCLI hackathonCli = new CreazioneHackathonCLI(hackathonHandler);
+        AggiungiMentoreCLI aggMentoreCli = new AggiungiMentoreCLI(aggMentoreHandler, sessioneApp);
+        IscrizioneTeamCLI iscrizioneTeamCLI = new IscrizioneTeamCLI(iscrizioneTeamHandler, sessioneApp);
+        CaricaSottomissioneCLI caricaSottomissioneCLI = new CaricaSottomissioneCLI(caricaSottomissioneHandler, sessioneApp);
+        GestioneInvitiCLI invitiCli = new GestioneInvitiCLI(invitiHandler);
 
-        // UC: Registrazione Visitatore
-        RegistrazioneHandler registrazioneHandler = new RegistrazioneHandler(utenteRepo);
+        // NUOVA CLI (Caso d'uso Accettare Invito)
+        AccettazioneInvitoCLI accettazioneInvitoCLI = new AccettazioneInvitoCLI(accettazioneInvitoHandler);
 
-        // UC: Aggiungere Mentore
-        AggiungiMentoreHandler aggMentoreHandler = new AggiungiMentoreHandler(hackathonRepo, utenteRepo);
         // ===============================
         // Menu applicazione
         // ===============================
-
         Scanner scanner = new Scanner(System.in);
         boolean appInEsecuzione = true;
 
         System.out.println("=====================================================");
         System.out.println("                 BENVENUTO IN HACKHUB                ");
         System.out.println("=====================================================");
-//        System.out.println(" Utente loggato: " + currentUtente.getUsername());
-        currentUtente = null;
-        System.out.println("\nPromemoria ID Utenti registrati nel sistema:");
-        System.out.println("- Giudice da poter assegnare: AnnaGiudice");
-        System.out.println("- Mentore da poter assegnare: LuigiMentore");
 
         while (appInEsecuzione) {
             System.out.println("\n-----------------------------------------------------");
+            Utente utenteCorrente = sessioneApp.getUtenteCorrente();
+            if (utenteCorrente != null) {
+                System.out.println("UTENTE LOGGATO: " + utenteCorrente.getUsername());
+            } else {
+                System.out.println("NESSUN UTENTE LOGGATO");
+            }
+            System.out.println("-----------------------------------------------------");
+
             System.out.println("HackHub, cosa vuoi fare?");
-            System.out.println("Premi 1 per andare al caso d'uso: Creare Team");
-            System.out.println("Premi 2 per andare al caso d'uso: Creare Hackathon");
-            System.out.println("Premi 3 per andare al caso d'uso: Registrazione Visitatore");
-            System.out.println("Premi 4 per andare al caso d'uso: Aggiungere Mentore");
-            System.out.println("Premi 5 per andare al caso d'uso: Effettuare login");
-            System.out.println("Premi 6 per andare al caso d'uso: Consultare Hackathon");
-            System.out.println("Premi 7 per andare al caso d'uso: Iscrivere Team ad Hackathon");
-            System.out.println("Premi 8 per andare al caso d'uso: Caricare Sottomissione");
-            System.out.println("Premi 0 per uscire dall'applicazione");
-            System.out.print(" Scelta: ");
+            System.out.println("1 - Creare Team");
+            System.out.println("2 - Creare Hackathon");
+            System.out.println("3 - Effettuare registrazione");
+            System.out.println("4 - Aggiungere Mentore");
+            System.out.println("5 - Effettuare login");
+            System.out.println("6 - Consultare Hackathon");
+            System.out.println("7 - Iscrivere Team ad Hackathon");
+            System.out.println("8 - Caricare Sottomissione");
+            System.out.println("9 - Invitare a entrare nel team");
+            System.out.println("10 - Accettare invito nel team");
+            System.out.println("0 - Uscire dall'applicazione");
+            System.out.print("Scelta: ");
 
             String scelta = scanner.nextLine();
 
-            switch (scelta) {
-                case "1":
-                    System.out.println("\n>>> AVVIO FLUSSO: CREA TEAM <<<");
-                    try {
-                        teamCli.run(currentUtente);
-                    } catch (Exception e) {
-                        System.err.println("\nErrore durante l'esecuzione del caso d'uso Crea Team: " + e.getMessage());
-                    }
-                    break;
-
-                case "2":
-                    System.out.println("\n>>> AVVIO FLUSSO: CREA HACKATHON <<<");
-                    try {
-                        hackathonCli.run(currentUtente);
-                    } catch (Exception e) {
-                        System.err.println("\nErrore durante l'esecuzione del caso d'uso Crea Hackathon: " + e.getMessage());
-                    }
-                    break;
-
-                case "3":
-                    System.out.println("\n>>> AVVIO FLUSSO: REGISTRAZIONE <<<");
-                    try {
-                        RegistrazioneCLI regCli = new RegistrazioneCLI(registrazioneHandler);
-                        Utente utenteAppenaRegistrato = regCli.run();
-                        currentUtente = utenteAppenaRegistrato;
-                    } catch (Exception e) {
-                        System.err.println("\nErrore durante l'esecuzione del caso d'uso Registrazione: " + e.getMessage());
-                    }
-                    break;
-                case "4":
-                    System.out.println("\n>>> AVVIO FLUSSO: AGGIUNGERE MENTORE <<<");
-                    try {
-                        AggiungiMentoreCLI aggMentoreCli = new AggiungiMentoreCLI(aggMentoreHandler);
-                        aggMentoreCli.run(currentUtente);
-
-                    } catch (Exception e) {
-                        System.err.println("Errore durante l'esecuzione del caso d'uso Aggiungere Mentore: " + e.getMessage());
-                    }
-                    break;
-                case "5":
-                    System.out.println("\n>>> AVVIO FLUSSO: EFFETTUARE LOGIN <<<");
-                    try {
-                        LoginHandler loginHandler = new LoginHandler(utenteRepo);
-                        LoginCLI loginCli = new LoginCLI(loginHandler);
-                        currentUtente = loginCli.run();
-                    } catch (Exception e) {
-                        System.err.println("Errore durante l'esecuzione del caso d'uso Effettuare Login: " + e.getMessage());
-                    }
-                    break;
-                case "6":
-                    System.out.println("\n>>> AVVIO FLUSSO: CONSULTARE HACKATHON <<<");
-                    try {
-                        consultareHackathonCLI.consultaHackathon();
-                    } catch (Exception e) {
-                        System.err.println(
-                         "\nErrore durante l'esecuzione del caso d'uso Consultare Hackathon: "
-                        + e.getMessage()
-                         );
-                    }
-                    break;
-                case "7":
-                    System.out.println("\n>>> AVVIO FLUSSO: ISCRIVERE TEAM AD HACKATHON <<<");
-                    try {
-                         if (currentUtente == null || currentUtente.getTeam() == null) {
-                            System.out.println("Devi essere autenticato e avere un team per iscriverti.");
-                         } else {
-                                    String teamId = currentUtente.getTeam().getName(); // TeamRepository usa il nome come ID
-                                    iscrizioneTeamCLI.iscriviTeam(teamId);
-                        }
-                    } catch (Exception e) {
-                        System.err.println("Errore durante l'esecuzione del caso d'uso Iscrivere Team ad Hackathon: "
-                        + e.getMessage());
-                    }
-                    break;
-                case "8":
-                    System.out.println("\n>>> AVVIO FLUSSO: CARICARE SOTTOMISSIONE <<<");
-                    try {
-                        if (currentUtente == null || currentUtente.getTeam() == null) {
-                            System.out.println("Devi essere autenticato e avere un team per caricare una sottomissione.");
-                        } else {
-                            caricaSottomissioneCLI.caricaSottomissione(currentUtente.getTeam());
-                        }
-                    } catch (Exception e) {
-                        System.err.println("Errore durante l'esecuzione del caso d'uso Caricare Sottomissione: "
-                        + e.getMessage());
-                    }
-                    break;
-                case "0":
-                    System.out.println("\nChiusura di HackHub in corso... Arrivederci!");
-                    appInEsecuzione = false;
-                    break;
-
-                default:
-                    System.out.println("\n Scelta non valida.");
-                    break;
+            try {
+                switch (scelta) {
+                    case "1": teamCli.run(); break;
+                    case "2": hackathonCli.run(); break;
+                    case "3": regCli.run(); break;
+                    case "4": aggMentoreCli.run(); break;
+                    case "5": loginCli.run(); break;
+                    case "6": consultareHackathonCLI.consultaHackathon(); break;
+                    case "7": iscrizioneTeamCLI.iscriviTeam(); break;
+                    case "8": caricaSottomissioneCLI.caricaSottomissione(); break;
+                    case "9": invitiCli.run(); break;
+                    case "10": accettazioneInvitoCLI.avviaGestioneInviti(); break; // Metodo dal sequence diagram
+                    case "0":
+                        System.out.println("\nChiusura di HackHub in corso... Arrivederci!");
+                        appInEsecuzione = false;
+                        break;
+                    default:
+                        System.out.println("\nScelta non valida.");
+                        break;
+                }
+            } catch (Exception e) {
+                System.err.println("Si è verificato un errore inaspettato: " + e.getMessage());
             }
         }
-
         scanner.close();
     }
 }

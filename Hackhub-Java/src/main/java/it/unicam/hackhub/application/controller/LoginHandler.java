@@ -1,20 +1,22 @@
 package it.unicam.hackhub.application.controller;
 
+import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
-
 import java.util.Optional;
 
 public class LoginHandler {
     private final UtenteRepository utenteRepo;
+    private final Sessione sessione; // AGGIUNTA
 
-    public LoginHandler(UtenteRepository utenteRepo) {
+    public LoginHandler(UtenteRepository utenteRepo, Sessione sessione) {
         this.utenteRepo = utenteRepo;
+        this.sessione = sessione;
     }
 
-    public Utente elaboraLogin(String username, String password){
-        validaDati(username, password);
+    public void elaboraLogin(String username, String password) {
         Optional<Utente> utenteContainer = utenteRepo.findById(username);
+
         if (utenteContainer.isEmpty()) {
             throw new IllegalArgumentException("Utente inesistente");
         }
@@ -22,16 +24,8 @@ public class LoginHandler {
         if (!utente.verificaPassword(password)) {
             throw new IllegalArgumentException("Password errata");
         }
-        return utente;
-    }
 
-    public void validaDati(String username, String password){
-        if (username == null || username.trim().isEmpty()) {
-            throw new IllegalArgumentException("Lo username non può essere vuoto.");
-        }
-        if (password == null || password.length() < 4) {
-            throw new IllegalArgumentException("La password deve contenere almeno 4 caratteri.");
-        }
+        // --- LOGICA DI SESSIONE: Imposto l'utente come loggato ---
+        sessione.setUtenteCorrente(utente);
     }
-
 }
