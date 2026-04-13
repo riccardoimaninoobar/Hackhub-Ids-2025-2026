@@ -6,61 +6,47 @@ import it.unicam.hackhub.domain.model.Sottomissione;
 import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
-
-import java.util.Optional;
+import java.util.Set;
 
 public class CaricaSottomissioneHandler {
 
     private final HackathonRepository hackathonRepo;
-    private final Sessione sessione; // AGGIUNTA LA SESSIONE
+    private final Sessione sessione;
 
     public CaricaSottomissioneHandler(HackathonRepository hackathonRepo, Sessione sessione) {
         this.hackathonRepo = hackathonRepo;
         this.sessione = sessione;
     }
 
-    // verificaStato(nomeHackathon)
-    public String verificaStato(String nomeHackathon) {
-        Optional<Hackathon> opt = hackathonRepo.findById(nomeHackathon);
-        if (opt.isEmpty()) {
-            throw new IllegalArgumentException("Hackathon inesistente");
-        }
-        return opt.get().getStato();
+    /**
+     * Recupera gli hackathon filtrati per lo stato "In corso" tramite il Team.
+     */
+    public Set<Hackathon> getHackathonInCorso() {
+        Utente corrente = sessione.getUtenteCorrente();
+        if (corrente == null) throw new IllegalStateException("Devi effettuare il login.");
+
+        Team t = corrente.getTeam();
+        if (t == null) throw new IllegalStateException("Devi far parte di un team.");
+
+        // Chiamata delegata al Team come da diagramma
+        return t.getHackathonInCorso();
     }
 
-    // MODIFICA: Rimosso il parametro "Team team"
-    public void caricamentoSottomissione(String nomeHackathon, String nomeFile, String link) {
+    /**
+     * Esegue la creazione della sottomissione e la delega allo stato dell'hackathon.
+     */
+    public void caricaSottomissione(Hackathon h, String link) {
+        // 1. Recupero del Team dalla sessione
+        Team team = sessione.getUtenteCorrente().getTeam();
 
-        // --- 1. Controllo di Sicurezza tramite Sessione ---
-        Utente utenteCorrente = sessione.getUtenteCorrente();
-        if (utenteCorrente == null) {
-            throw new IllegalStateException("Devi effettuare il login per caricare una sottomissione.");
-        }
+        // 2. Creazione della sottomissione (<<create>> nel diagramma)
+        Sottomissione s = new Sottomissione("Sottomissione_" + h.getNome(), link, team);
 
-        Team team = utenteCorrente.getTeam();
-        if (team == null) {
-            throw new IllegalStateException("Devi far parte di un team per caricare una sottomissione.");
-        }
+        // 3. Delega all'Hackathon (il quale delegherà allo Stato)
+        // Se lo stato != "In corso", l'oggetto Stato lancerà OperazioneNonConsentita
+        h.caricaSottomissione(s);
 
-        // --- 2. Recupero Hackathon e controlli ---
-        Hackathon h = hackathonRepo.findById(nomeHackathon)
-                .orElseThrow(() -> new IllegalArgumentException("Hackathon inesistente"));
-
-        if (!"in corso".equalsIgnoreCase(h.getStato())) {
-            throw new IllegalStateException("Non puoi più caricare una sottomissione, l'Hackathon non è in corso.");
-        }
-
-        // MODIFICA: Ora passiamo direttamente l'utenteCorrente per verificare l'iscrizione!
-        // Molto più pulito rispetto a "team.getMembers().iterator().next()"
-        if (!h.utentePartecipante(utenteCorrente)) {
-            throw new IllegalStateException("Il tuo team non è iscritto a questo hackathon");
-        }
-
-        // --- 3. Creazione Sottomissione e salvataggio ---
-        Sottomissione sottomissione = new Sottomissione(nomeFile, link, team);
-        h.aggiungiSottomissione(sottomissione);
-
+        // 4. Persistenza
         hackathonRepo.save(h);
-        System.out.println("Sottomissione '" + nomeFile + "' caricata con successo!");
     }
 }

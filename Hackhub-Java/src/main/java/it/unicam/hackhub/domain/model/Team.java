@@ -5,14 +5,17 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class Team {
     private String name;
     private final Set<Utente> members;
+    private final Set<Hackathon> hackathons;
 
     public Team(String name) {
         this.name = name;
         this.members = new HashSet<>();
+        this. hackathons = new HashSet<>();
     }
 
     public String getName() {
@@ -50,4 +53,20 @@ public class Team {
     public boolean isMembro(Utente u) {
         return this.members.contains(u);
     }
+    public Set<Hackathon> getHackathons() {
+        return new HashSet<>(hackathons); // Copia difensiva
+    }
+
+    public Set<Hackathon> getHackathonInCorso() {
+        return this.hackathons.stream()
+                // Sostituisci la condizione con il modo in cui gestisci lo stato
+                // Es. h.getStato().equals("In corso") oppure (h.getStatoCorrente() instanceof StatoInCorso)
+                .filter(h -> h.getStato().equals("In corso"))
+                .collect(Collectors.toSet());
+    }
+
+    public void addHackathon(Hackathon hackathon) {
+        this.hackathons.add(hackathon);
+    }
+
 }

@@ -15,7 +15,7 @@ public class Hackathon {
     private final Utente organizzatore;
     private final Set<Utente> mentori = new HashSet<>();;
     private final Utente giudice;
-    private String stato;
+    private StatoHackathon stato;
     private BigDecimal premioImporto;
     private Set<Team> teamPartecipanti = new HashSet<>();
     private final Set<Sottomissione> sottomissioni = new HashSet<>();
@@ -34,7 +34,7 @@ public class Hackathon {
         if (m != null) {
             this.mentori.addAll(m);
         }
-        this.stato = "In iscrizione";
+        this.stato = new StatoInIscrizione();
         this.premioImporto = premioImporto;
     }
     public void aggiungiMentore(Utente m) {
@@ -86,7 +86,21 @@ public class Hackathon {
     }
 
     public String getStato() {
-    return stato;
+        return this.stato.getNomeStato();
+    }
+    public void setStato(StatoHackathon stato) {
+        this.stato = stato;
+    }
+
+    public void iscriviTeam(Team t) {
+        // Delega allo stato: nel diagramma h chiama richiediIscrizioneTeam(h, t) sullo stato
+        this.aggiornaStato();
+        this.stato.iscriviTeam(this, t);
+    }
+
+    public void caricaSottomissione(Sottomissione s) {
+        this.aggiornaStato(); // Controlla se l'hackathon è terminato (passando a valutazione)
+        this.stato.caricaSottomissione(this, s);
     }
 
     public void aggiungiTeam(Team team) {
@@ -94,13 +108,33 @@ public class Hackathon {
             throw new IllegalArgumentException("team nullo");
         }
         this.teamPartecipanti.add(team);
+        team.addHackathon(this);
     }
 
+    // In Hackathon.java
     public void aggiungiSottomissione(Sottomissione sottomissione) {
-        if (sottomissione == null || !utentePartecipante(sottomissione.getTeam().getMembers().iterator().next())) {
-        throw new IllegalArgumentException("Sottomissione non valida per questo hackathon");
+        if (sottomissione == null || !teamPartecipanti.contains(sottomissione.getTeam())) {
+            throw new IllegalArgumentException("Sottomissione non valida per questo hackathon");
         }
         this.sottomissioni.add(sottomissione);
+    }
+
+    /**
+     * Verifica le scadenze temporali e aggiorna lo stato dell'Hackathon se necessario.
+     */
+    // In Hackathon.java
+    public void aggiornaStato() {
+        LocalDate oggi = LocalDate.now();
+
+        // Controlliamo che la data di scadenza non sia null prima del confronto
+        if (this.stato instanceof StatoInIscrizione && scadenzaIscrizioni != null && oggi.isAfter(scadenzaIscrizioni)) {
+            this.setStato(new StatoInCorso());
+        }
+
+        // Controlliamo che la data di fine non sia null prima del confronto
+        if (this.stato instanceof StatoInCorso && dataFine != null && oggi.isAfter(dataFine)) {
+            this.setStato(new StatoInValutazione());
+        }
     }
 }
 

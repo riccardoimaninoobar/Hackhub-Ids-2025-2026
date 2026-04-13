@@ -7,7 +7,8 @@ import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.TeamRepository;
 
-import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class IscrizioneTeamHandler {
 
@@ -23,38 +24,27 @@ public class IscrizioneTeamHandler {
         this.sessione = sessione;
     }
 
-    public String verificaStato(String nomeHackathon) {
-        Optional<Hackathon> opt = hackathonRepo.findById(nomeHackathon);
-        if (opt.isEmpty()) {
-            throw new IllegalArgumentException("Hackathon inesistente");
-        }
-        Hackathon h = opt.get();
-        return h.getStato();
+
+
+    public Set<Hackathon> getHackathonInIscrizione() {
+        // Corrisponde a findByStato("In iscrizione") sul repository
+        return hackathonRepo.findAll().stream()
+                .filter(h -> h.getStato().equalsIgnoreCase("In iscrizione"))
+                .collect(Collectors.toSet());
     }
 
-    // RIMOSSO: il parametro "String teamId"
-    public void iscriviTeamHandler(String nomeHackathon) {
-        // 1. Controllo di sicurezza tramite Sessione
+    public void iscriviTeam(Hackathon h) {
+        // 1. Recupero dati dalla sessione come nel diagramma
         Utente utenteCorrente = sessione.getUtenteCorrente();
-        if (utenteCorrente == null) {
-            throw new IllegalStateException("Devi effettuare il login per iscrivere il team.");
-        }
+        if (utenteCorrente == null) throw new IllegalStateException("Login richiesto.");
 
         Team team = utenteCorrente.getTeam();
-        if (team == null) {
-            throw new IllegalStateException("Non fai parte di nessun team, non puoi iscriverti.");
-        }
+        if (team == null) throw new IllegalStateException("Nessun team associato.");
 
-        // 2. Recupero Hackathon
-        Hackathon h = hackathonRepo.findById(nomeHackathon)
-                .orElseThrow(() -> new IllegalArgumentException("Hackathon inesistente"));
+        // 2. Chiamata all'Hackathon (che delega allo stato)
+        h.iscriviTeam(team);
 
-        if (!"In iscrizione".equalsIgnoreCase(h.getStato())) {
-            throw new IllegalStateException("Non puoi iscriverti a questo Hackathon");
-        }
-
-        // 3. Iscrizione effettiva e salvataggio
-        h.aggiungiTeam(team);
+        // 3. Salvataggio su repository
         hackathonRepo.save(h);
     }
 }

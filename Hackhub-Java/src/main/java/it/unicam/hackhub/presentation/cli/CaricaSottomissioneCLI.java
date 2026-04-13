@@ -1,75 +1,60 @@
 package it.unicam.hackhub.presentation.cli;
 
-import it.unicam.hackhub.application.context.Sessione; // IMPORTANTE: Importa la sessione
 import it.unicam.hackhub.application.controller.CaricaSottomissioneHandler;
-
+import it.unicam.hackhub.domain.model.Hackathon;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 
 public class CaricaSottomissioneCLI {
 
     private final CaricaSottomissioneHandler handler;
-    private final Sessione sessione; // AGGIUNTA
-    private final Scanner scanner;
+    private final Scanner scanner = new Scanner(System.in);
 
-    // Iniettiamo la sessione nel costruttore
-    public CaricaSottomissioneCLI(CaricaSottomissioneHandler handler, Sessione sessione) {
+    public CaricaSottomissioneCLI(CaricaSottomissioneHandler handler) {
         this.handler = handler;
-        this.sessione = sessione;
-        this.scanner = new Scanner(System.in);
     }
 
-    // MODIFICA: Metodo vuoto, nessun parametro!
-    public void caricaSottomissione() {
-
-        // --- CONTROLLO PREVENTIVO ---
-        if (sessione.getUtenteCorrente() == null || sessione.getUtenteCorrente().getTeam() == null) {
-            System.out.println("Errore: Devi essere loggato e far parte di un team per caricare sottomissioni.");
-            return; // Esce subito
-        }
-
+    /**
+     * Corrisponde a richiediCaricamentoSottomissione() nel diagramma.
+     */
+    public void richiediCaricamentoSottomissione() {
         System.out.println("\n>>> CARICA SOTTOMISSIONE <<<");
 
-        // 2. SYSTEM richiede il nome dell'hackathon
-        String nomeHackathon = inserisciNomeHackathon();
-
         try {
-            // 4. verifica che lo stato dell'hackathon sia "in corso"
-            String stato = handler.verificaStato(nomeHackathon);
-            if (!"in corso".equalsIgnoreCase(stato)) {
-                System.out.println("L'hackathon non è in corso: non puoi caricare sottomissioni.");
+            // 1. L'Handler recupera gli hackathon "In corso" (tramite Team e Stato)
+            Set<Hackathon> hs = handler.getHackathonInCorso();
+
+            // 2. Frammento [break]: se non ci sono hackathon validi, si ferma
+            if (hs.isEmpty()) {
+                System.out.println("Nessun Hackathon in corso disponibile per il caricamento.");
                 return;
             }
 
-            // 5. SYSTEM richiede al Membro team di caricare un file
-            String[] fileDettagli = inserisciFileDettagli();
+            // 3. Mostra l'elenco e permette la selezione (Seleziona Hackathon)
+            List<Hackathon> hackathonList = new ArrayList<>(hs);
+            System.out.println("Seleziona l'Hackathon:");
+            for (int i = 0; i < hackathonList.size(); i++) {
+                System.out.println("[" + i + "] " + hackathonList.get(i).getNome());
+            }
 
-            // 6. carica il file (L'HANDLER ORA NON VUOLE PIU' IL TEAM!)
-            handler.caricamentoSottomissione(nomeHackathon, fileDettagli[0], fileDettagli[1]);
+            System.out.print("Scelta: ");
+            int index = Integer.parseInt(scanner.nextLine());
+            Hackathon hackathonScelto = hackathonList.get(index);
 
-            // 7. SYSTEM avvisa che la sottomissione è stata caricata con successo
-            System.out.println("Sottomissione caricata con successo!");
+            // 4. Richiesta dati sottomissione
+            System.out.print("Inserisci link/percorso sottomissione: ");
+            String link = scanner.nextLine();
 
-        } catch (IllegalArgumentException e) {
-            // 3.a: hackathon non esiste
-            System.out.println(e.getMessage());
-            // riprende dal punto 2 (senza passare parametri)
-            caricaSottomissione();
-        } catch (IllegalStateException e) {
-            // 4.a: non può più caricare o il team non è iscritto
-            System.out.println(e.getMessage());
+            // 5. Delega all'handler per l'operazione di business
+            handler.caricaSottomissione(hackathonScelto, link);
+
+            System.out.println("Sottomissione caricata correttamente!");
+
+        } catch (IllegalStateException | IllegalArgumentException | IndexOutOfBoundsException e) {
+            // Gestione errori (es. OperazioneNonConsentita dello stato)
+            System.out.println("Errore: " + e.getMessage());
         }
-    }
-
-    private String inserisciNomeHackathon() {
-        System.out.print("Inserisci nome dell'hackathon: ");
-        return scanner.nextLine();
-    }
-
-    private String[] inserisciFileDettagli() {
-        System.out.print("Inserisci nome del file: ");
-        String nomeFile = scanner.nextLine();
-        System.out.print("Inserisci link del file: ");
-        String link = scanner.nextLine();
-        return new String[]{nomeFile, link};
     }
 }

@@ -2,13 +2,15 @@ package it.unicam.hackhub.presentation;
 
 import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.application.controller.*;
-import it.unicam.hackhub.domain.model.Hackathon;
 import it.unicam.hackhub.domain.model.HackathonBuilder;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.InvitoRepository;
 import it.unicam.hackhub.domain.repository.TeamRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
+// IMPORT AGGIUNTI PER RICHIESTA SUPPORTO
+import it.unicam.hackhub.domain.repository.RichiestaSupportoRepository;
+import it.unicam.hackhub.infrastructure.persistence.InMemoryRichiestaSupportoRepository;
 import it.unicam.hackhub.infrastructure.persistence.InMemoryHackathonRepository;
 import it.unicam.hackhub.infrastructure.persistence.InMemoryInvitoRepository;
 import it.unicam.hackhub.infrastructure.persistence.InMemoryTeamRepository;
@@ -34,6 +36,8 @@ public class Main {
         UtenteRepository utenteRepo = new InMemoryUtenteRepository();
         TeamRepository teamRepo = new InMemoryTeamRepository();
         InvitoRepository invitoRepo = new InMemoryInvitoRepository();
+        // NUOVO REPOSITORY
+        RichiestaSupportoRepository richiestaRepo = new InMemoryRichiestaSupportoRepository();
 
         // ===============================
         // 3. Seed utenti iniziali
@@ -77,11 +81,11 @@ public class Main {
         CreazioneHackathonHandler hackathonHandler = new CreazioneHackathonHandler(hackathonRepo, utenteRepo, aggMentoreHandler, sessioneApp);
         ConsultareHackathonHandler consultareHackathonHandler = new ConsultareHackathonHandler(hackathonRepo);
         IscrizioneTeamHandler iscrizioneTeamHandler = new IscrizioneTeamHandler(hackathonRepo, teamRepo, sessioneApp);
-        CaricaSottomissioneHandler caricaSottomissioneHandler = new CaricaSottomissioneHandler(hackathonRepo, sessioneApp);
+        CaricaSottomissioneHandler caricaSottomissioneHandler = new CaricaSottomissioneHandler(hackathonRepo,  sessioneApp);
         GestioneInvitiHandler invitiHandler = new GestioneInvitiHandler(utenteRepo, invitoRepo, sessioneApp);
-
-        // NUOVO HANDLER (Caso d'uso Accettare Invito)
         AccettazioneInvitoHandler accettazioneInvitoHandler = new AccettazioneInvitoHandler(invitoRepo, sessioneApp);
+        RichiestaSupportoHandler richiestaSupportoHandler = new RichiestaSupportoHandler(sessioneApp, richiestaRepo);
+        LogoutHandler logoutHandler = new LogoutHandler(sessioneApp);
 
         // ===============================
         // 6. Inizializzazione CLI
@@ -93,11 +97,11 @@ public class Main {
         CreazioneHackathonCLI hackathonCli = new CreazioneHackathonCLI(hackathonHandler);
         AggiungiMentoreCLI aggMentoreCli = new AggiungiMentoreCLI(aggMentoreHandler, sessioneApp);
         IscrizioneTeamCLI iscrizioneTeamCLI = new IscrizioneTeamCLI(iscrizioneTeamHandler, sessioneApp);
-        CaricaSottomissioneCLI caricaSottomissioneCLI = new CaricaSottomissioneCLI(caricaSottomissioneHandler, sessioneApp);
+        CaricaSottomissioneCLI caricaSottomissioneCLI = new CaricaSottomissioneCLI(caricaSottomissioneHandler);
         GestioneInvitiCLI invitiCli = new GestioneInvitiCLI(invitiHandler);
-
-        // NUOVA CLI (Caso d'uso Accettare Invito)
         AccettazioneInvitoCLI accettazioneInvitoCLI = new AccettazioneInvitoCLI(accettazioneInvitoHandler);
+        RichiestaSupportoCLI richiestaSupportoCLI = new RichiestaSupportoCLI(richiestaSupportoHandler);
+        LogoutCLI logoutCLI = new LogoutCLI(logoutHandler);
 
         // ===============================
         // Menu applicazione
@@ -130,6 +134,8 @@ public class Main {
             System.out.println("8 - Caricare Sottomissione");
             System.out.println("9 - Invitare a entrare nel team");
             System.out.println("10 - Accettare invito nel team");
+            System.out.println("11 - Inviare richiesta di supporto");
+            System.out.println("12 - Effettuare logout");
             System.out.println("0 - Uscire dall'applicazione");
             System.out.print("Scelta: ");
 
@@ -143,10 +149,12 @@ public class Main {
                     case "4": aggMentoreCli.run(); break;
                     case "5": loginCli.run(); break;
                     case "6": consultareHackathonCLI.consultaHackathon(); break;
-                    case "7": iscrizioneTeamCLI.iscriviTeam(); break;
-                    case "8": caricaSottomissioneCLI.caricaSottomissione(); break;
+                    case "7": iscrizioneTeamCLI.richiediIscrizioneTeam(); break;
+                    case "8": caricaSottomissioneCLI.richiediCaricamentoSottomissione(); break;
                     case "9": invitiCli.run(); break;
-                    case "10": accettazioneInvitoCLI.avviaGestioneInviti(); break; // Metodo dal sequence diagram
+                    case "10": accettazioneInvitoCLI.avviaGestioneInviti(); break;
+                    case "11": richiestaSupportoCLI.avviaRichiestaSupporto(); break;
+                    case "12": logoutCLI.richiediLogout(); break;
                     case "0":
                         System.out.println("\nChiusura di HackHub in corso... Arrivederci!");
                         appInEsecuzione = false;

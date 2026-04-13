@@ -47,12 +47,6 @@ public class AccettazioneInvitoCLI {
     private void selezionaInvito(Invito invito) {
         // Inoltra la richiesta all'handler
         handler.accettaInvito(invito);
-        // Corrisponde a mostraConferma("Sei entrato nel team!")
-        mostraConferma("Sei entrato nel team!");
-    }
-
-    // Metodo esplicito del diagramma[cite: 1]
-    private void mostraConferma(String messaggio) {
-        System.out.println(messaggio);
+        System.out.println("Sei entrato nel team!");
     }
 }
