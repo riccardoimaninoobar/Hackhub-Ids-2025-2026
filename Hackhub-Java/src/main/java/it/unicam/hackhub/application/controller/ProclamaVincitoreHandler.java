@@ -1,0 +1,68 @@
+package it.unicam.hackhub.application.controller;
+
+import it.unicam.hackhub.domain.model.Hackathon;
+import it.unicam.hackhub.domain.model.Sottomissione;
+import it.unicam.hackhub.domain.model.StatoConcluso;
+import it.unicam.hackhub.domain.model.Team;
+import it.unicam.hackhub.domain.repository.HackathonRepository;
+import it.unicam.hackhub.domain.repository.TeamRepository;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+public class ProclamaVincitoreHandler {
+
+    private final HackathonRepository hackathonRepo;
+    private final TeamRepository teamRepo;
+    private final SistemaPagamentoAdapter sistemaPagamento;
+
+    public ProclamaVincitoreHandler(HackathonRepository hackathonRepo, 
+                                    TeamRepository teamRepo, 
+                                    SistemaPagamentoAdapter sistemaPagamento) {
+        this.hackathonRepo = hackathonRepo;
+        this.teamRepo = teamRepo;
+        this.sistemaPagamento = sistemaPagamento;
+    }
+
+    public List<String> getValutazioniTeam(int idHackathon) {
+        Optional<Hackathon> optHackathon = hackathonRepo.findById(String.valueOf(idHackathon));
+        if (optHackathon.isEmpty()) {
+            throw new IllegalArgumentException("Hackathon non trovato.");
+        }
+        Hackathon hackathon = optHackathon.get();
+
+        if (!"In valutazione".equalsIgnoreCase(hackathon.getStato())) {
+            throw new IllegalStateException("L'Hackathon non è in stato di valutazione. Stato attuale: " + hackathon.getStato());
+        }
+
+        List<String> valutazioni = new ArrayList<>();
+        for (Sottomissione s : hackathon.getSottomissioni()) {
+            String nomeTeam = s.getTeam() != null ? s.getTeam().getName() : "Team Sconosciuto";
+            valutazioni.add("Team: " + nomeTeam + " -> Punteggio: " + s.getPunteggio());
+        }
+        return valutazioni;
+    }
+
+    public boolean proclamaVincitore(int idHackathon, int idTeam) {
+        Hackathon hackathon = hackathonRepo.findById(String.valueOf(idHackathon))
+                .orElseThrow(() -> new IllegalArgumentException("Hackathon non trovato."));
+        Team team = teamRepo.findById(String.valueOf(idTeam))
+                .orElseThrow(() -> new IllegalArgumentException("Team non trovato."));
+
+        if (!"In valutazione".equalsIgnoreCase(hackathon.getStato())) {
+            throw new IllegalStateException("Impossibile proclamare il vincitore: l'Hackathon non è in stato 'In valutazione'.");
+        }
+
+        if (!sistemaPagamento.erogaPremio(hackathon.getPremioInDenaro(), team.getDatiBancari())) {
+            System.err.println("Fallimento: impossibile erogare il premio. L'Hackathon permane in valutazione.");
+            return false;
+        }
+
+        hackathon.setTeamVincente(team);
+        hackathon.setStato(new StatoConcluso());
+        hackathonRepo.save(hackathon);
+        System.out.println("NOTIFICA: Complimenti ai membri del team " + team.getName() + ", avete vinto!");
+        return true;
+    }
+}

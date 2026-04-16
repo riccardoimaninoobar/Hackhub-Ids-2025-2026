@@ -8,12 +8,14 @@ public class Sottomissione {
     private final String link; // o percorso file
     private final LocalDateTime dataCaricamento;
     private final Team team;
+    private int punteggio;
 
     public Sottomissione(String nomeFile, String link, Team team) {
         this.nomeFile = nomeFile;
         this.link = link;
         this.dataCaricamento = LocalDateTime.now();
         this.team = team;
+        this.punteggio = 0;
     }
 
     // getter
@@ -21,6 +23,14 @@ public class Sottomissione {
     public String getLink() { return link; }
     public LocalDateTime getDataCaricamento() { return dataCaricamento; }
     public Team getTeam() { return team; }
+
+    public int getPunteggio() {
+        return this.punteggio;
+    }
+
+    public void setPunteggio(int punteggio) {
+        this.punteggio = punteggio;
+    }
 
     @Override
     public boolean equals(Object o) {

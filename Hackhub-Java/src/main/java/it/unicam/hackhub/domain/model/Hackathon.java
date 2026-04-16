@@ -19,6 +19,7 @@ public class Hackathon {
     private BigDecimal premioImporto;
     private Set<Team> teamPartecipanti = new HashSet<>();
     private final Set<Sottomissione> sottomissioni = new HashSet<>();
+    private Team teamVincente;
 
     Hackathon(String nome, String regolamento, LocalDate scadenzaIscrizioni, LocalDate dataInizio,
               LocalDate dataFine, String luogo, Integer dimMaxTeam, Utente o, Utente g, Set<Utente> m, BigDecimal premioImporto) {
@@ -48,6 +49,10 @@ public class Hackathon {
 
     public Utente getOrganizzatore() {
         return organizzatore;
+    }
+
+    public double getPremioInDenaro() {
+        return premioImporto != null ? premioImporto.doubleValue() : 0.0;
     }
 
     public Set<Sottomissione> getSottomissioni() {
@@ -136,7 +141,12 @@ public class Hackathon {
             this.setStato(new StatoInValutazione());
         }
     }
+
+    public Team getTeamVincente() {
+        return teamVincente;
+    }
+
+    public void setTeamVincente(Team teamVincente) {
+        this.teamVincente = teamVincente;
+    }
 }
-
-
-

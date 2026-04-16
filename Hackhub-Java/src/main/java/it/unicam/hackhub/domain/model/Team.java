@@ -11,11 +11,20 @@ public class Team {
     private String name;
     private final Set<Utente> members;
     private final Set<Hackathon> hackathons;
+    private String datiBancari;
 
     public Team(String name) {
         this.name = name;
         this.members = new HashSet<>();
         this. hackathons = new HashSet<>();
+    }
+
+     public String getDatiBancari() {
+        return datiBancari != null ? datiBancari : "Dati non inseriti";
+    }
+
+    public void setDatiBancari(String datiBancari) {
+        this.datiBancari = datiBancari;
     }
 
     public String getName() {

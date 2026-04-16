@@ -16,6 +16,11 @@ import it.unicam.hackhub.infrastructure.persistence.InMemoryInvitoRepository;
 import it.unicam.hackhub.infrastructure.persistence.InMemoryTeamRepository;
 import it.unicam.hackhub.infrastructure.persistence.InMemoryUtenteRepository;
 import it.unicam.hackhub.presentation.cli.*;
+import it.unicam.hackhub.application.controller.ProclamaVincitoreHandler;
+import it.unicam.hackhub.presentation.cli.ProclamaVincitoreCLI;
+import it.unicam.hackhub.application.controller.SistemaPagamentoAdapter;
+import it.unicam.hackhub.infrastructure.DummySistemaPagamentoAdapter;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -102,6 +107,10 @@ public class Main {
         AccettazioneInvitoCLI accettazioneInvitoCLI = new AccettazioneInvitoCLI(accettazioneInvitoHandler);
         RichiestaSupportoCLI richiestaSupportoCLI = new RichiestaSupportoCLI(richiestaSupportoHandler);
         LogoutCLI logoutCLI = new LogoutCLI(logoutHandler);
+        
+        SistemaPagamentoAdapter sistemaPagamentoAdapter = new DummySistemaPagamentoAdapter();
+        ProclamaVincitoreHandler proclamaVincitoreHandler = new ProclamaVincitoreHandler(hackathonRepo, teamRepo, sistemaPagamentoAdapter);
+        ProclamaVincitoreCLI proclamaVincitoreCLI = new ProclamaVincitoreCLI(proclamaVincitoreHandler, sessioneApp);
 
         // ===============================
         // Menu applicazione
@@ -136,6 +145,7 @@ public class Main {
             System.out.println("10 - Accettare invito nel team");
             System.out.println("11 - Inviare richiesta di supporto");
             System.out.println("12 - Effettuare logout");
+            System.out.println("13 - Proclama Team Vincitore (Include Erogazione Premio)");
             System.out.println("0 - Uscire dall'applicazione");
             System.out.print("Scelta: ");
 
@@ -155,6 +165,7 @@ public class Main {
                     case "10": accettazioneInvitoCLI.avviaGestioneInviti(); break;
                     case "11": richiestaSupportoCLI.avviaRichiestaSupporto(); break;
                     case "12": logoutCLI.richiediLogout(); break;
+                    case "13": proclamaVincitoreCLI.avviaMenu(); break;
                     case "0":
                         System.out.println("\nChiusura di HackHub in corso... Arrivederci!");
                         appInEsecuzione = false;
