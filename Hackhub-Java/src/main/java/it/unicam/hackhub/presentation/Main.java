@@ -16,10 +16,8 @@ import it.unicam.hackhub.infrastructure.persistence.InMemoryInvitoRepository;
 import it.unicam.hackhub.infrastructure.persistence.InMemoryTeamRepository;
 import it.unicam.hackhub.infrastructure.persistence.InMemoryUtenteRepository;
 import it.unicam.hackhub.presentation.cli.*;
-import it.unicam.hackhub.application.controller.ProclamaVincitoreHandler;
-import it.unicam.hackhub.presentation.cli.ProclamaVincitoreCLI;
-import it.unicam.hackhub.application.controller.SistemaPagamentoAdapter;
 import it.unicam.hackhub.infrastructure.DummySistemaPagamentoAdapter;
+import it.unicam.hackhub.infrastructure.DummyCalendarService;
 
 
 import java.math.BigDecimal;
@@ -91,6 +89,8 @@ public class Main {
         AccettazioneInvitoHandler accettazioneInvitoHandler = new AccettazioneInvitoHandler(invitoRepo, sessioneApp);
         RichiestaSupportoHandler richiestaSupportoHandler = new RichiestaSupportoHandler(sessioneApp, richiestaRepo);
         LogoutHandler logoutHandler = new LogoutHandler(sessioneApp);
+        DummyCalendarService calendarService = new DummyCalendarService();
+        GRichiestaSupportoHandler gRichiestaSupportoHandler = new GRichiestaSupportoHandler(sessioneApp, richiestaRepo, hackathonRepo, calendarService);
 
         // ===============================
         // 6. Inizializzazione CLI
@@ -106,6 +106,7 @@ public class Main {
         GestioneInvitiCLI invitiCli = new GestioneInvitiCLI(invitiHandler);
         AccettazioneInvitoCLI accettazioneInvitoCLI = new AccettazioneInvitoCLI(accettazioneInvitoHandler);
         RichiestaSupportoCLI richiestaSupportoCLI = new RichiestaSupportoCLI(richiestaSupportoHandler);
+        GRichiestaSupportoCLI gRichiestaSupportoCLI = new GRichiestaSupportoCLI(gRichiestaSupportoHandler);
         LogoutCLI logoutCLI = new LogoutCLI(logoutHandler);
         
         SistemaPagamentoAdapter sistemaPagamentoAdapter = new DummySistemaPagamentoAdapter();
@@ -144,8 +145,9 @@ public class Main {
             System.out.println("9 - Invitare a entrare nel team");
             System.out.println("10 - Accettare invito nel team");
             System.out.println("11 - Inviare richiesta di supporto");
-            System.out.println("12 - Effettuare logout");
-            System.out.println("13 - Proclama Team Vincitore (Include Erogazione Premio)");
+            System.out.println("12 - Gestire richieste di supporto");
+            System.out.println("13 - Effettuare logout");
+            System.out.println("14 - Proclama Team Vincitore (Include Erogazione Premio)");
             System.out.println("0 - Uscire dall'applicazione");
             System.out.print("Scelta: ");
 
@@ -164,8 +166,9 @@ public class Main {
                     case "9": invitiCli.run(); break;
                     case "10": accettazioneInvitoCLI.avviaGestioneInviti(); break;
                     case "11": richiestaSupportoCLI.avviaRichiestaSupporto(); break;
-                    case "12": logoutCLI.richiediLogout(); break;
-                    case "13": proclamaVincitoreCLI.avviaMenu(); break;
+                    case "12": gRichiestaSupportoCLI.gestisciRichieste(); break;
+                    case "13": logoutCLI.richiediLogout(); break;
+                    case "14": proclamaVincitoreCLI.avviaMenu(); break;
                     case "0":
                         System.out.println("\nChiusura di HackHub in corso... Arrivederci!");
                         appInEsecuzione = false;

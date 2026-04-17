@@ -71,6 +71,12 @@ public class Hackathon {
         }
         return this.giudice.equals(u);
     }
+    public boolean isMentore(Utente u) {
+        if (u == null)  {
+            throw new IllegalArgumentException("utente nullo");
+        }
+        return mentori.contains(u);
+    }
 
     public boolean utenteMembroStaff(Utente u) {
         if(u == null) {
