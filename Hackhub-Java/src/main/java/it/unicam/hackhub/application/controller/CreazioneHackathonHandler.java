@@ -80,7 +80,7 @@ public class CreazioneHackathonHandler {
     }
 
     public void assegnaMentore(String idMentore) {
-        aggiungiMentoreHandler.checkOrg(hackathon.getNome()); // Aggiornato secondo il tuo refactoring di AggiungiMentoreHandler
+        aggiungiMentoreHandler.checkOrg(hackathon.getNome());
         aggiungiMentoreHandler.aggiungiMentore(idMentore);
     }
 

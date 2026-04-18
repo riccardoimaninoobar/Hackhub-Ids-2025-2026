@@ -12,7 +12,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class CaricaSottomissioneHandlerTest {
+class CaricareSottomissioneHandlerTest {
 
     private CaricaSottomissioneHandler handler;
     private Sessione sessione;
@@ -22,7 +22,6 @@ class CaricaSottomissioneHandlerTest {
     private Team teamTest;
     private Hackathon hackathonInCorso;
 
-    // Nel setUp() di CaricaSottomissioneHandlerTest.java
     @BeforeEach
     void setUp() {
         sessione = new Sessione(null);

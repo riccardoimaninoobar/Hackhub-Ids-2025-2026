@@ -63,7 +63,7 @@ public class Main {
         HackathonBuilder hBuilder = new HackathonBuilder()
                 .assegnaNome("hackProva")
                 .assegnaRegolamento("non uccidere")
-                .assegnaScadenza(LocalDate.parse("2026-01-01"))
+                .assegnaScadenza(LocalDate.parse("2026-04-20"))
                 .assegnaDataInizio(LocalDate.parse("2026-01-10"))
                 .assegnaDataFine(LocalDate.parse("2026-03-01"))
                 .assegnaLuogo("Camerino")
