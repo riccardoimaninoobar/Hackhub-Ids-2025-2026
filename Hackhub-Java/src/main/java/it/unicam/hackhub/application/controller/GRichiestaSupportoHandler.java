@@ -6,6 +6,7 @@ import it.unicam.hackhub.domain.model.RichiestaSupporto;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.RichiestaSupportoRepository;
+import it.unicam.hackhub.domain.service.CalendarService;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

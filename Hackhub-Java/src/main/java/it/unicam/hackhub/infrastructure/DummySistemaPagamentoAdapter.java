@@ -1,6 +1,6 @@
 package it.unicam.hackhub.infrastructure;
 
-import it.unicam.hackhub.application.controller.SistemaPagamentoAdapter;
+import it.unicam.hackhub.domain.service.SistemaPagamentoAdapter;
 
 public class DummySistemaPagamentoAdapter implements SistemaPagamentoAdapter {
 

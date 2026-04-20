@@ -1,6 +1,6 @@
 package it.unicam.hackhub.infrastructure;
 
-import it.unicam.hackhub.application.controller.CalendarService;
+import it.unicam.hackhub.domain.service.CalendarService;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

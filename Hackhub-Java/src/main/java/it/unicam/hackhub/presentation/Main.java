@@ -10,6 +10,7 @@ import it.unicam.hackhub.domain.repository.TeamRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
 // IMPORT AGGIUNTI PER RICHIESTA SUPPORTO
 import it.unicam.hackhub.domain.repository.RichiestaSupportoRepository;
+import it.unicam.hackhub.domain.service.SistemaPagamentoAdapter;
 import it.unicam.hackhub.infrastructure.persistence.InMemoryRichiestaSupportoRepository;
 import it.unicam.hackhub.infrastructure.persistence.InMemoryHackathonRepository;
 import it.unicam.hackhub.infrastructure.persistence.InMemoryInvitoRepository;

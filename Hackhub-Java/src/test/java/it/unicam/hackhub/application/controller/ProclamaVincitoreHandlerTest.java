@@ -3,13 +3,13 @@ package it.unicam.hackhub.application.controller;
 import it.unicam.hackhub.domain.model.*;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.TeamRepository;
+import it.unicam.hackhub.domain.service.SistemaPagamentoAdapter;
 import it.unicam.hackhub.infrastructure.persistence.InMemoryHackathonRepository;
 import it.unicam.hackhub.infrastructure.persistence.InMemoryTeamRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 

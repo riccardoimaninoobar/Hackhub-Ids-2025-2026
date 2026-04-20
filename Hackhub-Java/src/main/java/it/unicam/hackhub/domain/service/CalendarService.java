@@ -1,4 +1,4 @@
-package it.unicam.hackhub.application.controller;
+package it.unicam.hackhub.domain.service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
