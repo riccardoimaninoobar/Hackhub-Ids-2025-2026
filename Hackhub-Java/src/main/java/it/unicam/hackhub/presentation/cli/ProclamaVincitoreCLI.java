@@ -27,24 +27,25 @@ public class ProclamaVincitoreCLI {
 
         try {
             System.out.println("--- PROCLAMA VINCITORE ---");
-            System.out.print("Inserisci l'ID dell'Hackathon: ");
-            int idHackathon = Integer.parseInt(scanner.nextLine());
+            // Aggiornato il prompt testuale e la lettura della stringa
+            System.out.print("Inserisci il nome dell'Hackathon: ");
+            String nomeHackathon = scanner.nextLine();
 
-            // PASSO 1 e 2: L'Organizzatore richiede di visualizzare le valutazioni e il sistema le mostra
-            List<String> valutazioni = handler.getValutazioniTeam(idHackathon);
+            // PASSO 1 e 2
+            List<String> valutazioni = handler.getValutazioniTeam(nomeHackathon);
             System.out.println("\nValutazioni del Giudice:");
             for (String val : valutazioni) {
                 System.out.println("- " + val);
             }
 
-            // PASSO 3: L'Organizzatore seleziona il team vincitore
-            System.out.print("\nInserisci l'ID del Team da proclamare vincitore: ");
-            int idTeam = Integer.parseInt(scanner.nextLine());
+            // PASSO 3: Aggiornato il prompt testuale e la lettura della stringa
+            System.out.print("\nInserisci il nome del Team da proclamare vincitore: ");
+            String nomeTeam = scanner.nextLine();
 
-            // PASSO 4, 5, 6, 7: Il sistema elabora la proclamazione e l'erogazione del premio
-            boolean successo = handler.proclamaVincitore(idHackathon, idTeam);
+            // PASSO 4, 5, 6, 7
+            boolean successo = handler.proclamaVincitore(nomeHackathon, nomeTeam);
 
-            // PASSO 8 (e 5.a.3): Feedback finale
+            // PASSO 8 (e 5.a.3)
             if (successo) {
                 System.out.println("Hackathon concluso con successo. Team proclamato e premio erogato.");
             } else {

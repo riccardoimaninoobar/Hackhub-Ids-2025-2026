@@ -8,7 +8,7 @@ public class StatoPendente implements StatoInvito {
         Team team = invito.getTeam();
 
         // 2. aggiungiMembro(utente) -> che al suo interno farà setTeam(team) su Utente
-        team.addMember(invito.getInvitato()); // Assumo tu abbia addMember o aggiungiMembro in Team
+        team.aggiungiMembro(invito.getInvitato()); // Assumo tu abbia aggiungiMembro o aggiungiMembro in Team
 
         // 3. <<create>> StatoAccettato e setState(accettato)
         invito.setStato(new StatoAccettato());

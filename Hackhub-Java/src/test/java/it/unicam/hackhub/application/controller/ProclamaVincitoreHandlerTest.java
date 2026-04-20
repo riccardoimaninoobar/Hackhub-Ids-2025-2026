@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -47,7 +48,7 @@ class ProclamaVincitoreHandlerTest {
 
         Utente org = new Utente("org", "org@mail.com", "pass");
 
-        // Creazione hackathon tramite builder
+        // Creazione hackathon (Nome: "Hack Finale")
         hackathon = new HackathonBuilder()
                 .assegnaNome("Hack Finale")
                 .assegnaOrganizzatore(org)
@@ -61,34 +62,57 @@ class ProclamaVincitoreHandlerTest {
         teamVincitore = new Team("Winners");
         teamVincitore.setDatiBancari("IBAN123456789");
 
-        // Salvataggio nei repository (le chiavi saranno "Hack Finale" e "Winners")
+        // Iscrizione del team all'hackathon
+        hackathon.aggiungiTeam(teamVincitore);
+
+        // Salvataggio nei repository
         hackathonRepo.save(hackathon);
         teamRepo.save(teamVincitore);
     }
 
     @Test
     void getValutazioniTeam_Successo() {
-        // Aggiungiamo una sottomissione fittizia
-        Sottomissione s = new Sottomissione("file.zip", "http://repo.git", teamVincitore);
+        // Aggiunta sottomissione
+        Sottomissione s = new Sottomissione("progetto.zip", "http://github.com/win", teamVincitore);
         s.setPunteggio(95);
         hackathon.aggiungiSottomissione(s);
 
-        // 2. CORREZIONE: getValutazioniTeam si aspetta un ID (int), ma l'handler lo converte in String
-        // Poiché i tuoi InMemoryRepository usano il NOME come ID, dobbiamo simulare una ricerca coerente
-        // Se non puoi cambiare la firma dell'handler, il test passerà solo se passi un "ID" che corrisponde al nome
-        // In questo caso forziamo il test a cercare tramite il nome se l'handler lo permette,
-        // ma data la firma 'int' dell'handler, questo test fallirà a runtime finché non modifichi l'Handler per accettare String.
+        // Ora passiamo la stringa con il nome esatto salvato nel repository
+        List<String> valutazioni = handlerSuccesso.getValutazioniTeam("Hack Finale");
 
-        // Esempio ipotizzando che l'ID numerico non sia compatibile con i nomi:
-        assertThrows(IllegalArgumentException.class, () -> handlerSuccesso.getValutazioniTeam(1));
+        assertNotNull(valutazioni);
+        assertEquals(1, valutazioni.size());
+        assertTrue(valutazioni.get(0).contains("Winners"));
+        assertTrue(valutazioni.get(0).contains("95"));
+    }
+
+    @Test
+    void proclamaVincitore_Successo() {
+        // Test base: il team esiste, l'hackathon esiste ed è in valutazione, il pagamento va a buon fine
+        boolean esito = handlerSuccesso.proclamaVincitore("Hack Finale", "Winners");
+
+        assertTrue(esito);
+        assertNotNull(hackathon.getTeamVincente());
+        assertEquals("Winners", hackathon.getTeamVincente().getName());
+
+        // Verifica che lo stato sia effettivamente cambiato in Concluso
+        assertTrue(hackathon.getStato() instanceof StatoConcluso || "Concluso".equalsIgnoreCase(hackathon.getStato().toString()));
     }
 
     @Test
     void proclamaVincitore_FallimentoPerErrorePagamento() {
-        // Il test fallirà a causa della conversione String.valueOf(int) che non troverà il nome nel repo
-        // Per farlo funzionare dovresti modificare l'Handler per accettare String (Nome) invece di int (ID).
+        // Se il pagamento fallisce, il metodo ritorna false (non lancia eccezioni)
+        boolean esito = handlerFallimento.proclamaVincitore("Hack Finale", "Winners");
+
+        assertFalse(esito);
+        assertNull(hackathon.getTeamVincente());
+    }
+
+    @Test
+    void proclamaVincitore_FallimentoPerHackathonInesistente() {
+        // Testiamo che cerchi correttamente l'Hackathon usando la Stringa e lanci l'eccezione se non lo trova
         assertThrows(IllegalArgumentException.class, () ->
-                handlerFallimento.proclamaVincitore(1, 1)
+                handlerSuccesso.proclamaVincitore("Hackathon Finto", "Winners")
         );
     }
 }

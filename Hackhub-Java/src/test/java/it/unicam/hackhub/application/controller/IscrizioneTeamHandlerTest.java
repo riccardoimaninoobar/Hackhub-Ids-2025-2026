@@ -45,7 +45,7 @@ class IscrizioneTeamHandlerTest {
         mentore = new Utente("mentore", "mentore@mail.it", "pass");
 
         team = new Team("TeamAlpha");
-        team.addMember(utente);
+        team.aggiungiMembro(utente);
 
         teamRepository.save(team);
         sessione.setUtenteCorrente(utente);

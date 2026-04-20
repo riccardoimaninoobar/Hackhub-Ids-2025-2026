@@ -32,7 +32,7 @@ class GestioneInvitiHandlerTest {
 
         utenteMittente = new Utente("leader", "leader@mail.com", "pass");
         teamTest = new Team("Team Alpha");
-        teamTest.addMember(utenteMittente);
+        teamTest.aggiungiMembro(utenteMittente);
 
         utenteDaInvitare = new Utente("targetUser", "target@mail.com", "pass");
 
@@ -68,7 +68,7 @@ class GestioneInvitiHandlerTest {
         sessione.setUtenteCorrente(utenteMittente);
         
         Team altroTeam = new Team("Team Beta");
-        altroTeam.addMember(utenteDaInvitare);
+        altroTeam.aggiungiMembro(utenteDaInvitare);
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
             handler.elaboraInvito("targetUser");

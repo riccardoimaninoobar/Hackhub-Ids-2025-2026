@@ -32,7 +32,7 @@ class RichiestaSupportoHandlerTest {
         // Prepariamo i dati fittizi
         utenteTest = new Utente("testUser", "test@mail.com", "password123");
         teamTest = new Team("Team Alpha");
-        teamTest.addMember(utenteTest);
+        teamTest.aggiungiMembro(utenteTest);
 
         // Creiamo un Hackathon usando il tuo Builder
         Utente org = new Utente("org", "org@mail.com", "pass");

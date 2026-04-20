@@ -96,8 +96,8 @@ public class Hackathon {
         return false;
     }
 
-    public String getStato() {
-        return this.stato.getNomeStato();
+    public StatoHackathon getStato() {
+        return this.stato;
     }
     public void setStato(StatoHackathon stato) {
         this.stato = stato;

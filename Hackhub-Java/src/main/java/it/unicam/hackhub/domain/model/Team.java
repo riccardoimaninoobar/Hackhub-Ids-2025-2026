@@ -1,9 +1,7 @@
 package it.unicam.hackhub.domain.model;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -39,7 +37,7 @@ public class Team {
         return members;
     }
 
-    public void addMember(Utente member) {
+    public void aggiungiMembro(Utente member) {
         if (!this.members.contains(member)) {
             this.members.add(member);
             member.setTeam(this);

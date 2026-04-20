@@ -12,8 +12,6 @@ import it.unicam.hackhub.infrastructure.persistence.InMemoryUtenteRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class AggiungiMentoreHandlerTest {
@@ -54,7 +52,7 @@ class AggiungiMentoreHandlerTest {
                 .build();
 
         Team team = new Team("Team Beta");
-        team.addMember(partecipante);
+        team.aggiungiMembro(partecipante);
         hackathonTest.aggiungiTeam(team);
 
         hackathonRepo.save(hackathonTest);

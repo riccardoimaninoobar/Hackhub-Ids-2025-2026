@@ -39,7 +39,7 @@ public class CreazioneTeamHandler {
         }
 
         Team newTeam = new Team(nomeTeam);
-        newTeam.addMember(u); // Aggiunge l'utente loggato come creatore/membro
+        newTeam.aggiungiMembro(u); // Aggiunge l'utente loggato come creatore/membro
         teamRepository.save(newTeam);
         return newTeam;
     }

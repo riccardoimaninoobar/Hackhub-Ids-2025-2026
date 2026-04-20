@@ -2,6 +2,7 @@ package it.unicam.hackhub.application.controller;
 
 import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.Hackathon;
+import it.unicam.hackhub.domain.model.StatoInIscrizione;
 import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
@@ -29,7 +30,7 @@ public class IscrizioneTeamHandler {
     public Set<Hackathon> getHackathonInIscrizione() {
         // Corrisponde a findByStato("In iscrizione") sul repository
         return hackathonRepo.findAll().stream()
-                .filter(h -> h.getStato().equalsIgnoreCase("In iscrizione"))
+                .filter(h -> h.getStato() instanceof StatoInIscrizione)
                 .collect(Collectors.toSet());
     }
 
