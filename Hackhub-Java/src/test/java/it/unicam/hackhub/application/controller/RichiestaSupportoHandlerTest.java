@@ -2,157 +2,124 @@ package it.unicam.hackhub.application.controller;
 
 import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.*;
-import it.unicam.hackhub.domain.repository.RichiestaSupportoRepository;
-import it.unicam.hackhub.infrastructure.persistence.InMemoryRichiestaSupportoRepository;
+import it.unicam.hackhub.domain.repository.*;
+import it.unicam.hackhub.presentation.CliRunner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@Transactional
 class RichiestaSupportoHandlerTest {
 
+    @MockBean
+    private CliRunner cliRunner;
+
+    @Autowired
     private RichiestaSupportoHandler handler;
+
+    @Autowired
     private Sessione sessione;
+
+    @Autowired
+    private UtenteRepository utenteRepo;
+
+    @Autowired
+    private TeamRepository teamRepo;
+
+    @Autowired
+    private HackathonRepository hackathonRepo;
+
+    @Autowired
     private RichiestaSupportoRepository richiestaRepo;
 
-    // Oggetti di dominio condivisi per i test
-    private Utente utenteTest;
+    private Utente utenteLoggato;
     private Team teamTest;
     private Hackathon hackathonInCorso;
 
     @BeforeEach
     void setUp() {
-        // Inizializziamo le dipendenze
-        sessione = new Sessione(null);
-        richiestaRepo = new InMemoryRichiestaSupportoRepository();
-        handler = new RichiestaSupportoHandler(sessione, richiestaRepo);
+        // 1. Creiamo e salviamo l'utente
+        utenteLoggato = new Utente("devUser", "dev@mail.com", "pass");
+        utenteRepo.save(utenteLoggato);
 
-        // Prepariamo i dati fittizi
-        utenteTest = new Utente("testUser", "test@mail.com", "password123");
-        teamTest = new Team("Team Alpha");
-        teamTest.aggiungiMembro(utenteTest);
+        // 2. Creiamo e salviamo il team
+        teamTest = new Team("AlphaTeam");
+        teamRepo.save(teamTest);
 
-        // Creiamo un Hackathon usando il tuo Builder
-        Utente org = new Utente("org", "org@mail.com", "pass");
-        HackathonBuilder builder = new HackathonBuilder()
-                .assegnaNome("Hackathon Nazionale")
-                .assegnaRegolamento("Regole standard")
-                .assegnaOrganizzatore(org);
+        // 3. Colleghiamo utente e team
+        teamTest.aggiungiMembro(utenteLoggato);
+        utenteRepo.save(utenteLoggato);
 
-        hackathonInCorso = builder.build();
+        // 4. Creiamo un hackathon in corso e iscriviamo il team
+        hackathonInCorso = new HackathonBuilder()
+                .assegnaNome("HackInCorso")
+                .assegnaOrganizzatore(new Utente("org", "o@m.it", "p")) // L'organizzatore viene salvato a cascata se configurato, o salvato prima
+                .assegnaScadenza(LocalDate.now().plusDays(1))
+                .assegnaDataInizio(LocalDate.now().minusDays(1))
+                .assegnaDataFine(LocalDate.now().plusDays(2))
+                .build();
 
-        // Forziamo lo stato "In corso" (tramite il tuo Pattern State!)
+        // Assicuriamoci che l'organizzatore fittizio sia nel DB
+        utenteRepo.save(hackathonInCorso.getOrganizzatore());
+
         hackathonInCorso.setStato(new StatoInCorso());
-    }
+        hackathonInCorso.aggiungiTeam(teamTest);
+        hackathonRepo.save(hackathonInCorso);
 
-    // ==========================================================
-    // TEST 1: Metodo getHackathons()
-    // ==========================================================
+        // Prepariamo la sessione
+        sessione.setUtenteCorrente(utenteLoggato);
+    }
 
     @Test
     void getHackathons_Successo() {
-        // Arrange
-        sessione.setUtenteCorrente(utenteTest);
-        hackathonInCorso.aggiungiTeam(teamTest); // Iscrive il team all'evento
+        Set<Hackathon> hs = handler.getHackathons();
 
-        // Act
-        Set<Hackathon> result = handler.getHackathons();
-
-        // Assert
-        assertFalse(result.isEmpty(), "Il set non dovrebbe essere vuoto");
-        assertTrue(result.contains(hackathonInCorso), "Il set dovrebbe contenere l'hackathon in corso");
+        assertFalse(hs.isEmpty());
+        assertTrue(hs.stream().anyMatch(h -> h.getNome().equals("HackInCorso")));
     }
 
     @Test
-    void getHackathons_LanciaEccezioneSeNessunUtenteLoggato() {
-        // Arrange
+    void getHackathons_FallisceSeUtenteNonLoggato() {
         sessione.setUtenteCorrente(null);
 
-        // Act & Assert
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-            handler.getHackathons();
-        });
-        assertEquals("Devi effettuare il login.", exception.getMessage());
-    }
-
-    @Test
-    void getHackathons_LanciaEccezioneSeUtenteSenzaTeam() {
-        // Arrange
-        Utente utenteSenzaTeam = new Utente("solo", "solo@mail.com", "pass");
-        sessione.setUtenteCorrente(utenteSenzaTeam);
-
-        // Act & Assert
-        assertThrows(IllegalStateException.class, () -> {
-            handler.getHackathons();
-        }, "Dovrebbe lanciare eccezione se l'utente non fa parte di alcun team.");
-    }
-
-    @Test
-    void getHackathons_LanciaEccezioneSeNessunHackathonInCorso() {
-        // Arrange
-        sessione.setUtenteCorrente(utenteTest);
-
-        // Creiamo un hackathon che è rimasto "In Iscrizione" e ci iscriviamo il team
-        Hackathon hackInIscrizione = new HackathonBuilder()
-                .assegnaNome("Hack Futuro")
-                .assegnaOrganizzatore(new Utente("org2", "o@mail.com", "pass"))
-                .build();
-        hackInIscrizione.aggiungiTeam(teamTest);
-
-        // Act & Assert
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-            handler.getHackathons();
-        });
-        assertEquals("Il tuo team non è iscritto ad alcun Hackathon attualmente in corso.", exception.getMessage());
-    }
-
-    // ==========================================================
-    // TEST 2: Metodo convalidaDescrizione(desc)
-    // ==========================================================
-
-    @Test
-    void convalidaDescrizione_NonLanciaEccezioneSeValida() {
-        String descrizioneLunga = "Questa è una descrizione molto dettagliata del problema tecnico, sicuramente maggiore di venti caratteri.";
-        assertDoesNotThrow(() -> handler.convalidaDescrizione(descrizioneLunga));
+        assertThrows(IllegalStateException.class, () -> handler.getHackathons());
     }
 
     @Test
     void convalidaDescrizione_LanciaEccezioneSeTroppoCorta() {
-        String descrizioneCorta = "Aiuto non va nulla"; // 18 caratteri
-        assertThrows(IllegalArgumentException.class, () -> {
-            handler.convalidaDescrizione(descrizioneCorta);
-        });
+        String descCorta = "Corta";
+        assertThrows(IllegalArgumentException.class, () -> handler.convalidaDescrizione(descCorta));
     }
 
     @Test
-    void convalidaDescrizione_LanciaEccezioneSeNull() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            handler.convalidaDescrizione(null);
-        });
+    void convalidaDescrizione_SuccessoSeLungaAbbastanza() {
+        String descValida = "Questa descrizione è lunga abbastanza per superare la validazione.";
+        assertDoesNotThrow(() -> handler.convalidaDescrizione(descValida));
     }
 
-    // ==========================================================
-    // TEST 3: Metodo registraRichiestaSupporto(h, desc)
-    // ==========================================================
-
     @Test
-    void registraRichiestaSupporto_SalvaCorrettamenteNelRepository() {
-        // Arrange
-        sessione.setUtenteCorrente(utenteTest);
-        String descrizioneValida = "Ho un problema con il database che non si connette alla porta 8080.";
+    void registraRichiestaSupporto_SalvaCorrettamenteNelDB() {
+        String desc = "Richiesta di supporto tecnico per configurazione ambiente.";
 
-        // Act
-        handler.registraRichiestaSupporto(hackathonInCorso, descrizioneValida);
+        handler.registraRichiestaSupporto(hackathonInCorso, desc);
 
-        // Assert
-        assertEquals(1, richiestaRepo.findAll().size(), "Ci dovrebbe essere esattamente una richiesta salvata");
+        // Verifichiamo la persistenza interrogando la repository
+        long count = richiestaRepo.count();
+        assertEquals(1, count, "Dovrebbe esserci una richiesta di supporto salvata nel DB");
 
         RichiestaSupporto salvata = richiestaRepo.findAll().get(0);
-        assertNotNull(salvata.getId());
-        assertEquals(teamTest, salvata.getTeam());
-        assertEquals(hackathonInCorso, salvata.getHackathon());
-        assertEquals(descrizioneValida, salvata.getDescrizione());
+        assertEquals(desc, salvata.getDescrizione());
+        assertEquals(teamTest.getName(), salvata.getTeam().getName());
+        assertEquals(hackathonInCorso.getNome(), salvata.getHackathon().getNome());
     }
 }

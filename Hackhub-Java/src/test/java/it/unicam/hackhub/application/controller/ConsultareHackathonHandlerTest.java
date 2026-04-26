@@ -4,26 +4,38 @@ import it.unicam.hackhub.domain.model.Hackathon;
 import it.unicam.hackhub.domain.model.HackathonBuilder;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
-import it.unicam.hackhub.infrastructure.persistence.InMemoryHackathonRepository;
+import it.unicam.hackhub.domain.repository.UtenteRepository;
+import it.unicam.hackhub.presentation.CliRunner;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+@SpringBootTest
+@Transactional
 class ConsultareHackathonHandlerTest {
 
+    @MockBean
+    private CliRunner cliRunner;
+
+    @Autowired
     private HackathonRepository hackathonRepository;
+
+    @Autowired
     private ConsultareHackathonHandler handler;
 
-    @BeforeEach
-    void setUp() {
-        hackathonRepository = new InMemoryHackathonRepository();
-        handler = new ConsultareHackathonHandler(hackathonRepository);
-    }
+    @Autowired
+    private UtenteRepository utenteRepository;
+
 
     @Test
     void getListaHackathon_restituisceListaVuota_quandoNonCiSonoHackathon() {
@@ -38,6 +50,10 @@ class ConsultareHackathonHandlerTest {
         Utente organizzatore = new Utente("org1", "org1@mail.it", "pass");
         Utente giudice = new Utente("giudice1", "giudice1@mail.it", "pass");
         Utente mentore = new Utente("mentore1", "mentore1@mail.it", "pass");
+
+        utenteRepository.save(organizzatore);
+        utenteRepository.save(giudice);
+        utenteRepository.save(mentore);
 
         Hackathon hackathon1 = new HackathonBuilder()
                 .assegnaNome("Hackathon AI")

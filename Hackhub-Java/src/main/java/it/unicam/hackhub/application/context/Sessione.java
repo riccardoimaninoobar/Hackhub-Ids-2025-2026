@@ -7,7 +7,9 @@ import org.springframework.stereotype.Component;
 public class Sessione {
     private Utente utenteCorrente;
 
-    public Sessione() { }
+    public Sessione() {
+        this.utenteCorrente = null;
+    }
     public Utente getUtenteCorrente() {
         return utenteCorrente;
     }

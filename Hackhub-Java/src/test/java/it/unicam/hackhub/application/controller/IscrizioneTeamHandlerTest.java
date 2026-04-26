@@ -7,10 +7,14 @@ import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.TeamRepository;
-import it.unicam.hackhub.infrastructure.persistence.InMemoryHackathonRepository;
-import it.unicam.hackhub.infrastructure.persistence.InMemoryTeamRepository;
+import it.unicam.hackhub.domain.repository.UtenteRepository;
+import it.unicam.hackhub.presentation.CliRunner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -18,11 +22,27 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@Transactional
 class IscrizioneTeamHandlerTest {
 
+    // Blocca l'avvio della console
+    @MockBean
+    private CliRunner cliRunner;
+
+    @Autowired
     private HackathonRepository hackathonRepository;
+
+    @Autowired
     private TeamRepository teamRepository;
+
+    @Autowired
+    private UtenteRepository utenteRepository;
+
+    @Autowired
     private Sessione sessione;
+
+    @Autowired
     private IscrizioneTeamHandler handler;
 
     private Utente utente;
@@ -33,21 +53,26 @@ class IscrizioneTeamHandlerTest {
 
     @BeforeEach
     void setUp() {
-        hackathonRepository = new InMemoryHackathonRepository();
-        teamRepository = new InMemoryTeamRepository();
-        sessione = new Sessione(null);
-
-        handler = new IscrizioneTeamHandler(hackathonRepository, teamRepository, sessione);
-
+        // 1. Creiamo e salviamo tutti gli utenti nel database
         utente = new Utente("membro1", "membro1@mail.it", "pass");
         organizzatore = new Utente("organizzatore", "org@mail.it", "pass");
         giudice = new Utente("giudice", "giudice@mail.it", "pass");
         mentore = new Utente("mentore", "mentore@mail.it", "pass");
 
-        team = new Team("TeamAlpha");
-        team.aggiungiMembro(utente);
+        utenteRepository.save(utente);
+        utenteRepository.save(organizzatore);
+        utenteRepository.save(giudice);
+        utenteRepository.save(mentore);
 
+        // 2. Creiamo il team e lo salviamo
+        team = new Team("TeamAlpha");
         teamRepository.save(team);
+
+        // 3. Colleghiamo utente e team per mantenere la consistenza in RAM e nel DB
+        team.aggiungiMembro(utente);
+        utenteRepository.save(utente);
+
+        // 4. Impostiamo l'utente loggato nella sessione
         sessione.setUtenteCorrente(utente);
     }
 
@@ -56,13 +81,15 @@ class IscrizioneTeamHandlerTest {
         Hackathon h1 = creaHackathonInIscrizione("HackathonAI");
         Hackathon h2 = creaHackathonInIscrizione("HackathonWeb");
 
+        // Salviamo nel DB gli hackathon appena creati
         hackathonRepository.save(h1);
         hackathonRepository.save(h2);
 
         Set<Hackathon> risultato = handler.getHackathonInIscrizione();
 
         assertNotNull(risultato);
-        assertEquals(2, risultato.size());
+        // Non usiamo assertEquals(2, ...) perché potrebbero esserci altri Hackathon nel DB.
+        // Verifichiamo invece che i nostri siano stati pescati correttamente.
         assertTrue(risultato.stream().anyMatch(h -> h.getNome().equals("HackathonAI")));
         assertTrue(risultato.stream().anyMatch(h -> h.getNome().equals("HackathonWeb")));
     }
@@ -72,16 +99,24 @@ class IscrizioneTeamHandlerTest {
         Hackathon hackathon = creaHackathonInIscrizione("HackProva");
         hackathonRepository.save(hackathon);
 
-        handler.iscriviTeam(hackathon);
+        // L'utente loggato ("membro1") iscrive il suo team
+        assertDoesNotThrow(() -> handler.iscriviTeam(hackathon));
 
-        Hackathon salvato = hackathonRepository.findById("HackProva")
-        .orElseThrow(() -> new AssertionError("Hackathon non trovato"));
+        // Sincronizziamo il DB per sicurezza e verifichiamo l'esito recuperando i dati freschi
+        hackathonRepository.flush();
+
+        Hackathon salvato = hackathonRepository.findByNome("HackProva")
+                .orElseThrow(() -> new AssertionError("Hackathon non trovato"));
+
         assertTrue(salvato.utentePartecipante(utente));
     }
 
     @Test
     void iscriviTeam_lanciaEccezione_seHackathonNonEPiuInIscrizione() {
         Hackathon hackathon = creaHackathonScaduto("HackScaduto");
+
+        // Aggiorniamo forzatamente lo stato usando le date di scadenza (passerà a InCorso o Valutazione)
+        hackathon.aggiornaStato();
         hackathonRepository.save(hackathon);
 
         assertThrows(RuntimeException.class, () -> handler.iscriviTeam(hackathon));

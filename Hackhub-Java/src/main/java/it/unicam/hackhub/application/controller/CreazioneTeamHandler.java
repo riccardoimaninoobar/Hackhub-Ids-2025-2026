@@ -18,7 +18,7 @@ public class CreazioneTeamHandler {
     }
 
     public boolean verificaTeamEsistente(String nomeTeam) {
-        return teamRepository.existsById(nomeTeam);
+        return teamRepository.existsByNome(nomeTeam);
     }
 
     public boolean verificaUtenteInTeam(Utente u) {

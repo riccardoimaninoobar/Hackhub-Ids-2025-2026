@@ -1,28 +1,42 @@
 package it.unicam.hackhub.domain.model;
 
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
-
+@Entity
+@Table(name = "richiesta_supporto")
 public class RichiestaSupporto {
-    private final String id;
-    private final Team team;
-    private final Hackathon hackathon;
-    private final String descrizione;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_id", nullable = false)
+    private Team team;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hackathon_id", nullable = false)
+    private Hackathon hackathon;
+    @Column(nullable = false, length = 1000)
+    private String descrizione;
+    @Column(length = 1000)
     private String risposta;
     private LocalDate dataCall;
     private LocalTime oraCall;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private StatoRichiestaSupporto stato;
 
+    protected RichiestaSupporto() {}
+
     public RichiestaSupporto(Team team, Hackathon hackathon, String descrizione) {
-        this.id = UUID.randomUUID().toString();
         this.team = team;
         this.hackathon = hackathon;
         this.descrizione = descrizione;
         this.stato = StatoRichiestaSupporto.APERTA;
     }
 
-    public String getId() { return id; }
+    public Long getId() { return id; }
     public Team getTeam() { return team; }
     public Hackathon getHackathon() { return hackathon; }
     public String getDescrizione() { return descrizione; }

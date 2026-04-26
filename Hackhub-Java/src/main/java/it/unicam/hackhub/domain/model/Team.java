@@ -1,23 +1,35 @@
 package it.unicam.hackhub.domain.model;
 
+import jakarta.persistence.*;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
+@Entity
+@Table(name = "teams")
 public class Team {
-    private String name;
-    private final Set<Utente> members;
-    private final Set<Hackathon> hackathons;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(unique = true, nullable = false)
+    private String nome;
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<Utente> members;
+    @ManyToMany(mappedBy = "teamPartecipanti", fetch = FetchType.LAZY)
+    private Set<Hackathon> hackathons;
     private String datiBancari;
 
+    protected Team() {}
     public Team(String name) {
-        this.name = name;
+        this.nome = name;
         this.members = new HashSet<>();
         this. hackathons = new HashSet<>();
     }
 
-     public String getDatiBancari() {
+    public Long getId() { return id; }
+
+    public String getDatiBancari() {
         return datiBancari != null ? datiBancari : "Dati non inseriti";
     }
 
@@ -26,11 +38,11 @@ public class Team {
     }
 
     public String getName() {
-        return name;
+        return nome;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setName(String nome) {
+        this.nome = nome;
     }
 
     public Set<Utente> getMembers() {
@@ -49,12 +61,12 @@ public class Team {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Team team = (Team) o;
-        return Objects.equals(name, team.name);
+        return Objects.equals(nome, team.nome);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(nome);
     }
 
     public boolean isMembro(Utente u) {
@@ -66,9 +78,7 @@ public class Team {
 
     public Set<Hackathon> getHackathonInCorso() {
         return this.hackathons.stream()
-                // Sostituisci la condizione con il modo in cui gestisci lo stato
-                // Es. h.getStato().equals("In corso") oppure (h.getStatoCorrente() instanceof StatoInCorso)
-                .filter(h -> h.getStato().equals("In corso"))
+                .filter(h -> h.getStato() instanceof StatoInCorso)
                 .collect(Collectors.toSet());
     }
 

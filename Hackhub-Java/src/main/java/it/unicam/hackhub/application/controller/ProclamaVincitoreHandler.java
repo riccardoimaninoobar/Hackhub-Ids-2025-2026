@@ -30,7 +30,7 @@ public class ProclamaVincitoreHandler {
     }
 
     public List<String> getValutazioniTeam(String nomeHackathon) {
-        Optional<Hackathon> optHackathon = hackathonRepo.findById(nomeHackathon);
+        Optional<Hackathon> optHackathon = hackathonRepo.findByNome(nomeHackathon);
         if (optHackathon.isEmpty()) {
             throw new IllegalArgumentException("Hackathon non trovato.");
         }
@@ -52,9 +52,9 @@ public class ProclamaVincitoreHandler {
     }
 
     public boolean proclamaVincitore(String nomeHackathon, String nomeTeam) {
-        Hackathon hackathon = hackathonRepo.findById(nomeHackathon)
+        Hackathon hackathon = hackathonRepo.findByNome(nomeHackathon)
                 .orElseThrow(() -> new IllegalArgumentException("Hackathon non trovato."));
-        Team team = teamRepo.findById(nomeTeam)
+        Team team = teamRepo.findByNome(nomeTeam)
                 .orElseThrow(() -> new IllegalArgumentException("Team non trovato."));
 
         if (!(hackathon.getStato() instanceof StatoInValutazione)) {

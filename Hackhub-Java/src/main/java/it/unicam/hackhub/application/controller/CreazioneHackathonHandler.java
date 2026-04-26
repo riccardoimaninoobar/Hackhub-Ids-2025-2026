@@ -37,7 +37,7 @@ public class CreazioneHackathonHandler {
     }
 
     public boolean hackathonExists(String nome) {
-        return hackathonRepo.findById(nome).isPresent();
+        return hackathonRepo.findByNome(nome).isPresent();
     }
 
     // RIMOSSO: il parametro "Utente organizzatore" non è più passato dalla CLI
@@ -67,9 +67,9 @@ public class CreazioneHackathonHandler {
                 .assegnaOrganizzatore(organizzatore);
     }
 
-    public boolean assegnaGiudice(String idGiudice) {
+    public boolean assegnaGiudice(String nomeGiudice) {
         checkBuilder();
-        var optUtente = utenteRepo.findById(idGiudice);
+        var optUtente = utenteRepo.findByUsername(nomeGiudice);
         if(optUtente.isEmpty()) {
             return false;
         }

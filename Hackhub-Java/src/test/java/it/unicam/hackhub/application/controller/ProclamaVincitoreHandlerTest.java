@@ -3,82 +3,84 @@ package it.unicam.hackhub.application.controller;
 import it.unicam.hackhub.domain.model.*;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.TeamRepository;
+import it.unicam.hackhub.domain.repository.UtenteRepository;
 import it.unicam.hackhub.domain.service.SistemaPagamentoAdapter;
-import it.unicam.hackhub.infrastructure.persistence.InMemoryHackathonRepository;
-import it.unicam.hackhub.infrastructure.persistence.InMemoryTeamRepository;
+import it.unicam.hackhub.presentation.CliRunner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@Transactional
 class ProclamaVincitoreHandlerTest {
 
-    private ProclamaVincitoreHandler handlerSuccesso;
-    private ProclamaVincitoreHandler handlerFallimento;
+    @MockBean
+    private CliRunner cliRunner;
+
+    // Usiamo un mock per l'adapter di pagamento così possiamo decidere se deve fallire o meno
+    @MockBean
+    private SistemaPagamentoAdapter pagamentoAdapter;
+
+    @Autowired
+    private ProclamaVincitoreHandler handler;
+
+    @Autowired
     private HackathonRepository hackathonRepo;
+
+    @Autowired
     private TeamRepository teamRepo;
+
+    @Autowired
+    private UtenteRepository utenteRepo;
 
     private Hackathon hackathon;
     private Team teamVincitore;
 
     @BeforeEach
     void setUp() {
-        hackathonRepo = new InMemoryHackathonRepository();
-        teamRepo = new InMemoryTeamRepository();
-
-        SistemaPagamentoAdapter pagamentoSuccess = new SistemaPagamentoAdapter() {
-            @Override
-            public boolean erogaPremio(double importo, String datiBancari) {
-                return true;
-            }
-        };
-
-        SistemaPagamentoAdapter pagamentoFail = new SistemaPagamentoAdapter() {
-            @Override
-            public boolean erogaPremio(double importo, String datiBancari) {
-                return false;
-            }
-        };
-
-        handlerSuccesso = new ProclamaVincitoreHandler(hackathonRepo, teamRepo, pagamentoSuccess);
-        handlerFallimento = new ProclamaVincitoreHandler(hackathonRepo, teamRepo, pagamentoFail);
-
+        // 1. Salvataggio Utenti
         Utente org = new Utente("org", "org@mail.com", "pass");
+        Utente giudice = new Utente("giudice", "g@m.it", "p");
+        utenteRepo.save(org);
+        utenteRepo.save(giudice);
 
-        // Creazione hackathon (Nome: "Hack Finale")
+        // 2. Salvataggio Team
+        teamVincitore = new Team("Winners");
+        teamVincitore.setDatiBancari("IBAN123456789");
+        teamRepo.save(teamVincitore);
+
+        // 3. Salvataggio Hackathon
         hackathon = new HackathonBuilder()
                 .assegnaNome("Hack Finale")
                 .assegnaOrganizzatore(org)
                 .assegnaPremioImporto(new BigDecimal("1000"))
-                .assegnaGiudice(new Utente("giudice", "g@m.it", "p"))
+                .assegnaGiudice(giudice)
                 .build();
 
-        // Impostiamo lo stato necessario per la valutazione
         hackathon.setStato(new StatoInValutazione());
-
-        teamVincitore = new Team("Winners");
-        teamVincitore.setDatiBancari("IBAN123456789");
-
-        // Iscrizione del team all'hackathon
         hackathon.aggiungiTeam(teamVincitore);
 
-        // Salvataggio nei repository
         hackathonRepo.save(hackathon);
-        teamRepo.save(teamVincitore);
     }
 
     @Test
     void getValutazioniTeam_Successo() {
-        // Aggiunta sottomissione
+        // Aggiunta sottomissione (essendo legata all'hackathon salvato, viene gestita dal DB)
         Sottomissione s = new Sottomissione("progetto.zip", "http://github.com/win", teamVincitore);
         s.setPunteggio(95);
         hackathon.aggiungiSottomissione(s);
+        hackathonRepo.save(hackathon); // Aggiorniamo l'hackathon con la sottomissione
 
-        // Ora passiamo la stringa con il nome esatto salvato nel repository
-        List<String> valutazioni = handlerSuccesso.getValutazioniTeam("Hack Finale");
+        List<String> valutazioni = handler.getValutazioniTeam("Hack Finale");
 
         assertNotNull(valutazioni);
         assertEquals(1, valutazioni.size());
@@ -88,31 +90,39 @@ class ProclamaVincitoreHandlerTest {
 
     @Test
     void proclamaVincitore_Successo() {
-        // Test base: il team esiste, l'hackathon esiste ed è in valutazione, il pagamento va a buon fine
-        boolean esito = handlerSuccesso.proclamaVincitore("Hack Finale", "Winners");
+        // Simuliamo che il pagamento vada a buon fine
+        Mockito.when(pagamentoAdapter.erogaPremio(Mockito.anyDouble(), Mockito.anyString()))
+                .thenReturn(true);
+
+        boolean esito = handler.proclamaVincitore("Hack Finale", "Winners");
 
         assertTrue(esito);
-        assertNotNull(hackathon.getTeamVincente());
-        assertEquals("Winners", hackathon.getTeamVincente().getName());
 
-        // Verifica che lo stato sia effettivamente cambiato in Concluso
-        assertTrue(hackathon.getStato() instanceof StatoConcluso || "Concluso".equalsIgnoreCase(hackathon.getStato().toString()));
+        // Ricarichiamo l'hackathon dal DB per verificare lo stato aggiornato
+        Hackathon aggiornato = hackathonRepo.findByNome("Hack Finale").orElseThrow();
+        assertNotNull(aggiornato.getTeamVincente());
+        assertEquals("Winners", aggiornato.getTeamVincente().getName());
+        assertTrue(aggiornato.getStato() instanceof StatoConcluso);
     }
 
     @Test
     void proclamaVincitore_FallimentoPerErrorePagamento() {
-        // Se il pagamento fallisce, il metodo ritorna false (non lancia eccezioni)
-        boolean esito = handlerFallimento.proclamaVincitore("Hack Finale", "Winners");
+        // Simuliamo un errore del sistema bancario
+        Mockito.when(pagamentoAdapter.erogaPremio(Mockito.anyDouble(), Mockito.anyString()))
+                .thenReturn(false);
+
+        boolean esito = handler.proclamaVincitore("Hack Finale", "Winners");
 
         assertFalse(esito);
-        assertNull(hackathon.getTeamVincente());
+
+        Hackathon aggiornato = hackathonRepo.findByNome("Hack Finale").orElseThrow();
+        assertNull(aggiornato.getTeamVincente(), "Il team vincente non deve essere impostato se il pagamento fallisce");
     }
 
     @Test
     void proclamaVincitore_FallimentoPerHackathonInesistente() {
-        // Testiamo che cerchi correttamente l'Hackathon usando la Stringa e lanci l'eccezione se non lo trova
         assertThrows(IllegalArgumentException.class, () ->
-                handlerSuccesso.proclamaVincitore("Hackathon Finto", "Winners")
+                handler.proclamaVincitore("Hackathon Finto", "Winners")
         );
     }
 }

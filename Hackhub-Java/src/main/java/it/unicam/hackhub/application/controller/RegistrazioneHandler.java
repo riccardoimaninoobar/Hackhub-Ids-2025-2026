@@ -29,15 +29,12 @@ public class RegistrazioneHandler {
     }
 
     private boolean verificaUtenteEsistente(String username) {
-        return utenteRepository.existsById(username);
+        return utenteRepository.existsByUsername(username);
     }
 
     public void elaboraRegistrazione(String username, String email, String password) {
-        try {
-            validaDati(username, email, password);
-        } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
-        }
+        // Rimuovi il try-catch: la validazione deve bloccare l'esecuzione se i dati sono errati
+        validaDati(username, email, password);
 
         if (verificaUtenteEsistente(username)) {
             throw new IllegalArgumentException("Esiste già un utente con lo stesso username o e-mail.");
@@ -46,8 +43,7 @@ public class RegistrazioneHandler {
         Utente nuovoUtente = new Utente(username, email, password);
         utenteRepository.save(nuovoUtente);
 
-        // AUTO-LOGIN: l'utente appena registrato diventa quello loggato
+        // AUTO-LOGIN
         sessione.setUtenteCorrente(nuovoUtente);
-
     }
 }

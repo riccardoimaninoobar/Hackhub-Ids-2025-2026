@@ -4,26 +4,41 @@ import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.TeamRepository;
-import it.unicam.hackhub.infrastructure.persistence.InMemoryTeamRepository;
+import it.unicam.hackhub.domain.repository.UtenteRepository;
+import it.unicam.hackhub.presentation.CliRunner;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@Transactional
 class CreazioneTeamHandlerTest {
 
+    @MockBean
+    private CliRunner cliRunner;
+
+    @Autowired
     private CreazioneTeamHandler handler;
+
+    @Autowired
     private Sessione sessione;
+    @Autowired
+    private UtenteRepository utenteRepository;
+    @Autowired
     private TeamRepository teamRepo;
+
     private Utente utenteTest;
 
     @BeforeEach
     void setUp() {
-        sessione = new Sessione(null);
-        teamRepo = new InMemoryTeamRepository();
-        handler = new CreazioneTeamHandler(teamRepo, sessione);
-
-        utenteTest = new Utente("leader", "leader@mail.com", "pass");
+        utenteTest = new Utente("testuser","test@user.it", "123456");
+        utenteRepository.save(utenteTest);
     }
 
     @Test
@@ -37,8 +52,10 @@ class CreazioneTeamHandlerTest {
         // Verifica che l'utente sia stato aggiunto al team e viceversa
         assertTrue(creato.isMembro(utenteTest));
         assertEquals(creato, utenteTest.getTeam());
-        assertTrue(teamRepo.existsById("Team Innovazione"));
+        assertTrue(teamRepo.existsByNome("Team Innovazione"));
     }
+
+
 
     @Test
     void creaTeam_FallisceSeUtenteNonLoggato() {

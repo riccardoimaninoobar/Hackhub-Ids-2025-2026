@@ -7,19 +7,37 @@ import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
-import it.unicam.hackhub.infrastructure.persistence.InMemoryHackathonRepository;
-import it.unicam.hackhub.infrastructure.persistence.InMemoryUtenteRepository;
+import it.unicam.hackhub.domain.repository.TeamRepository;
+import it.unicam.hackhub.presentation.CliRunner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@Transactional // Garantisce che ogni test parta con un DB pulito effettuando il rollback alla fine
 class AggiungiMentoreHandlerTest {
 
-    private AggiungiMentoreHandler handler;
-    private Sessione sessione;
+    @MockBean
+    private CliRunner cliRunner;
+
+    // Chiediamo a Spring di iniettare le vere repository collegate ad H2
+    @Autowired
     private HackathonRepository hackathonRepo;
+
+    @Autowired
     private UtenteRepository utenteRepo;
+
+    @Autowired
+    private TeamRepository teamRepo;
+
+    // Gestiamo manualmente Sessione e Handler per assicurarci di avere istanze pulite
+    private Sessione sessione;
+    private AggiungiMentoreHandler handler;
 
     private Utente organizzatore;
     private Utente utenteGiudice;
@@ -29,9 +47,8 @@ class AggiungiMentoreHandlerTest {
 
     @BeforeEach
     void setUp() {
-        sessione = new Sessione(null);
-        hackathonRepo = new InMemoryHackathonRepository();
-        utenteRepo = new InMemoryUtenteRepository();
+        // Nessun mock, usiamo le implementazioni reali
+        sessione = new Sessione();
         handler = new AggiungiMentoreHandler(hackathonRepo, utenteRepo, sessione);
 
         // Prepariamo gli utenti
@@ -40,19 +57,27 @@ class AggiungiMentoreHandlerTest {
         candidatoMentore = new Utente("esperto", "esp@mail.it", "pass");
         partecipante = new Utente("player1", "p1@mail.it", "pass");
 
+        // Salviamo gli utenti nel VERO database H2
         utenteRepo.save(organizzatore);
         utenteRepo.save(utenteGiudice);
         utenteRepo.save(candidatoMentore);
         utenteRepo.save(partecipante);
 
+        // 1. CREIAMO E SALVIAMO SUBITO IL TEAM
+        Team team = new Team("Team Beta");
+        teamRepo.save(team); // <--- SALVIAMO PER EVITARE L'ECCEZIONE "TRANSIENT"
+
+        // 2. AGGIUNGIAMO L'UTENTE E SINCRONIZZIAMO
+        team.aggiungiMembro(partecipante);
+        utenteRepo.save(partecipante); // Salviamo l'utente aggiornato col suo team
+
+        // 3. PREPARIAMO L'HACKATHON
         hackathonTest = new HackathonBuilder()
                 .assegnaNome("HackTest")
                 .assegnaOrganizzatore(organizzatore)
                 .assegnaGiudice(utenteGiudice)
                 .build();
 
-        Team team = new Team("Team Beta");
-        team.aggiungiMembro(partecipante);
         hackathonTest.aggiungiTeam(team);
 
         hackathonRepo.save(hackathonTest);
@@ -77,7 +102,6 @@ class AggiungiMentoreHandlerTest {
 
     @Test
     void checkOrg_FallisceSeNonOrganizzatore() {
-        // Un utente qualsiasi tenta di aggiungere un mentore
         sessione.setUtenteCorrente(candidatoMentore);
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> handler.checkOrg("HackTest"));
         assertEquals("L'utente loggato non è Organizzatore dell'Hackathon", ex.getMessage());
@@ -89,14 +113,14 @@ class AggiungiMentoreHandlerTest {
 
     @Test
     void aggiungiMentore_Successo() {
-        // Arrange
         sessione.setUtenteCorrente(organizzatore);
-        handler.checkOrg("HackTest"); // Necessario per impostare lo stato interno dell'handler
+        handler.checkOrg("HackTest");
 
-        // Act
         handler.aggiungiMentore("esperto");
 
-        // Assert
+        // Assicuriamoci che i dati vengano sincronizzati col DB
+        hackathonRepo.flush();
+
         assertTrue(hackathonTest.isMentore(candidatoMentore));
     }
 
@@ -105,7 +129,6 @@ class AggiungiMentoreHandlerTest {
         sessione.setUtenteCorrente(organizzatore);
         handler.checkOrg("HackTest");
 
-        // Tenta di aggiungere il giudice come mentore
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> handler.aggiungiMentore("giudice"));
         assertEquals("Utente già parte dello staff", ex.getMessage());
     }
@@ -115,7 +138,6 @@ class AggiungiMentoreHandlerTest {
         sessione.setUtenteCorrente(organizzatore);
         handler.checkOrg("HackTest");
 
-        // Tenta di aggiungere un partecipante
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> handler.aggiungiMentore("player1"));
         assertEquals("Utente partecipante", ex.getMessage());
     }

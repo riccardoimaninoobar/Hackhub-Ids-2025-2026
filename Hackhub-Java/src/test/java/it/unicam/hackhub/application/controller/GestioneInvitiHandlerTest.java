@@ -1,38 +1,50 @@
 package it.unicam.hackhub.application.controller;
 
 import it.unicam.hackhub.application.context.Sessione;
+import it.unicam.hackhub.domain.model.StatoPendente;
 import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.InvitoRepository;
+import it.unicam.hackhub.domain.repository.TeamRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
-import it.unicam.hackhub.infrastructure.persistence.InMemoryInvitoRepository;
-import it.unicam.hackhub.infrastructure.persistence.InMemoryUtenteRepository;
+import it.unicam.hackhub.presentation.CliRunner;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+@SpringBootTest
+@Transactional
 class GestioneInvitiHandlerTest {
-
+    @MockBean
+    private CliRunner cliRunner;
+    @Autowired
     private GestioneInvitiHandler handler;
+    @Autowired
     private Sessione sessione;
+    @Autowired
     private UtenteRepository utenteRepo;
+    @Autowired
     private InvitoRepository invitoRepo;
+
+    @Autowired
+    private TeamRepository teamRepo;
 
     private Utente utenteMittente;
     private Utente utenteDaInvitare;
     private Team teamTest;
 
+
     @BeforeEach
     void setUp() {
-        sessione = new Sessione(null);
-        utenteRepo = new InMemoryUtenteRepository();
-        invitoRepo = new InMemoryInvitoRepository();
-        handler = new GestioneInvitiHandler(utenteRepo, invitoRepo, sessione);
-
         utenteMittente = new Utente("leader", "leader@mail.com", "pass");
         teamTest = new Team("Team Alpha");
         teamTest.aggiungiMembro(utenteMittente);
+        teamRepo.save(teamTest);
 
         utenteDaInvitare = new Utente("targetUser", "target@mail.com", "pass");
 
@@ -49,7 +61,7 @@ class GestioneInvitiHandlerTest {
         assertDoesNotThrow(() -> handler.elaboraInvito("targetUser"));
 
         // Assert
-        assertTrue(invitoRepo.existsActiveInvitation(utenteDaInvitare, teamTest, "IN_ATTESA"),
+        assertTrue(invitoRepo.existsByInvitatoAndTeamMittenteAndStato(utenteDaInvitare, teamTest, new StatoPendente()),
                 "L'invito dovrebbe essere salvato con stato IN_ATTESA nel repository");
     }
 
@@ -66,10 +78,16 @@ class GestioneInvitiHandlerTest {
     @Test
     void elaboraInvito_FallisceSeUtenteGiaInTeam() {
         sessione.setUtenteCorrente(utenteMittente);
-        
-        Team altroTeam = new Team("Team Beta");
-        altroTeam.aggiungiMembro(utenteDaInvitare);
 
+        // 1. Creiamo e SALVIAMO il nuovo team nel database
+        Team altroTeam = new Team("Team Beta");
+        teamRepo.save(altroTeam);
+
+        // 2. Aggiungiamo l'utente e AGGIORNIAMO il suo record nel database
+        altroTeam.aggiungiMembro(utenteDaInvitare);
+        utenteRepo.save(utenteDaInvitare);
+
+        // 3. Ora l'handler troverà i dati corretti e coerenti nel DB
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
             handler.elaboraInvito("targetUser");
         });

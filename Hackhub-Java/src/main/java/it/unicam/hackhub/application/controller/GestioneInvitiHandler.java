@@ -2,6 +2,7 @@ package it.unicam.hackhub.application.controller;
 
 import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.Invito;
+import it.unicam.hackhub.domain.model.StatoPendente;
 import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.InvitoRepository;
@@ -38,7 +39,7 @@ public class GestioneInvitiHandler {
         checkPrerequisiti();
         Team teamCorrente = sessione.getUtenteCorrente().getTeam();
 
-        Optional<Utente> optUtente = utenteRepo.findById(username);
+        Optional<Utente> optUtente = utenteRepo.findByUsername(username);
         if (optUtente.isEmpty()) {
             throw new IllegalArgumentException("Utente inesistente");
         }
@@ -48,7 +49,7 @@ public class GestioneInvitiHandler {
             throw new IllegalArgumentException("L'utente è già in un team");
         }
 
-        boolean giaInvitato = invitoRepo.existsActiveInvitation(invitato, teamCorrente, "IN_ATTESA");
+        boolean giaInvitato = invitoRepo.existsByInvitatoAndTeamMittenteAndStato(invitato, teamCorrente, new StatoPendente());
         if (giaInvitato) {
             throw new IllegalArgumentException("L'utente è già stato invitato");
         }

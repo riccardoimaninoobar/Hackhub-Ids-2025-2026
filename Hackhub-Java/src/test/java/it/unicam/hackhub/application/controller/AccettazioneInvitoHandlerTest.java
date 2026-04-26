@@ -5,19 +5,31 @@ import it.unicam.hackhub.domain.model.Invito;
 import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.InvitoRepository;
-import it.unicam.hackhub.infrastructure.persistence.InMemoryInvitoRepository;
+import it.unicam.hackhub.domain.repository.TeamRepository;
+import it.unicam.hackhub.domain.repository.UtenteRepository;
+import it.unicam.hackhub.presentation.CliRunner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@Transactional // Svuota il DB dopo ogni test
 class AccettazioneInvitoHandlerTest {
+    @MockBean
+    private CliRunner cliRunner;
 
-    private AccettazioneInvitoHandler handler;
-    private Sessione sessione;
-    private InvitoRepository invitoRepo;
+    @Autowired private AccettazioneInvitoHandler handler;
+    @Autowired private Sessione sessione;
+    @Autowired private InvitoRepository invitoRepo;
+    @Autowired private UtenteRepository utenteRepo;
+    @Autowired private TeamRepository teamRepo;
 
     private Utente utenteInvitato;
     private Team teamMittente;
@@ -25,12 +37,12 @@ class AccettazioneInvitoHandlerTest {
 
     @BeforeEach
     void setUp() {
-        sessione = new Sessione(null);
-        invitoRepo = new InMemoryInvitoRepository();
-        handler = new AccettazioneInvitoHandler(invitoRepo, sessione);
-
+        // Creiamo e SALVIAMO nel VERO database
         utenteInvitato = new Utente("invitedUser", "invited@mail.com", "pass");
+        utenteRepo.save(utenteInvitato);
+
         teamMittente = new Team("Omega Team");
+        teamRepo.save(teamMittente);
 
         invito = new Invito(utenteInvitato, teamMittente);
         invitoRepo.save(invito);
@@ -42,7 +54,8 @@ class AccettazioneInvitoHandlerTest {
 
         List<Invito> pendenti = handler.getInvitiPendenti();
 
-        assertNotNull(pendenti, "La lista degli inviti non dovrebbe essere nulla");
+        assertFalse(pendenti.isEmpty(), "La lista degli inviti non dovrebbe essere vuota");
+        assertEquals("IN_ATTESA", pendenti.get(0).getNomeStato());
     }
 
     @Test
@@ -51,9 +64,12 @@ class AccettazioneInvitoHandlerTest {
 
         assertDoesNotThrow(() -> handler.accettaInvito(invito));
 
-        // Verifichiamo il corretto mutamento di stato dell'invito
-        assertNotEquals("IN_ATTESA", invito.getNomeStato(), "Lo stato dell'invito non dovrebbe più essere IN_ATTESA");
-        // Verifichiamo che l'utente adesso faccia parte del Team mittente
-        assertEquals(teamMittente, utenteInvitato.getTeam(), "L'utente dovrebbe essere stato aggiunto al team");
+        // Ricarichiamo dal database per verificare che JPA abbia fatto il suo dovere!
+        Invito invitoAggiornato = invitoRepo.findById(invito.getId()).get();
+        assertEquals("ACCETTATO", invitoAggiornato.getNomeStato(), "Lo stato dell'invito salvato nel DB deve essere ACCETTATO");
+
+        Utente utenteAggiornato = utenteRepo.findById(utenteInvitato.getId()).get();
+        assertNotNull(utenteAggiornato.getTeam(), "L'utente dovrebbe far parte di un team");
+        assertEquals(teamMittente.getId(), utenteAggiornato.getTeam().getId(), "Il team dell'utente deve combaciare con quello del mittente");
     }
 }

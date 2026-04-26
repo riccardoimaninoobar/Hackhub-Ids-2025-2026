@@ -1,48 +1,81 @@
 package it.unicam.hackhub.application.controller;
 
+import org.springframework.boot.test.mock.mockito.MockBean;
+import it.unicam.hackhub.presentation.CliRunner;
+
 import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.*;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
-import it.unicam.hackhub.infrastructure.persistence.InMemoryHackathonRepository;
+import it.unicam.hackhub.domain.repository.TeamRepository;
+import it.unicam.hackhub.domain.repository.UtenteRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@Transactional
 class CaricaSottomissioneHandlerTest {
+
+    // Disabilita l'interfaccia a riga di comando durante il test
+    @MockBean
+    private CliRunner cliRunner;
+
+    @Autowired
+    private HackathonRepository hackathonRepo;
+
+    @Autowired
+    private UtenteRepository utenteRepo;
+
+    @Autowired
+    private TeamRepository teamRepo;
 
     private CaricaSottomissioneHandler handler;
     private Sessione sessione;
-    private HackathonRepository hackathonRepo;
 
     private Utente utenteTest;
+    private Utente organizzatore;
     private Team teamTest;
     private Hackathon hackathonInCorso;
 
     @BeforeEach
     void setUp() {
-        sessione = new Sessione(null);
-        hackathonRepo = new InMemoryHackathonRepository();
+        sessione = new Sessione();
         handler = new CaricaSottomissioneHandler(hackathonRepo, sessione);
 
+        // 1. Creiamo e salviamo gli utenti
         utenteTest = new Utente("devUser", "dev@mail.com", "pass");
-        teamTest = new Team("Coders");
-        teamTest.aggiungiMembro(utenteTest);
+        organizzatore = new Utente("org", "o@m.it", "p");
+        utenteRepo.save(utenteTest);
+        utenteRepo.save(organizzatore);
 
+        // 2. Creiamo e salviamo il team
+        teamTest = new Team("Coders");
+        teamRepo.save(teamTest);
+
+        // 3. Colleghiamo l'utente al team e aggiorniamo il DB
+        teamTest.aggiungiMembro(utenteTest);
+        utenteRepo.save(utenteTest);
+
+        // 4. Creiamo l'Hackathon
         hackathonInCorso = new HackathonBuilder()
                 .assegnaNome("Global Game Jam")
-                .assegnaOrganizzatore(new Utente("org", "o@m.it", "p"))
+                .assegnaOrganizzatore(organizzatore)
                 .assegnaScadenza(LocalDate.now().plusDays(1)) // Scadenza domani
-                .assegnaDataFine(LocalDate.now().plusDays(2))     // Fine tra due giorni
+                .assegnaDataFine(LocalDate.now().plusDays(2)) // Fine tra due giorni
                 .build();
 
         // Forza lo stato iniziale e iscrivi il team
         hackathonInCorso.setStato(new StatoInCorso());
         hackathonInCorso.aggiungiTeam(teamTest);
 
+        // Salviamo l'Hackathon nel DB
         hackathonRepo.save(hackathonInCorso);
     }
 
@@ -55,6 +88,9 @@ class CaricaSottomissioneHandlerTest {
         // Act
         assertDoesNotThrow(() -> handler.caricaSottomissione(hackathonInCorso, link));
 
+        // Sincronizziamo col DB per essere certi che la sottomissione sia persistita
+        hackathonRepo.flush();
+
         // Assert
         assertEquals(1, hackathonInCorso.getSottomissioni().size());
         Sottomissione s = hackathonInCorso.getSottomissioni().iterator().next();
@@ -66,8 +102,10 @@ class CaricaSottomissioneHandlerTest {
     void caricaSottomissione_FallisceSeStatoSbagliato() {
         // Arrange
         sessione.setUtenteCorrente(utenteTest);
+
         // Cambiamo lo stato in "Valutazione" (dove non si può più caricare)
         hackathonInCorso.setStato(new StatoInValutazione());
+        hackathonRepo.save(hackathonInCorso); // Sincronizziamo il cambio di stato
 
         // Act & Assert
         IllegalStateException ex = assertThrows(IllegalStateException.class, () ->
@@ -86,6 +124,7 @@ class CaricaSottomissioneHandlerTest {
         Set<Hackathon> hs = handler.getHackathonInCorso();
 
         // Assert
-        assertTrue(hs.contains(hackathonInCorso));
+        // Controlliamo che la lista recuperata dal DB contenga un Hackathon con il nome corretto
+        assertTrue(hs.stream().anyMatch(h -> h.getNome().equals("Global Game Jam")));
     }
 }

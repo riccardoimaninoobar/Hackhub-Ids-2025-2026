@@ -3,42 +3,64 @@ package it.unicam.hackhub.application.controller;
 import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
-import it.unicam.hackhub.infrastructure.persistence.InMemoryUtenteRepository;
+import it.unicam.hackhub.presentation.CliRunner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+// PASSAGGIO 1: Annotazioni Spring Boot
+@SpringBootTest
+@Transactional
 class RegistrazioneHandlerTest {
 
+    // PASSAGGIO 2: Disattivazione della CLI
+    @MockBean
+    private CliRunner cliRunner;
+
+    // PASSAGGIO 3: Iniezione dei componenti reali
+    @Autowired
     private RegistrazioneHandler handler;
+
+    @Autowired
     private Sessione sessione;
+
+    @Autowired
     private UtenteRepository utenteRepo;
 
+    // PASSAGGIO 4: Setup iniziale
     @BeforeEach
     void setUp() {
-        sessione = new Sessione(null);
-        utenteRepo = new InMemoryUtenteRepository();
-        handler = new RegistrazioneHandler(utenteRepo, sessione);
+        // Puliamo la sessione per garantire l'isolamento dei test
+        sessione.setUtenteCorrente(null);
     }
 
+    // PASSAGGIO 5: Test con database reale
     @Test
     void elaboraRegistrazione_SuccessoEAutoLogin() {
-        // Esegue la registrazione
+        // Act: Esegue la registrazione reale
         handler.elaboraRegistrazione("nuovoUtente", "email@test.it", "password123");
 
-        // Verifica persistenza
-        assertTrue(utenteRepo.existsById("nuovoUtente"));
+        // Assert: Verifica persistenza nel database H2
+        assertTrue(utenteRepo.existsByUsername("nuovoUtente"),
+                "L'utente dovrebbe essere stato salvato nel database.");
 
-        // Verifica Auto-Login (Punto 5 del requisito)
-        assertNotNull(sessione.getUtenteCorrente());
+        // Assert: Verifica Auto-Login (Punto 5 del requisito)
+        // Poiché handler e test usano lo stesso Bean 'Sessione', il cambiamento è visibile qui.
+        assertNotNull(sessione.getUtenteCorrente(), "La sessione dovrebbe contenere l'utente dopo la registrazione.");
         assertEquals("nuovoUtente", sessione.getUtenteCorrente().getUsername());
     }
 
     @Test
     void elaboraRegistrazione_FallisceSeUtenteGiaEsistente() {
+        // Arrange: Salviamo preventivamente un utente nel DB
         utenteRepo.save(new Utente("userEsistente", "vecchia@mail.it", "pass"));
 
+        // Act & Assert: Verifichiamo che il database impedisca il duplicato tramite la logica dell'handler
         assertThrows(IllegalArgumentException.class, () ->
                 handler.elaboraRegistrazione("userEsistente", "nuova@mail.it", "password")
         );
@@ -46,8 +68,7 @@ class RegistrazioneHandlerTest {
 
     @Test
     void elaboraRegistrazione_ValidazioneEmailErrata() {
-        // L'handler cattura l'eccezione internamente o la lancia a seconda dell'implementazione.
-        // Se l'implementazione attuale lancia l'eccezione:
+        // Act & Assert: Verifica la logica di validazione interna (se presente nel dominio o handler)
         assertThrows(IllegalArgumentException.class, () ->
                 handler.elaboraRegistrazione("user", "email_senza_at", "12345")
         );

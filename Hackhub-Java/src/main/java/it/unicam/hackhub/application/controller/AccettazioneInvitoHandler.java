@@ -2,6 +2,7 @@ package it.unicam.hackhub.application.controller;
 
 import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.Invito;
+import it.unicam.hackhub.domain.model.StatoPendente;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.InvitoRepository;
 import org.springframework.stereotype.Service;
@@ -22,8 +23,8 @@ public class AccettazioneInvitoHandler {
     public List<Invito> getInvitiPendenti() {
         // Chiama getUtenteCorrente() sulla Sessione[cite: 1]
         Utente utente = sessione.getUtenteCorrente();
-        // Chiama findPending(utente) sul Repository[cite: 1]
-        return invitoRepo.findPending(utente);
+        // Chiama findByInvitatoAndStato(utente) sul Repository[cite: 1]
+        return invitoRepo.findByInvitatoAndStato(utente, new StatoPendente());
     }
 
     // Corrisponde a accettaInvito(invito)[cite: 1]

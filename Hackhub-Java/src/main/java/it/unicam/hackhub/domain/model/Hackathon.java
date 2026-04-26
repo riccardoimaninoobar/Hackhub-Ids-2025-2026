@@ -1,26 +1,59 @@
 package it.unicam.hackhub.domain.model;
+import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
+@Entity
+@Table(name ="hackathons")
 public class Hackathon {
-    private final String nome;
-    private final String regolamento;
-    private final LocalDate scadenzaIscrizioni;
-    private final LocalDate dataInizio;
-    private final LocalDate dataFine;
-    private final String luogo;
-    private final Integer dimMaxTeam;
-    private final Utente organizzatore;
-    private final Set<Utente> mentori = new HashSet<>();;
-    private final Utente giudice;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(nullable = false, unique = true)
+    private String nome;
+    @Column(length = 2000)
+    private String regolamento;
+
+    private LocalDate scadenzaIscrizioni;
+    private LocalDate dataInizio;
+    private LocalDate dataFine;
+    private String luogo;
+    private Integer dimMaxTeam;
+    // relazioni con Utente
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "organizzatore_id")
+    private Utente organizzatore;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "hackathon_mentori", // Crea la tabella ponte
+            joinColumns = @JoinColumn(name = "hackathon_id"),
+            inverseJoinColumns = @JoinColumn(name = "utente_id")
+    )
+    private Set<Utente> mentori = new HashSet<>();;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "giudice_id")
+    private Utente giudice;
+    @Convert(converter = it.unicam.hackhub.infrastructure.persistence.StatoHackathonConverter.class)
+    @Column(name = "stato")
     private StatoHackathon stato;
     private BigDecimal premioImporto;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "hackathon_team", // Crea la tabella ponte
+            joinColumns = @JoinColumn(name = "hackathon_id"),
+            inverseJoinColumns = @JoinColumn(name = "team_id")
+    )
     private Set<Team> teamPartecipanti = new HashSet<>();
-    private final Set<Sottomissione> sottomissioni = new HashSet<>();
+    @OneToMany(mappedBy = "hackathon", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Sottomissione> sottomissioni = new HashSet<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_vincente_id")
     private Team teamVincente;
 
+    protected Hackathon() {}
     Hackathon(String nome, String regolamento, LocalDate scadenzaIscrizioni, LocalDate dataInizio,
               LocalDate dataFine, String luogo, Integer dimMaxTeam, Utente o, Utente g, Set<Utente> m, BigDecimal premioImporto) {
         this.nome = nome;
@@ -128,6 +161,7 @@ public class Hackathon {
             throw new IllegalArgumentException("Sottomissione non valida per questo hackathon");
         }
         this.sottomissioni.add(sottomissione);
+        sottomissione.setHackathon(this);
     }
 
     /**

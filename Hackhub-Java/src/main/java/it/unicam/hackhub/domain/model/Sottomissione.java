@@ -1,14 +1,30 @@
 package it.unicam.hackhub.domain.model;
 
+import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
-
+@Entity
+@Table(name = "sottomissioni")
 public class Sottomissione {
-    private final String nomeFile;
-    private final String link; // o percorso file
-    private final LocalDateTime dataCaricamento;
-    private final Team team;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(nullable = false)
+    private String nomeFile;
+    private String link; // o percorso file
+    @Column(nullable = false)
+    private LocalDateTime dataCaricamento;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "team_id", nullable = false)
+    private Team team;
     private int punteggio;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hackathon_id")
+    private Hackathon hackathon;
+
+    protected Sottomissione() {}
 
     public Sottomissione(String nomeFile, String link, Team team) {
         this.nomeFile = nomeFile;
@@ -19,6 +35,7 @@ public class Sottomissione {
     }
 
     // getter
+    public Long getId() { return id; }
     public String getNomeFile() { return nomeFile; }
     public String getLink() { return link; }
     public LocalDateTime getDataCaricamento() { return dataCaricamento; }
@@ -31,6 +48,10 @@ public class Sottomissione {
     public void setPunteggio(int punteggio) {
         this.punteggio = punteggio;
     }
+
+    public Hackathon getHackathon() { return hackathon; }
+
+    public void setHackathon(Hackathon hackathon) { this.hackathon = hackathon; }
 
     @Override
     public boolean equals(Object o) {

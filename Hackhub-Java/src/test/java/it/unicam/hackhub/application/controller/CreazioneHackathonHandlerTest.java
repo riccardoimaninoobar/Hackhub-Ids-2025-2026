@@ -5,10 +5,13 @@ import it.unicam.hackhub.domain.model.Hackathon;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
-import it.unicam.hackhub.infrastructure.persistence.InMemoryHackathonRepository;
-import it.unicam.hackhub.infrastructure.persistence.InMemoryUtenteRepository;
+import it.unicam.hackhub.presentation.CliRunner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -16,14 +19,17 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest // Accende Spring e il Database!
+@Transactional  // Svuota il DB alla fine di ogni singolo test
 class CreazioneHackathonHandlerTest {
 
-    private CreazioneHackathonHandler handler;
-    private AggiungiMentoreHandler aggiungiMentoreHandler;
-
-    private Sessione sessione;
-    private HackathonRepository hackathonRepo;
-    private UtenteRepository utenteRepo;
+    @MockBean
+    private CliRunner cliRunner;
+    // Spring "inietta" automaticamente tutto. Niente più 'new' o 'mock'!
+    @Autowired private CreazioneHackathonHandler handler;
+    @Autowired private Sessione sessione;
+    @Autowired private HackathonRepository hackathonRepo;
+    @Autowired private UtenteRepository utenteRepo;
 
     private Utente organizzatore;
     private Utente utenteGiudice;
@@ -31,13 +37,7 @@ class CreazioneHackathonHandlerTest {
 
     @BeforeEach
     void setUp() {
-        sessione = new Sessione(null);
-        hackathonRepo = new InMemoryHackathonRepository();
-        utenteRepo = new InMemoryUtenteRepository();
-
-        aggiungiMentoreHandler = new AggiungiMentoreHandler(hackathonRepo, utenteRepo, sessione);
-        handler = new CreazioneHackathonHandler(hackathonRepo, utenteRepo, aggiungiMentoreHandler, sessione);
-
+        // Creiamo gli utenti e li salviamo nel VERO database H2
         organizzatore = new Utente("org", "org@mail.it", "pass");
         utenteGiudice = new Utente("giudice", "g@mail.it", "pass");
         mentore = new Utente("esperto", "esp@mail.it", "pass");
@@ -59,19 +59,17 @@ class CreazioneHackathonHandlerTest {
             handler.creaHackathonBase("GlobalHack", "Regole", LocalDate.now(), LocalDate.now(), LocalDate.now().plusDays(2), "Roma", 5, new BigDecimal("1000"));
         });
 
-        // Non è ancora salvato nel repo, perché manca il giudice e il build()!
-        assertFalse(hackathonRepo.existsById("GlobalHack"));
+        // Verifichiamo l'esistenza usando il NOME (Business Key)
+        assertFalse(hackathonRepo.existsByNome("GlobalHack"));
     }
 
     @Test
     void creaHackathonBase_FallisceSeGiaEsiste() {
         sessione.setUtenteCorrente(organizzatore);
 
-        // Simuliamo un Hackathon già esistente
         handler.creaHackathonBase("HackEsistente", "R", LocalDate.now(), LocalDate.now(), LocalDate.now().plusDays(1), "L", 2, new BigDecimal("10"));
-        handler.assegnaGiudice("giudice"); // Lo salva!
+        handler.assegnaGiudice("giudice");
 
-        // Tentiamo di ricrearne un altro con lo stesso nome
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
             handler.creaHackathonBase("HackEsistente", "Altre", LocalDate.now(), LocalDate.now(), LocalDate.now().plusDays(1), "Altro", 2, new BigDecimal("20"));
         });
@@ -91,8 +89,9 @@ class CreazioneHackathonHandlerTest {
 
         assertTrue(result, "L'assegnazione del giudice dovrebbe restituire true se l'utente esiste.");
 
-        // Ora deve essere salvato nel repository
-        Optional<Hackathon> salvato = hackathonRepo.findById("Hack1");
+        // Ripeschiamo l'Hackathon dal DB usando il NOME
+        Optional<Hackathon> salvato = hackathonRepo.findByNome("Hack1");
+
         assertTrue(salvato.isPresent());
         assertEquals("Hack1", salvato.get().getNome());
         assertTrue(salvato.get().isOrganizzatore(organizzatore));
@@ -107,15 +106,14 @@ class CreazioneHackathonHandlerTest {
     void assegnaMentore_AggiungeCorrettamenteTramiteDelega() {
         sessione.setUtenteCorrente(organizzatore);
         handler.creaHackathonBase("HackFinale", "R", LocalDate.now(), LocalDate.now(), LocalDate.now().plusDays(1), "Roma", 5, new BigDecimal("1000"));
-        handler.assegnaGiudice("giudice"); // Salva l'hackathon nel repo
+        handler.assegnaGiudice("giudice");
 
-        // Act: richiamiamo assegnaMentore sul CreazioneHackathonHandler
         assertDoesNotThrow(() -> {
             handler.assegnaMentore("esperto");
         });
 
-        // Assert: Verifichiamo che il mentore sia stato effettivamente aggiunto
-        Hackathon h = hackathonRepo.findById("HackFinale").get();
+        // Ricarichiamo dal DB per verificare l'aggiornamento
+        Hackathon h = hackathonRepo.findByNome("HackFinale").get();
         assertTrue(h.isMentore(mentore), "Il mentore deve risultare nello staff dell'Hackathon creato.");
     }
 }

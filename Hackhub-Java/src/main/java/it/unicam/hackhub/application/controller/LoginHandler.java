@@ -18,7 +18,7 @@ public class LoginHandler {
     }
 
     public void elaboraLogin(String username, String password) {
-        Optional<Utente> utenteContainer = utenteRepo.findById(username);
+        Optional<Utente> utenteContainer = utenteRepo.findByUsername(username);
 
         if (utenteContainer.isEmpty()) {
             throw new IllegalArgumentException("Utente inesistente");

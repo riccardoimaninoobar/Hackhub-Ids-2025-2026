@@ -30,7 +30,7 @@ public class AggiungiMentoreHandler {
             throw new IllegalStateException("Devi effettuare il login per eseguire questa azione.");
         }
 
-        Optional<Hackathon> h = hackathonRepo.findById(nomeHackathon);
+        Optional<Hackathon> h = hackathonRepo.findByNome(nomeHackathon);
         if(h.isEmpty()) {
             throw new IllegalArgumentException("Hackathon inesistente");
         }
@@ -45,7 +45,7 @@ public class AggiungiMentoreHandler {
 
     public void aggiungiMentore(String username) {
         // ... (Rimane identico a come l'hai scritto tu) ...
-        Optional<Utente> utente = utenteRepo.findById(username);
+        Optional<Utente> utente = utenteRepo.findByUsername(username);
         if(utente.isEmpty()){ throw new IllegalArgumentException("Utente inesistente"); }
         if(hackathon.utenteMembroStaff(utente.get())){ throw new IllegalArgumentException("Utente già parte dello staff");}
         if(hackathon.utentePartecipante(utente.get())){throw new IllegalArgumentException("Utente partecipante");}
