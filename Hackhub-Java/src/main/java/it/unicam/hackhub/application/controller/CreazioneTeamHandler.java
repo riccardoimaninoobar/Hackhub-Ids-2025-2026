@@ -4,7 +4,9 @@ import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.TeamRepository;
+import org.springframework.stereotype.Service;
 
+@Service
 public class CreazioneTeamHandler {
 
     private final TeamRepository teamRepository;

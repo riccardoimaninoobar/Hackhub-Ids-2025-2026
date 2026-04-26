@@ -1,7 +1,9 @@
 package it.unicam.hackhub.application.controller;
 
 import it.unicam.hackhub.application.context.Sessione;
+import org.springframework.stereotype.Service;
 
+@Service
 public class LogoutHandler {
     private final Sessione sessione;
 

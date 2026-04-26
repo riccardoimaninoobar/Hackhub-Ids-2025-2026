@@ -1,7 +1,9 @@
 package it.unicam.hackhub.infrastructure;
 
 import it.unicam.hackhub.domain.service.SistemaPagamentoAdapter;
+import org.springframework.stereotype.Service;
 
+@Service
 public class DummySistemaPagamentoAdapter implements SistemaPagamentoAdapter {
 
     @Override

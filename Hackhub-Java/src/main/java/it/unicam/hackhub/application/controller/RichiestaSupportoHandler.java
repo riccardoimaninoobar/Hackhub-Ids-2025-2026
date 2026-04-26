@@ -6,9 +6,11 @@ import it.unicam.hackhub.domain.model.RichiestaSupporto;
 import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.RichiestaSupportoRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.Set;
 
+@Service
 public class RichiestaSupportoHandler {
     private final Sessione sessione;
     private final RichiestaSupportoRepository richiestaRepo;

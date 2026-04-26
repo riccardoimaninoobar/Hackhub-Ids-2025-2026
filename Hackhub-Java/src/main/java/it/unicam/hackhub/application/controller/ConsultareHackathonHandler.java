@@ -2,9 +2,11 @@ package it.unicam.hackhub.application.controller;
 
 import it.unicam.hackhub.domain.model.Hackathon;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class ConsultareHackathonHandler {
 
     private final HackathonRepository hackathonRepo;

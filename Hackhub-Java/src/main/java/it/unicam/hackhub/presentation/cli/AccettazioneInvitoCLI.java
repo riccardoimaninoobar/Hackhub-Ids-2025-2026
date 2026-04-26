@@ -2,9 +2,12 @@ package it.unicam.hackhub.presentation.cli;
 
 import it.unicam.hackhub.application.controller.AccettazioneInvitoHandler;
 import it.unicam.hackhub.domain.model.Invito;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Scanner;
 
+@Component
 public class AccettazioneInvitoCLI {
     private final AccettazioneInvitoHandler handler;
     private final Scanner scanner = new Scanner(System.in);

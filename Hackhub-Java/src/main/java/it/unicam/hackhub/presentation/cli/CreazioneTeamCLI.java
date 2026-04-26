@@ -3,8 +3,11 @@ package it.unicam.hackhub.presentation.cli;
 import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.application.controller.CreazioneTeamHandler;
 import it.unicam.hackhub.domain.model.Team;
+import org.springframework.stereotype.Component;
+
 import java.util.Scanner;
 
+@Component
 public class CreazioneTeamCLI {
     private final CreazioneTeamHandler handler;
     private final Sessione sessione;

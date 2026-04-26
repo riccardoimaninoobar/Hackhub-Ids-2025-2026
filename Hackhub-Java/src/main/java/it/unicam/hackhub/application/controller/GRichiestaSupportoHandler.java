@@ -7,12 +7,14 @@ import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.RichiestaSupportoRepository;
 import it.unicam.hackhub.domain.service.CalendarService;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Service
 public class GRichiestaSupportoHandler {
     private final Sessione sessione;
     private final RichiestaSupportoRepository richiestaRepo;

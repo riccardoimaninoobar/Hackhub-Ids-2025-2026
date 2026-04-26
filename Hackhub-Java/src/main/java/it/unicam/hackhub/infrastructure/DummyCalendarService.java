@@ -1,12 +1,14 @@
 package it.unicam.hackhub.infrastructure;
 
 import it.unicam.hackhub.domain.service.CalendarService;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
 
+@Service
 public class DummyCalendarService implements CalendarService {
     private final Set<String> slotPrenotati = new HashSet<>();
 

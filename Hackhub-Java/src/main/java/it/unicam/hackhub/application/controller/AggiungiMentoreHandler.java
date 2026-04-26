@@ -5,8 +5,11 @@ import it.unicam.hackhub.domain.model.Hackathon;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
+import org.springframework.stereotype.Service;
+
 import java.util.Optional;
 
+@Service
 public class AggiungiMentoreHandler {
     private final HackathonRepository hackathonRepo;
     private final UtenteRepository utenteRepo;

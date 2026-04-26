@@ -6,8 +6,11 @@ import it.unicam.hackhub.domain.model.Sottomissione;
 import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
+import org.springframework.stereotype.Service;
+
 import java.util.Set;
 
+@Service
 public class CaricaSottomissioneHandler {
 
     private final HackathonRepository hackathonRepo;

@@ -3,9 +3,12 @@ package it.unicam.hackhub.presentation.cli;
 import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.application.controller.ProclamaVincitoreHandler;
 import it.unicam.hackhub.domain.model.Utente;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Scanner;
 
+@Component
 public class ProclamaVincitoreCLI {
 
     private final ProclamaVincitoreHandler handler;

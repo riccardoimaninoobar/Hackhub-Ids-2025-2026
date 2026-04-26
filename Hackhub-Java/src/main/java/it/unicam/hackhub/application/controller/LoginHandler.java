@@ -3,8 +3,11 @@ package it.unicam.hackhub.application.controller;
 import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
+import org.springframework.stereotype.Service;
+
 import java.util.Optional;
 
+@Service
 public class LoginHandler {
     private final UtenteRepository utenteRepo;
     private final Sessione sessione; // AGGIUNTA

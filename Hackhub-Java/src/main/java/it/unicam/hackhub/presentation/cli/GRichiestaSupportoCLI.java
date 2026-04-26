@@ -2,12 +2,14 @@ package it.unicam.hackhub.presentation.cli;
 
 import it.unicam.hackhub.application.controller.GRichiestaSupportoHandler;
 import it.unicam.hackhub.domain.model.RichiestaSupporto;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Scanner;
 
+@Component
 public class GRichiestaSupportoCLI {
     private final GRichiestaSupportoHandler handler;
     private final Scanner scanner = new Scanner(System.in);

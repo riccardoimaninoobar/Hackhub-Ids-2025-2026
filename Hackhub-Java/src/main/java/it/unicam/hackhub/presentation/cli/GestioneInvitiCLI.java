@@ -1,8 +1,11 @@
 package it.unicam.hackhub.presentation.cli;
 
 import it.unicam.hackhub.application.controller.GestioneInvitiHandler;
+import org.springframework.stereotype.Component;
+
 import java.util.Scanner;
 
+@Component
 public class GestioneInvitiCLI {
 
     private final GestioneInvitiHandler handler;

@@ -5,9 +5,10 @@ import it.unicam.hackhub.domain.model.StatoPendente;
 import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.InvitoRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
-
+@Repository
 public class InMemoryInvitoRepository
         extends InMemoryRepository<Invito, String>
         implements InvitoRepository {

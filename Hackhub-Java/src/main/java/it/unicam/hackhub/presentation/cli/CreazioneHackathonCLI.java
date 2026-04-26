@@ -1,10 +1,13 @@
 package it.unicam.hackhub.presentation.cli;
 
 import it.unicam.hackhub.application.controller.CreazioneHackathonHandler;
+import org.springframework.stereotype.Component;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Scanner;
 
+@Component
 public class CreazioneHackathonCLI {
     private final CreazioneHackathonHandler handler;
     private final Scanner scanner = new Scanner(System.in);

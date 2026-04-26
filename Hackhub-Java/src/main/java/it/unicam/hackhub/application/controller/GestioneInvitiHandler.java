@@ -6,9 +6,11 @@ import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.InvitoRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Service
 public class GestioneInvitiHandler {
 
     private final UtenteRepository utenteRepo;

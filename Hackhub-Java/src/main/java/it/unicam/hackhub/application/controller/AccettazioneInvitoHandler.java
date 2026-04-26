@@ -4,8 +4,11 @@ import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.Invito;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.InvitoRepository;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 
+@Service
 public class AccettazioneInvitoHandler {
     private final InvitoRepository invitoRepo;
     private final Sessione sessione;

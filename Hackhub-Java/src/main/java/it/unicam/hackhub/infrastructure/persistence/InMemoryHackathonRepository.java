@@ -2,7 +2,8 @@ package it.unicam.hackhub.infrastructure.persistence;
 
 import it.unicam.hackhub.domain.model.Hackathon;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
-
+import org.springframework.stereotype.Repository;
+@Repository
 public class InMemoryHackathonRepository
         extends InMemoryRepository<Hackathon, String>
         implements HackathonRepository {

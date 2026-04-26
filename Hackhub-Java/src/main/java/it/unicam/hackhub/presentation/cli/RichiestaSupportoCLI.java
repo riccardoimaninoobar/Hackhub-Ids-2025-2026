@@ -2,12 +2,14 @@ package it.unicam.hackhub.presentation.cli;
 
 import it.unicam.hackhub.application.controller.RichiestaSupportoHandler;
 import it.unicam.hackhub.domain.model.Hackathon;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
+@Component
 public class RichiestaSupportoCLI {
     private final RichiestaSupportoHandler handler;
     private final Scanner scanner = new Scanner(System.in);

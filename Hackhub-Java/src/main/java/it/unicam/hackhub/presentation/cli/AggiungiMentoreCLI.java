@@ -2,8 +2,11 @@ package it.unicam.hackhub.presentation.cli;
 
 import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.application.controller.AggiungiMentoreHandler;
+import org.springframework.stereotype.Component;
+
 import java.util.Scanner;
 
+@Component
 public class AggiungiMentoreCLI {
     private final AggiungiMentoreHandler handler;
     private final Sessione sessione;

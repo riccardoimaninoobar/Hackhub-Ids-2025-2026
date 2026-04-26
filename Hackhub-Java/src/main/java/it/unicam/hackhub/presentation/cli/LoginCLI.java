@@ -1,8 +1,11 @@
 package it.unicam.hackhub.presentation.cli;
 
 import it.unicam.hackhub.application.controller.LoginHandler;
+import org.springframework.stereotype.Component;
+
 import java.util.Scanner;
 
+@Component
 public class LoginCLI {
     private final LoginHandler handler;
     private final Scanner scanner = new Scanner(System.in);

@@ -2,11 +2,14 @@ package it.unicam.hackhub.presentation.cli;
 
 import it.unicam.hackhub.application.controller.CaricaSottomissioneHandler;
 import it.unicam.hackhub.domain.model.Hackathon;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
+@Component
 public class CaricaSottomissioneCLI {
 
     private final CaricaSottomissioneHandler handler;

@@ -3,12 +3,14 @@ package it.unicam.hackhub.presentation.cli;
 import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.application.controller.IscrizioneTeamHandler;
 import it.unicam.hackhub.domain.model.Hackathon;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
+@Component
 public class IscrizioneTeamCLI {
     private final IscrizioneTeamHandler handler;
     private final Sessione sessione;

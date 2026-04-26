@@ -1,8 +1,11 @@
 package it.unicam.hackhub.presentation.cli;
 
 import it.unicam.hackhub.application.controller.RegistrazioneHandler;
+import org.springframework.stereotype.Component;
+
 import java.util.Scanner;
 
+@Component
 public class RegistrazioneCLI {
     private final RegistrazioneHandler handler;
     private final Scanner scanner;

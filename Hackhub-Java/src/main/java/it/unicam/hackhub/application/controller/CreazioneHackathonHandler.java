@@ -4,10 +4,12 @@ import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.*;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+@Service
 public class CreazioneHackathonHandler {
 
     private final HackathonRepository hackathonRepo;

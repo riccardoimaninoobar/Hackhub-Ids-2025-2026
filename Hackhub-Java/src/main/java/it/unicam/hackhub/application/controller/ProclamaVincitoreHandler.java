@@ -8,11 +8,13 @@ import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.TeamRepository;
 import it.unicam.hackhub.domain.service.SistemaPagamentoAdapter;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class ProclamaVincitoreHandler {
 
     private final HackathonRepository hackathonRepo;

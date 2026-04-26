@@ -2,9 +2,12 @@ package it.unicam.hackhub.presentation.cli;
 
 import it.unicam.hackhub.application.controller.ConsultareHackathonHandler;
 import it.unicam.hackhub.domain.model.Hackathon;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Scanner;
 
+@Component
 public class ConsultareHackathonCLI {
     private final ConsultareHackathonHandler handler;
     private final Scanner scanner = new Scanner(System.in);
