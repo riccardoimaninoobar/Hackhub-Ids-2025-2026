@@ -43,38 +43,6 @@ class LogoutHandlerTest {
         utenteRepo.save(utenteLoggato);
     }
 
-    // ==========================================================
-    // TEST 1: Metodo verificaSessione()
-    // ==========================================================
-
-    @Test
-    void verificaSessione_NonLanciaEccezioneSeUtenteLoggato() {
-        // Arrange: impostiamo l'utente nella sessione iniettata da Spring
-        sessione.setUtenteCorrente(utenteLoggato);
-
-        // Act & Assert: verifichiamo che il controllo passi senza eccezioni
-        assertDoesNotThrow(() -> {
-            handler.verificaSessione();
-        }, "Non dovrebbe lanciare eccezioni se c'è un utente loggato nella sessione.");
-    }
-
-    @Test
-    void verificaSessione_LanciaEccezioneSeNessunUtenteLoggato() {
-        // Arrange: ci assicuriamo che la sessione sia vuota
-        sessione.setUtenteCorrente(null);
-
-        // Act & Assert
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-            handler.verificaSessione();
-        });
-
-        assertEquals("Nessun utente attualmente loggato. Impossibile effettuare il logout.", exception.getMessage());
-    }
-
-    // ==========================================================
-    // TEST 2: Metodo effettuaLogout()
-    // ==========================================================
-
     @Test
     void effettuaLogout_AzzeraCorrettamenteLaSessione() {
         // Arrange: partiamo da una situazione in cui l'utente è loggato
@@ -87,4 +55,4 @@ class LogoutHandlerTest {
         // Assert: verifichiamo che l'utente corrente sia tornato a null
         assertNull(sessione.getUtenteCorrente(), "L'utente corrente nella sessione deve essere null dopo il logout.");
     }
-}
+}   

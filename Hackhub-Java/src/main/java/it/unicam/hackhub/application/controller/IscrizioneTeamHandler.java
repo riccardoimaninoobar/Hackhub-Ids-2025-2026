@@ -8,6 +8,7 @@ import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.TeamRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // AGGIUNTO
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,7 +18,7 @@ public class IscrizioneTeamHandler {
 
     private final HackathonRepository hackathonRepo;
     private final TeamRepository teamRepo;
-    private final Sessione sessione; // AGGIUNTA
+    private final Sessione sessione;
 
     public IscrizioneTeamHandler(HackathonRepository hackathonRepo,
                                  TeamRepository teamRepo,
@@ -27,27 +28,34 @@ public class IscrizioneTeamHandler {
         this.sessione = sessione;
     }
 
-
-
     public Set<Hackathon> getHackathonInIscrizione() {
-        // Corrisponde a findByStato("In iscrizione") sul repository
         return hackathonRepo.findAll().stream()
                 .filter(h -> h.getStato() instanceof StatoInIscrizione)
                 .collect(Collectors.toSet());
     }
 
-    public void iscriviTeam(Hackathon h) {
-        // 1. Recupero dati dalla sessione come nel diagramma
+    // PER IL REST
+    @Transactional
+    public void iscriviTeam(String nomeHackathon) {
         Utente utenteCorrente = sessione.getUtenteCorrente();
-        if (utenteCorrente == null) throw new IllegalStateException("Login richiesto.");
+        if (utenteCorrente == null) throw new IllegalStateException("Devi effettuare il login per iscriverti.");
 
-        Team team = utenteCorrente.getTeam();
-        if (team == null) throw new IllegalStateException("Nessun team associato.");
+        Team teamDallaSessione = utenteCorrente.getTeam();
+        if (teamDallaSessione == null) throw new IllegalStateException("Nessun team associato. Devi prima creare o unirti a un team.");
 
-        // 2. Chiamata all'Hackathon (che delega allo stato)
-        h.iscriviTeam(team);
+        Team teamConnesso = teamRepo.findById(teamDallaSessione.getId())
+                .orElseThrow(() -> new IllegalStateException("Team non trovato nel database."));
 
-        // 3. Salvataggio su repository
-        hackathonRepo.save(h);
+        Hackathon hackathon = hackathonRepo.findByNome(nomeHackathon)
+                .orElseThrow(() -> new IllegalArgumentException("Hackathon '" + nomeHackathon + "' inesistente."));
+
+        hackathon.iscriviTeam(teamConnesso);
+        hackathonRepo.save(hackathon);
+    }
+
+    // PER CLI
+    @Transactional
+    public void iscriviTeam(Hackathon h) {
+        iscriviTeam(h.getNome());
     }
 }

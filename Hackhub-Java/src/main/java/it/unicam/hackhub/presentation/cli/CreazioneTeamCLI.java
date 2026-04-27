@@ -36,7 +36,7 @@ public class CreazioneTeamCLI {
         }
 
         try {
-            Team newTeam = handler.creaTeam(teamName);
+            Team newTeam = handler.creaTeam(teamName, null);
             System.out.println("\n-> Team '" + newTeam.getName() + "' creato con successo!");
         } catch (IllegalArgumentException | IllegalStateException e) {
             System.out.println("Errore imprevisto: " + e.getMessage());

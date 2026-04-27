@@ -1,8 +1,12 @@
 package it.unicam.hackhub.presentation.api;
 
+import it.unicam.hackhub.application.controller.AggiungiMentoreHandler;
 import it.unicam.hackhub.application.controller.CreazioneHackathonHandler;
+import it.unicam.hackhub.application.controller.IscrizioneTeamHandler;
+import it.unicam.hackhub.presentation.dto.AggiungiMentoreRequest;
 import it.unicam.hackhub.presentation.dto.CreazioneHackathonRequest;
 import it.unicam.hackhub.presentation.dto.HackathonResponse;
+import it.unicam.hackhub.presentation.dto.IscrizioneTeamRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,13 +19,18 @@ import java.util.stream.Collectors;
 public class HackathonController {
 
     private final CreazioneHackathonHandler creazioneHandler;
-
     private final ConsultareHackathonHandler consultareHandler;
+    private final AggiungiMentoreHandler aggiungiMentoreHandler;
+    private final IscrizioneTeamHandler iscrizioneTeamHandler;
 
     public HackathonController(CreazioneHackathonHandler creazioneHandler,
-                               ConsultareHackathonHandler consultareHandler) {
+                               ConsultareHackathonHandler consultareHandler,
+                               AggiungiMentoreHandler aggiungiMentoreHandler,
+                               IscrizioneTeamHandler  iscrizioneTeamHandler) {
         this.creazioneHandler = creazioneHandler;
         this.consultareHandler = consultareHandler;
+        this.aggiungiMentoreHandler = aggiungiMentoreHandler;
+        this.iscrizioneTeamHandler = iscrizioneTeamHandler;
     }
 
     @PostMapping("/creazione")
@@ -72,5 +81,55 @@ public class HackathonController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/aggiungi-mentore")
+    public ResponseEntity<String> aggiungiMentore(@RequestBody AggiungiMentoreRequest request) {
+        try {
+            // Uniamo le due chiamate necessarie all'handler
+            aggiungiMentoreHandler.checkOrg(request.nomeHackathon());
+            aggiungiMentoreHandler.aggiungiMentore(request.usernameMentore());
+
+            return ResponseEntity.ok("Il mentore '" + request.usernameMentore() +
+                    "' è stato aggiunto all'Hackathon '" + request.nomeHackathon() + "'.");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Errore interno: " + e.getMessage());
+        }
+    }
+
+    // ENDPOINT 1 per UC iscrizione team: Restituisce solo gli Hackathon attualmente in fase di iscrizione
+    @GetMapping("/in-iscrizione")
+    public ResponseEntity<List<HackathonResponse>> visualizzaIscrivibili() {
+        var listaHackathon = iscrizioneTeamHandler.getHackathonInIscrizione();
+
+        List<HackathonResponse> response = listaHackathon.stream()
+                .map(h -> new HackathonResponse(
+                        h.getNome(),
+                        h.getLuogo(),
+                        h.getDataInizio(),
+                        h.getDataFine(),
+                        h.getOrganizzatore().getUsername(),
+                        h.getStato().toString()
+                ))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ENDPOINT 2: Permette l'iscrizione del team loggato all'hackathon specificato
+    @PostMapping("/iscrizione-team")
+    public ResponseEntity<String> iscriviTeam(@RequestBody IscrizioneTeamRequest request) {
+        try {
+            iscrizioneTeamHandler.iscriviTeam(request.nomeHackathon());
+            return ResponseEntity.ok("Il tuo team è stato iscritto all'Hackathon '" + request.nomeHackathon() + "' con successo!");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Errore interno: " + e.getMessage());
+        }
     }
 }

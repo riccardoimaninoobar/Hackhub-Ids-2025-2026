@@ -45,7 +45,7 @@ class CreazioneTeamHandlerTest {
     void creaTeam_Successo() {
         sessione.setUtenteCorrente(utenteTest);
 
-        Team creato = handler.creaTeam("Team Innovazione");
+        Team creato = handler.creaTeam("Team Innovazione", "IT12345678");
 
         assertNotNull(creato);
         assertEquals("Team Innovazione", creato.getName());
@@ -62,7 +62,7 @@ class CreazioneTeamHandlerTest {
         sessione.setUtenteCorrente(null);
 
         assertThrows(IllegalStateException.class, () ->
-                handler.creaTeam("SoloTeam")
+                handler.creaTeam("SoloTeam", "IT12345678")
         );
     }
 
@@ -73,7 +73,7 @@ class CreazioneTeamHandlerTest {
         teamEsistente.aggiungiMembro(utenteTest); // L'utente ha già un team
 
         assertThrows(IllegalStateException.class, () ->
-                handler.creaTeam("NuovoTeam")
+                handler.creaTeam("NuovoTeam", "IT12345678")
         );
     }
 
@@ -83,7 +83,7 @@ class CreazioneTeamHandlerTest {
         teamRepo.save(new Team("TeamDuplicato"));
 
         assertThrows(IllegalArgumentException.class, () ->
-                handler.creaTeam("TeamDuplicato")
+                handler.creaTeam("TeamDuplicato", "IT12345678")
         );
     }
 }

@@ -76,6 +76,12 @@ public class Hackathon {
             this.mentori.add(m);
         }
     }
+
+    @PostLoad
+    public void onLoad() {
+        this.aggiornaStato();
+    }
+
     public String getNome() {
         return nome;
     }

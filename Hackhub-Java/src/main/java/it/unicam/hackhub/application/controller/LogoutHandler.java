@@ -11,14 +11,12 @@ public class LogoutHandler {
         this.sessione = sessione;
     }
 
+
     // Metodo preventivo per far controllare alla CLI se può procedere
-    public void verificaSessione() {
+    public void effettuaLogout() {
         if (sessione.getUtenteCorrente() == null) {
             throw new IllegalStateException("Nessun utente attualmente loggato. Impossibile effettuare il logout.");
         }
-    }
-
-    public void effettuaLogout() {
         sessione.setUtenteCorrente(null);
     }
 }
