@@ -189,4 +189,9 @@ public class Hackathon {
     public void setTeamVincente(Team teamVincente) {
         this.teamVincente = teamVincente;
     }
+
+    public String getLuogo() { return luogo; }
+    public LocalDate getDataInizio() { return dataInizio; }
+    public LocalDate getDataFine() { return dataFine; }
+
 }

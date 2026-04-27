@@ -64,33 +64,36 @@ public class CliRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // 1. Dati di Seed Iniziali (Salvati nei repository gestiti da Spring)
-        Utente o = new Utente("mock_organizzatore", "org@hack.it", "pass123");
-        Utente g = new Utente("AnnaGiudice", "anna@hack.it", "pass123");
-        Utente m = new Utente("LuigiMentore", "luigi@hack.it", "pass123");
-        Utente mentore2 = new Utente("GianniManni", "gianbigman@hack.it", "pass123");
-        Utente rizzler = new Utente("rizzler","therizzlerking@hack.it", "42069");
+        if(utenteRepo.count() == 0) {
+            // 1. Dati di Seed Iniziali (Salvati nei repository gestiti da Spring)
+            Utente o = new Utente("mock_organizzatore", "org@hack.it", "pass123");
+            Utente g = new Utente("AnnaGiudice", "anna@hack.it", "pass123");
+            Utente m = new Utente("LuigiMentore", "luigi@hack.it", "pass123");
+            Utente mentore2 = new Utente("GianniManni", "gianbigman@hack.it", "pass123");
+            Utente rizzler = new Utente("rizzler", "therizzlerking@hack.it", "42069");
 
-        utenteRepo.save(rizzler);
-        utenteRepo.save(o);
-        utenteRepo.save(g);
-        utenteRepo.save(m);
-        utenteRepo.save(mentore2);
+            utenteRepo.save(rizzler);
+            utenteRepo.save(o);
+            utenteRepo.save(g);
+            utenteRepo.save(m);
+            utenteRepo.save(mentore2);
 
-        HackathonBuilder hBuilder = new HackathonBuilder()
-                .assegnaNome("hackProva")
-                .assegnaRegolamento("non uccidere")
-                .assegnaScadenza(LocalDate.parse("2026-04-20"))
-                .assegnaDataInizio(LocalDate.parse("2026-01-10"))
-                .assegnaDataFine(LocalDate.parse("2026-03-01"))
-                .assegnaLuogo("Camerino")
-                .assegnaDimMaxTeam(5)
-                .assegnaPremioImporto(new BigDecimal(1000))
-                .assegnaOrganizzatore(o)
-                .assegnaGiudice(g)
-                .assegnaMentore(m);
-        hackathonRepo.save(hBuilder.build());
+            HackathonBuilder hBuilder = new HackathonBuilder()
+                    .assegnaNome("hackProva")
+                    .assegnaRegolamento("non uccidere")
+                    .assegnaScadenza(LocalDate.parse("2026-04-20"))
+                    .assegnaDataInizio(LocalDate.parse("2026-01-10"))
+                    .assegnaDataFine(LocalDate.parse("2026-03-01"))
+                    .assegnaLuogo("Camerino")
+                    .assegnaDimMaxTeam(5)
+                    .assegnaPremioImporto(new BigDecimal(1000))
+                    .assegnaOrganizzatore(o)
+                    .assegnaGiudice(g)
+                    .assegnaMentore(m);
+            hackathonRepo.save(hBuilder.build());
+        }  else System.out.println("Database già popolato");
 
+        /*
         // 2. Avvio Menu Interattivo
         Scanner scanner = new Scanner(System.in);
         boolean appInEsecuzione = true;
@@ -158,6 +161,6 @@ public class CliRunner implements CommandLineRunner {
                 System.err.println("Si è verificato un errore inaspettato: " + e.getMessage());
             }
         }
-        // Quando il ciclo termina, il metodo finisce e Spring Boot si spegne dolcemente.
+         */
     }
 }
