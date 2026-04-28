@@ -11,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -119,7 +118,7 @@ class RichiestaSupportoHandlerTest {
 
         RichiestaSupporto salvata = richiestaRepo.findAll().get(0);
         assertEquals(desc, salvata.getDescrizione());
-        assertEquals(teamTest.getName(), salvata.getTeam().getName());
+        assertEquals(teamTest.getNome(), salvata.getTeam().getNome());
         assertEquals(hackathonInCorso.getNome(), salvata.getHackathon().getNome());
     }
 }

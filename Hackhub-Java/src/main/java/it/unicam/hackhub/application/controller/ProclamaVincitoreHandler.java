@@ -8,6 +8,7 @@ import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.TeamRepository;
 import it.unicam.hackhub.domain.service.SistemaPagamentoAdapter;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class ProclamaVincitoreHandler {
 
     private final HackathonRepository hackathonRepo;
@@ -45,7 +47,7 @@ public class ProclamaVincitoreHandler {
 
         List<String> valutazioni = new ArrayList<>();
         for (Sottomissione s : hackathon.getSottomissioni()) {
-            String nomeTeam = s.getTeam() != null ? s.getTeam().getName() : "Team Sconosciuto";
+            String nomeTeam = s.getTeam() != null ? s.getTeam().getNome() : "Team Sconosciuto";
             valutazioni.add("Team: " + nomeTeam + " -> Punteggio: " + s.getPunteggio());
         }
         return valutazioni;
@@ -69,7 +71,7 @@ public class ProclamaVincitoreHandler {
         hackathon.setTeamVincente(team);
         hackathon.setStato(new StatoConcluso());
         hackathonRepo.save(hackathon);
-        System.out.println("NOTIFICA: Complimenti ai membri del team " + team.getName() + ", avete vinto!");
+        System.out.println("NOTIFICA: Complimenti ai membri del team " + team.getNome() + ", avete vinto!");
         return true;
     }
 }

@@ -18,9 +18,6 @@ public class TeamController {
     @PostMapping("/creazione")
     public ResponseEntity<String> creaTeam(@RequestBody CreazioneTeamRequest request) {
         try {
-            // NOTA: Controlla come si chiama il metodo esatto nel tuo CreazioneTeamHandler.
-            // Potrebbe essere "creaTeam", "inizializzaTeam", o simile.
-            // Aggiorna questa riga di conseguenza!
             teamHandler.creaTeam(request.nome(), request.datiBancari());
 
             return ResponseEntity.ok("Il team '" + request.nome() + "' è stato creato con successo!");

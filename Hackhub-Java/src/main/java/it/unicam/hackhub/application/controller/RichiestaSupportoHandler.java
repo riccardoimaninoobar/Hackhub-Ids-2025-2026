@@ -8,20 +8,26 @@ import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.model.NotificaEvent;
 import it.unicam.hackhub.domain.repository.RichiestaSupportoRepository;
+import it.unicam.hackhub.domain.repository.UtenteRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
 
 @Service
+@Transactional
 public class RichiestaSupportoHandler {
     private final Sessione sessione;
     private final RichiestaSupportoRepository richiestaRepo;
+    private final UtenteRepository utenteRepo;
     private final ApplicationEventPublisher eventPublisher;
 
-    public RichiestaSupportoHandler(Sessione sessione, RichiestaSupportoRepository richiestaRepo, ApplicationEventPublisher eventPublisher) {
+    public RichiestaSupportoHandler(Sessione sessione, RichiestaSupportoRepository richiestaRepo,
+                                    UtenteRepository utenteRepo, ApplicationEventPublisher eventPublisher) {
         this.sessione = sessione;
         this.richiestaRepo = richiestaRepo;
+        this.utenteRepo = utenteRepo;
         this.eventPublisher = eventPublisher;
     }
 
@@ -30,7 +36,10 @@ public class RichiestaSupportoHandler {
         Utente corrente = sessione.getUtenteCorrente();
         if (corrente == null) throw new IllegalStateException("Devi effettuare il login.");
 
-        Team t = corrente.getTeam();
+        Utente u = utenteRepo.findById(corrente.getId())
+                .orElseThrow(() -> new IllegalStateException("Utente non trovato."));
+
+        Team t = u.getTeam();
         if (t == null) throw new IllegalStateException("Devi far parte di un team per richiedere supporto.");
 
         Set<Hackathon> hs = t.getHackathonInCorso();
@@ -50,12 +59,19 @@ public class RichiestaSupportoHandler {
 
     // 3. Crea e salva la richiesta
     public void registraRichiestaSupporto(Hackathon h, String desc) {
-        Team t = sessione.getUtenteCorrente().getTeam(); // Recuperiamo il team in modo sicuro
+        // Validazione preventiva
+        convalidaDescrizione(desc);
+
+        Utente corrente = sessione.getUtenteCorrente();
+        Utente u = utenteRepo.findById(corrente.getId()).get();
+        Team t = u.getTeam();
+
         RichiestaSupporto richiesta = new RichiestaSupporto(t, h, desc);
         richiestaRepo.save(richiesta);
-        
+
         for (Utente mentore : h.getMentori()) {
-            Notifica notifica = new Notifica(mentore, "Nuova Richiesta di Supporto", "Il team " + t.getName() + " ha richiesto supporto: " + desc);
+            Notifica notifica = new Notifica(mentore, "Nuova Richiesta di Supporto",
+                    "Il team " + t.getNome() + " ha richiesto supporto: " + desc);
             eventPublisher.publishEvent(new NotificaEvent(notifica));
         }
     }

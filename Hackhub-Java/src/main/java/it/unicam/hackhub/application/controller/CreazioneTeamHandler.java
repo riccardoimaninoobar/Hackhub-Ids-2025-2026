@@ -13,7 +13,7 @@ public class CreazioneTeamHandler {
 
     private final TeamRepository teamRepository;
     private final Sessione sessione;
-    private final UtenteRepository utenteRepository; // AGGIUNTO
+    private final UtenteRepository utenteRepository;
 
     // Aggiorna il costruttore
     public CreazioneTeamHandler(TeamRepository teamRepository, Sessione sessione, UtenteRepository utenteRepository) {

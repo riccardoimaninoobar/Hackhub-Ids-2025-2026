@@ -37,7 +37,7 @@ public class Team {
         this.datiBancari = datiBancari;
     }
 
-    public String getName() {
+    public String getNome() {
         return nome;
     }
 

@@ -75,6 +75,7 @@ public class HackathonController {
                         h.getLuogo(),
                         h.getDataInizio(),
                         h.getDataFine(),
+                        h.getScadenzaIscrizioni(),
                         h.getOrganizzatore().getUsername(),
                         h.getStato().toString()
                 ))
@@ -111,7 +112,7 @@ public class HackathonController {
                         h.getLuogo(),
                         h.getDataInizio(),
                         h.getDataFine(),
-                        h.getOrganizzatore().getUsername(),
+                        h.getScadenzaIscrizioni(), h.getOrganizzatore().getUsername(),
                         h.getStato().toString()
                 ))
                 .collect(Collectors.toList());

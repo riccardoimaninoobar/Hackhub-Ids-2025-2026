@@ -9,7 +9,6 @@ import it.unicam.hackhub.presentation.CliRunner;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -48,7 +47,7 @@ class CreazioneTeamHandlerTest {
         Team creato = handler.creaTeam("Team Innovazione", "IT12345678");
 
         assertNotNull(creato);
-        assertEquals("Team Innovazione", creato.getName());
+        assertEquals("Team Innovazione", creato.getNome());
         // Verifica che l'utente sia stato aggiunto al team e viceversa
         assertTrue(creato.isMembro(utenteTest));
         assertEquals(creato, utenteTest.getTeam());

@@ -12,9 +12,12 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 @Service
+@Transactional
 public class GRichiestaSupportoHandler {
     private final Sessione sessione;
     private final RichiestaSupportoRepository richiestaRepo;

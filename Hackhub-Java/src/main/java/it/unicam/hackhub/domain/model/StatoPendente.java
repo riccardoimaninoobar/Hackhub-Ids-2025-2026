@@ -4,8 +4,8 @@ public class StatoPendente implements StatoInvito {
 
     @Override
     public void accetta(Invito invito) {
-        // 1. getTeam()
-        Team team = invito.getTeam();
+        // 1. getTeamMittente()
+        Team team = invito.getTeamMittente();
 
         // 2. aggiungiMembro(utente) -> che al suo interno farà setTeam(team) su Utente
         team.aggiungiMembro(invito.getInvitato()); // Assumo tu abbia aggiungiMembro o aggiungiMembro in Team

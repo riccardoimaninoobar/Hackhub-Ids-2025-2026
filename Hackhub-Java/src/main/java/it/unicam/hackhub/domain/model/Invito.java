@@ -2,7 +2,6 @@ package it.unicam.hackhub.domain.model;
 
 import jakarta.persistence.*;
 
-import java.util.UUID;
 @Entity
 @Table(name = "invito")
 public class Invito {
@@ -47,7 +46,7 @@ public class Invito {
 
     public Long getId() { return id; }
     public Utente getInvitato() { return invitato; }
-    public Team getTeam() { return teamMittente; }
+    public Team getTeamMittente() { return teamMittente; }
     public StatoInvito getStato() { return stato; } // Ritorna l'oggetto Stato
 
     // Helper per recuperare agilmente la stringa

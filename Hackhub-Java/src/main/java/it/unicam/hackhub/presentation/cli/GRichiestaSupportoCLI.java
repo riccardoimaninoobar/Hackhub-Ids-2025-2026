@@ -3,12 +3,13 @@ package it.unicam.hackhub.presentation.cli;
 import it.unicam.hackhub.application.controller.GRichiestaSupportoHandler;
 import it.unicam.hackhub.domain.model.RichiestaSupporto;
 import it.unicam.hackhub.domain.model.Utente;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Scanner;
-
+@Component
 public class GRichiestaSupportoCLI {
     private final GRichiestaSupportoHandler handler;
     private final Scanner scanner = new Scanner(System.in);
@@ -23,7 +24,7 @@ public class GRichiestaSupportoCLI {
             System.out.println("--- Richieste di supporto ---");
             for (int i = 0; i < richieste.size(); i++) {
                 RichiestaSupporto r = richieste.get(i);
-                System.out.println(i + "] Team: " + r.getTeam().getName() + " | " + r.getDescrizione());
+                System.out.println(i + "] Team: " + r.getTeam().getNome() + " | " + r.getDescrizione());
             }
 
             System.out.print("Seleziona una richiesta: ");
@@ -62,7 +63,7 @@ public class GRichiestaSupportoCLI {
             System.out.println("Nessuna richiesta di supporto aperta trovata per i tuoi hackathon.");
         } else {
             for (RichiestaSupporto r : richieste) {
-                System.out.println("- Team: " + r.getTeam().getName() + " | Oggetto: " + r.getDescrizione());
+                System.out.println("- Team: " + r.getTeam().getNome() + " | Oggetto: " + r.getDescrizione());
             }
         }
     }

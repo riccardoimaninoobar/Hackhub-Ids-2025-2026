@@ -82,6 +82,9 @@ public class Hackathon {
         this.aggiornaStato();
     }
 
+    public Long getId() {
+        return id;
+    }
     public String getNome() {
         return nome;
     }
@@ -204,5 +207,6 @@ public class Hackathon {
     public String getLuogo() { return luogo; }
     public LocalDate getDataInizio() { return dataInizio; }
     public LocalDate getDataFine() { return dataFine; }
+    public LocalDate getScadenzaIscrizioni() { return scadenzaIscrizioni; }
 
 }

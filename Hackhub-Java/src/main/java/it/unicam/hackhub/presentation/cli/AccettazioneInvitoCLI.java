@@ -41,7 +41,7 @@ public class AccettazioneInvitoCLI {
         } else {
             System.out.println("--- Inviti Pendenti ---");
             for (int i = 0; i < invitiPendenti.size(); i++) {
-                System.out.println(i + "] Invito dal team: " + invitiPendenti.get(i).getTeam().getName());
+                System.out.println(i + "] Invito dal team: " + invitiPendenti.get(i).getTeamMittente().getNome());
             }
         }
     }

@@ -7,6 +7,6 @@ public record HackathonResponse(
         String luogo,
         LocalDate inizio,
         LocalDate fine,
-        String organizzatore,
+        LocalDate scadenzaIscrizioni, String organizzatore,
         String stato
 ) {}

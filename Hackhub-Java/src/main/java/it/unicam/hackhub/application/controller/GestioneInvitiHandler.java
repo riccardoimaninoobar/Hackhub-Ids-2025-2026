@@ -63,7 +63,7 @@ public class GestioneInvitiHandler {
         Invito nuovoInvito = new Invito(invitato, teamCorrente);
         invitoRepo.save(nuovoInvito);
 
-        Notifica notifica = new Notifica(invitato, "Nuovo Invito", "Sei stato invitato a unirti al team " + teamCorrente.getName());
+        Notifica notifica = new Notifica(invitato, "Nuovo Invito", "Sei stato invitato a unirti al team " + teamCorrente.getNome());
         eventPublisher.publishEvent(new NotificaEvent(notifica));
     }
 }

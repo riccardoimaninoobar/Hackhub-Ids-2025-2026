@@ -101,7 +101,7 @@ class ProclamaVincitoreHandlerTest {
         // Ricarichiamo l'hackathon dal DB per verificare lo stato aggiornato
         Hackathon aggiornato = hackathonRepo.findByNome("Hack Finale").orElseThrow();
         assertNotNull(aggiornato.getTeamVincente());
-        assertEquals("Winners", aggiornato.getTeamVincente().getName());
+        assertEquals("Winners", aggiornato.getTeamVincente().getNome());
         assertTrue(aggiornato.getStato() instanceof StatoConcluso);
     }
 
