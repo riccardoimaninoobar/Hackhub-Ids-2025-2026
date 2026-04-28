@@ -110,6 +110,11 @@ public class Hackathon {
         }
         return this.giudice.equals(u);
     }
+
+    public Set<Utente> getMentori() {
+        return new HashSet<>(mentori); // copia difensiva
+    }
+
     public boolean isMentore(Utente u) {
         if (u == null)  {
             throw new IllegalArgumentException("utente nullo");

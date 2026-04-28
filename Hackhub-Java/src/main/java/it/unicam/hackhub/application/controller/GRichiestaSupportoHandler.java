@@ -7,12 +7,12 @@ import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.RichiestaSupportoRepository;
 import it.unicam.hackhub.domain.service.CalendarService;
-import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.stereotype.Service;
 
 @Service
 public class GRichiestaSupportoHandler {
@@ -41,6 +41,13 @@ public class GRichiestaSupportoHandler {
             throw new IllegalStateException("Non ci sono richieste di supporto da gestire.");
         }
         return richieste;
+    }
+
+    public List<RichiestaSupporto> ottieniRichiestePerMentore(Utente mentore) {
+        return richiestaRepo.findAll().stream()
+                .filter(r -> r.getStato() != null && ("Aperto".equalsIgnoreCase(r.getStato().toString()) || "Pendente".equalsIgnoreCase(r.getStato().toString())))
+                .filter(r -> r.getHackathon().isMentore(mentore))
+                .collect(Collectors.toList());
     }
 
     public void rispondiRichiesta(RichiestaSupporto richiesta, String risposta) {

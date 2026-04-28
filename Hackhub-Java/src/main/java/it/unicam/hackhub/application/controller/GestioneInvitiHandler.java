@@ -2,11 +2,14 @@ package it.unicam.hackhub.application.controller;
 
 import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.Invito;
+import it.unicam.hackhub.domain.model.Notifica;
 import it.unicam.hackhub.domain.model.StatoPendente;
 import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
+import it.unicam.hackhub.domain.model.NotificaEvent;
 import it.unicam.hackhub.domain.repository.InvitoRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -17,11 +20,13 @@ public class GestioneInvitiHandler {
     private final UtenteRepository utenteRepo;
     private final InvitoRepository invitoRepo;
     private final Sessione sessione;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public GestioneInvitiHandler(UtenteRepository utenteRepo, InvitoRepository invitoRepo, Sessione sessione) {
+    public GestioneInvitiHandler(UtenteRepository utenteRepo, InvitoRepository invitoRepo, Sessione sessione, ApplicationEventPublisher eventPublisher) {
         this.utenteRepo = utenteRepo;
         this.invitoRepo = invitoRepo;
         this.sessione = sessione;
+        this.eventPublisher = eventPublisher;
     }
 
     // EARLY EXIT per la CLI
@@ -57,5 +62,8 @@ public class GestioneInvitiHandler {
         // Tutto ok, si procede con l'invito!
         Invito nuovoInvito = new Invito(invitato, teamCorrente);
         invitoRepo.save(nuovoInvito);
+
+        Notifica notifica = new Notifica(invitato, "Nuovo Invito", "Sei stato invitato a unirti al team " + teamCorrente.getName());
+        eventPublisher.publishEvent(new NotificaEvent(notifica));
     }
 }

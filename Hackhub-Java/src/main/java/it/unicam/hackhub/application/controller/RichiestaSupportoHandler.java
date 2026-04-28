@@ -2,10 +2,13 @@ package it.unicam.hackhub.application.controller;
 
 import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.Hackathon;
+import it.unicam.hackhub.domain.model.Notifica;
 import it.unicam.hackhub.domain.model.RichiestaSupporto;
 import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
+import it.unicam.hackhub.domain.model.NotificaEvent;
 import it.unicam.hackhub.domain.repository.RichiestaSupportoRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
@@ -14,10 +17,12 @@ import java.util.Set;
 public class RichiestaSupportoHandler {
     private final Sessione sessione;
     private final RichiestaSupportoRepository richiestaRepo;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public RichiestaSupportoHandler(Sessione sessione, RichiestaSupportoRepository richiestaRepo) {
+    public RichiestaSupportoHandler(Sessione sessione, RichiestaSupportoRepository richiestaRepo, ApplicationEventPublisher eventPublisher) {
         this.sessione = sessione;
         this.richiestaRepo = richiestaRepo;
+        this.eventPublisher = eventPublisher;
     }
 
     // 1. Recupera la lista degli hackathon del team
@@ -48,5 +53,10 @@ public class RichiestaSupportoHandler {
         Team t = sessione.getUtenteCorrente().getTeam(); // Recuperiamo il team in modo sicuro
         RichiestaSupporto richiesta = new RichiestaSupporto(t, h, desc);
         richiestaRepo.save(richiesta);
+        
+        for (Utente mentore : h.getMentori()) {
+            Notifica notifica = new Notifica(mentore, "Nuova Richiesta di Supporto", "Il team " + t.getName() + " ha richiesto supporto: " + desc);
+            eventPublisher.publishEvent(new NotificaEvent(notifica));
+        }
     }
 }
