@@ -10,6 +10,9 @@ import it.unicam.hackhub.presentation.dto.IscrizioneTeamRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import it.unicam.hackhub.application.controller.ConsultareSottomissioniHandler;
+import it.unicam.hackhub.presentation.dto.SottomissioneResponse;
+
 import it.unicam.hackhub.application.controller.ConsultareHackathonHandler;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,15 +25,18 @@ public class HackathonController {
     private final ConsultareHackathonHandler consultareHandler;
     private final AggiungiMentoreHandler aggiungiMentoreHandler;
     private final IscrizioneTeamHandler iscrizioneTeamHandler;
+    private final ConsultareSottomissioniHandler consultareSottomissioniHandler;
 
     public HackathonController(CreazioneHackathonHandler creazioneHandler,
                                ConsultareHackathonHandler consultareHandler,
                                AggiungiMentoreHandler aggiungiMentoreHandler,
-                               IscrizioneTeamHandler  iscrizioneTeamHandler) {
+                               IscrizioneTeamHandler  iscrizioneTeamHandler,
+                                ConsultareSottomissioniHandler consultareSottomissioniHandler) {
         this.creazioneHandler = creazioneHandler;
         this.consultareHandler = consultareHandler;
         this.aggiungiMentoreHandler = aggiungiMentoreHandler;
         this.iscrizioneTeamHandler = iscrizioneTeamHandler;
+        this.consultareSottomissioniHandler = consultareSottomissioniHandler;
     }
 
     @PostMapping("/creazione")
@@ -132,5 +138,34 @@ public class HackathonController {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Errore interno: " + e.getMessage());
         }
+    }
+
+    // ENDPOINT 3: Permette di consultare tutte le sottomissioni di un hackathon (solo per staff)
+    @GetMapping("/{nomeHackathon}/sottomissioni")
+    public ResponseEntity<?> consultaSottomissioni(@PathVariable String nomeHackathon) {
+        try {
+            List<SottomissioneResponse> response = consultareSottomissioniHandler
+            .getSottomissioniHackathon(nomeHackathon)
+            .stream()
+            .map(s -> new SottomissioneResponse(
+                    s.getId(),
+                    s.getNomeFile(),
+                    s.getLink(),
+                    s.getDataCaricamento(),
+                    s.getTeam() != null ? s.getTeam().getNome() : "Team sconosciuto",
+                    s.getPunteggio()
+                ))
+                .toList();
+            if (response.isEmpty()) {
+                return ResponseEntity.ok("Non sono presenti sottomissioni per questo Hackathon.");
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body(e.getMessage());
+            } catch (Exception e) {
+                 e.printStackTrace();
+                return ResponseEntity.status(500).body("Errore interno: " + e.getMessage());
+            }
     }
 }

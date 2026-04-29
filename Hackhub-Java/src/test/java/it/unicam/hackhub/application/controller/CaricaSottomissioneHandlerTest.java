@@ -47,7 +47,7 @@ class CaricaSottomissioneHandlerTest {
     @BeforeEach
     void setUp() {
         sessione = new Sessione();
-        handler = new CaricaSottomissioneHandler(hackathonRepo, sessione);
+        handler = new CaricaSottomissioneHandler(hackathonRepo, sessione, utenteRepo);
 
         // 1. Creiamo e salviamo gli utenti
         utenteTest = new Utente("devUser", "dev@mail.com", "pass");

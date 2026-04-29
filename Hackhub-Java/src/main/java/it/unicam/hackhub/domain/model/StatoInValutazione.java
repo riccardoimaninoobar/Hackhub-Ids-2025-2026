@@ -5,7 +5,7 @@ public class StatoInValutazione implements StatoHackathon {
     @Override
     public void valutaSottomissione(Hackathon h, Sottomissione s, int punteggio) {
         // Ramo di successo: delega il salvataggio del voto all'Hackathon
-        // h.addValutazioneInterna(s, punteggio);
+        s.setPunteggio(punteggio);
     }
 
     @Override

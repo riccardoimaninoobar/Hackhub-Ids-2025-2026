@@ -35,6 +35,8 @@ public class CliRunner implements CommandLineRunner {
     private final GRichiestaSupportoCLI gRichiestaSupportoCLI;
     private final LogoutCLI logoutCLI;
     private final ProclamaVincitoreCLI proclamaVincitoreCLI;
+    private final ConsultareSottomissioniCLI consultareSottomissioniCLI;
+    private final ValutareSottomissioneCLI valutareSottomissioneCLI;
 
     public CliRunner(Sessione sessioneApp, HackathonRepository hackathonRepo, UtenteRepository utenteRepo,
                      CreazioneTeamCLI teamCli, CreazioneHackathonCLI hackathonCli, RegistrazioneCLI regCli,
@@ -42,7 +44,9 @@ public class CliRunner implements CommandLineRunner {
                      IscrizioneTeamCLI iscrizioneTeamCLI, CaricaSottomissioneCLI caricaSottomissioneCLI,
                      GestioneInvitiCLI invitiCli, AccettazioneInvitoCLI accettazioneInvitoCLI,
                      RichiestaSupportoCLI richiestaSupportoCLI, GRichiestaSupportoCLI gRichiestaSupportoCLI,
-                     LogoutCLI logoutCLI, ProclamaVincitoreCLI proclamaVincitoreCLI) {
+                     LogoutCLI logoutCLI, ProclamaVincitoreCLI proclamaVincitoreCLI,  
+                     ConsultareSottomissioniCLI consultareSottomissioniCLI, 
+                     ValutareSottomissioneCLI valutareSottomissioneCLI) {
         this.sessioneApp = sessioneApp;
         this.hackathonRepo = hackathonRepo;
         this.utenteRepo = utenteRepo;
@@ -60,6 +64,8 @@ public class CliRunner implements CommandLineRunner {
         this.gRichiestaSupportoCLI = gRichiestaSupportoCLI;
         this.logoutCLI = logoutCLI;
         this.proclamaVincitoreCLI = proclamaVincitoreCLI;
+        this.consultareSottomissioniCLI = consultareSottomissioniCLI;
+        this.valutareSottomissioneCLI = valutareSottomissioneCLI;
     }
 
     @Override
@@ -128,6 +134,8 @@ public class CliRunner implements CommandLineRunner {
             System.out.println("12 - Gestire richieste di supporto");
             System.out.println("13 - Effettuare logout");
             System.out.println("14 - Proclama Team Vincitore (Include Erogazione Premio)");
+            System.out.println("15 - Consultare sottomissioni");
+            System.out.println("16 - Valutare una sottomissione");
             System.out.println("0 - Uscire dall'applicazione");
             System.out.print("Scelta: ");
 
@@ -149,6 +157,8 @@ public class CliRunner implements CommandLineRunner {
                     case "12": gRichiestaSupportoCLI.gestisciRichieste(); break;
                     case "13": logoutCLI.richiediLogout(); break;
                     case "14": proclamaVincitoreCLI.avviaMenu(); break;
+                    case "15": consultareSottomissioniCLI.consultaSottomissioni(); break;
+                    case "16": valutareSottomissioneCLI.valutareSottomissione(); break;
                     case "0":
                         System.out.println("\nChiusura di HackHub in corso... Arrivederci!");
                         appInEsecuzione = false;
