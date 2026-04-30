@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -23,11 +23,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional
 class ProclamaVincitoreHandlerTest {
 
-    @MockBean
+    @MockitoBean
     private CliRunner cliRunner;
 
     // Usiamo un mock per l'adapter di pagamento così possiamo decidere se deve fallire o meno
-    @MockBean
+    @MockitoBean
     private SistemaPagamentoAdapter pagamentoAdapter;
 
     @Autowired
@@ -91,7 +91,7 @@ class ProclamaVincitoreHandlerTest {
     @Test
     void proclamaVincitore_Successo() {
         // Simuliamo che il pagamento vada a buon fine
-        Mockito.when(pagamentoAdapter.erogaPremio(Mockito.anyDouble(), Mockito.anyString()))
+        Mockito.when(pagamentoAdapter.erogaPagamento(Mockito.anyDouble(), Mockito.anyString()))
                 .thenReturn(true);
 
         boolean esito = handler.proclamaVincitore("Hack Finale", "Winners");
@@ -108,7 +108,7 @@ class ProclamaVincitoreHandlerTest {
     @Test
     void proclamaVincitore_FallimentoPerErrorePagamento() {
         // Simuliamo un errore del sistema bancario
-        Mockito.when(pagamentoAdapter.erogaPremio(Mockito.anyDouble(), Mockito.anyString()))
+        Mockito.when(pagamentoAdapter.erogaPagamento(Mockito.anyDouble(), Mockito.anyString()))
                 .thenReturn(false);
 
         boolean esito = handler.proclamaVincitore("Hack Finale", "Winners");

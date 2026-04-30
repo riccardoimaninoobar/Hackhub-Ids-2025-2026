@@ -63,7 +63,7 @@ public class ProclamaVincitoreHandler {
             throw new IllegalStateException("Impossibile proclamare il vincitore: l'Hackathon non è in stato 'In valutazione'.");
         }
 
-        if (!sistemaPagamento.erogaPremio(hackathon.getPremioInDenaro(), team.getDatiBancari())) {
+        if (!sistemaPagamento.erogaPagamento(hackathon.getPremioInDenaro(), team.getDatiBancari())) {
             System.err.println("Fallimento: impossibile erogare il premio. L'Hackathon permane in valutazione.");
             return false;
         }

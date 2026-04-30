@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional
 class GRichiestaSupportoHandlerTest {
 
-    @MockBean
+    @MockitoBean
     private CliRunner cliRunner;
 
     @Autowired private GRichiestaSupportoHandler handler;
@@ -40,7 +40,7 @@ class GRichiestaSupportoHandlerTest {
     @Autowired private TeamRepository teamRepo;
 
     // Questa è una MAGIA di Spring: "Crea un finto CalendarService e iniettalo nell'Handler al posto di quello vero"
-    @MockBean private CalendarService calendarService;
+    @MockitoBean private CalendarService calendarService;
 
     private Utente mentore;
     private Utente utenteNonAutorizzato;

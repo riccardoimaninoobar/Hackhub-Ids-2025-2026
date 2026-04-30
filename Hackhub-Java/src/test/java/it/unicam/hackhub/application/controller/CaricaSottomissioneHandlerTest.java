@@ -1,6 +1,6 @@
 package it.unicam.hackhub.application.controller;
 
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import it.unicam.hackhub.presentation.CliRunner;
 
 import it.unicam.hackhub.application.context.Sessione;
@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class CaricaSottomissioneHandlerTest {
 
     // Disabilita l'interfaccia a riga di comando durante il test
-    @MockBean
+    @MockitoBean
     private CliRunner cliRunner;
 
     @Autowired

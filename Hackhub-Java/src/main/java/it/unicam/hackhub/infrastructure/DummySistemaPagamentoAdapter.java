@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 public class DummySistemaPagamentoAdapter implements SistemaPagamentoAdapter {
 
     @Override
-    public boolean erogaPremio(double importo, String datiBancari) {
+    public boolean erogaPagamento(double importo, String datiBancari) {
         System.out.println(">>> Contattando il Sistema di Pagamento Esterno...");
         
         // Simula il passo 3.a: Fallimento se mancano i dati bancari

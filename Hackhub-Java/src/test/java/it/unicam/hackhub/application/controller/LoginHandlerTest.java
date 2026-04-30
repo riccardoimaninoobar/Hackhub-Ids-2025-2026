@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class LoginHandlerTest {
 
     // PASSAGGIO 2: Blocchiamo la console
-    @MockBean
+    @MockitoBean
     private CliRunner cliRunner;
 
     // PASSAGGIO 3: Niente più 'new' o Mockito, lasciamo fare a Spring
