@@ -1,6 +1,9 @@
 package it.unicam.hackhub.infrastructure.persistence;
 
-import it.unicam.hackhub.domain.model.*;
+import it.unicam.hackhub.domain.model.invito.state.StatoAccettato;
+import it.unicam.hackhub.domain.model.invito.state.StatoInvito;
+import it.unicam.hackhub.domain.model.invito.state.StatoPendente;
+import it.unicam.hackhub.domain.model.invito.state.StatoRifiutato;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 

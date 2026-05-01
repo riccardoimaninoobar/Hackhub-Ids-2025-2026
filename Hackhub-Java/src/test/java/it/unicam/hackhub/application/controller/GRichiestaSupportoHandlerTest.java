@@ -2,6 +2,8 @@ package it.unicam.hackhub.application.controller;
 
 import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.*;
+import it.unicam.hackhub.domain.model.hackathon.Hackathon;
+import it.unicam.hackhub.domain.model.hackathon.HackathonBuilder;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.RichiestaSupportoRepository;
 import it.unicam.hackhub.domain.repository.TeamRepository;

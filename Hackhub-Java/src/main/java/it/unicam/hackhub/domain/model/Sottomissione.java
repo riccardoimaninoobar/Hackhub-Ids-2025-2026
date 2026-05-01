@@ -1,5 +1,6 @@
 package it.unicam.hackhub.domain.model;
 
+import it.unicam.hackhub.domain.model.hackathon.Hackathon;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;

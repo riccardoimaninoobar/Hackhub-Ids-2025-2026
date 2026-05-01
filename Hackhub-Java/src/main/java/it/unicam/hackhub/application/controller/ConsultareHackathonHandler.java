@@ -1,6 +1,6 @@
 package it.unicam.hackhub.application.controller;
 
-import it.unicam.hackhub.domain.model.Hackathon;
+import it.unicam.hackhub.domain.model.hackathon.Hackathon;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import org.springframework.stereotype.Service;
 

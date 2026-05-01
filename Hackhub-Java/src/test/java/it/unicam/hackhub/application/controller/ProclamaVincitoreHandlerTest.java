@@ -1,6 +1,10 @@
 package it.unicam.hackhub.application.controller;
 
 import it.unicam.hackhub.domain.model.*;
+import it.unicam.hackhub.domain.model.hackathon.Hackathon;
+import it.unicam.hackhub.domain.model.hackathon.HackathonBuilder;
+import it.unicam.hackhub.domain.model.hackathon.state.StatoConcluso;
+import it.unicam.hackhub.domain.model.hackathon.state.StatoInValutazione;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.TeamRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;

@@ -1,7 +1,7 @@
 package it.unicam.hackhub.presentation.api;
 
 import it.unicam.hackhub.application.controller.RichiestaSupportoHandler;
-import it.unicam.hackhub.domain.model.Hackathon;
+import it.unicam.hackhub.domain.model.hackathon.Hackathon;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.presentation.dto.HackathonSupportoResponse;
 import it.unicam.hackhub.presentation.dto.InviaRichiestaSupportoRequest;

@@ -1,10 +1,11 @@
 package it.unicam.hackhub.domain.model;
 
+import it.unicam.hackhub.domain.model.hackathon.Hackathon;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.UUID;
+
 @Entity
 @Table(name = "richiesta_supporto")
 public class RichiestaSupporto {

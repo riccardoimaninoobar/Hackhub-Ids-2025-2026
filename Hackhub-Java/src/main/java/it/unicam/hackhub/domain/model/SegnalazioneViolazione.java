@@ -1,5 +1,6 @@
 package it.unicam.hackhub.domain.model;
 
+import it.unicam.hackhub.domain.model.hackathon.Hackathon;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -40,6 +41,8 @@ public class SegnalazioneViolazione {
     @Column(nullable = false, updatable = false)
     private LocalDateTime dataSegnalazione;
 
+    private String motivazioneOrganizzatore;
+
     /**
      * Costruttore protetto richiesto obbligatoriamente da JPA/Hibernate.
      * Non deve essere usato per la logica di business.
@@ -77,6 +80,8 @@ public class SegnalazioneViolazione {
 
     public StatoSegnalazione getStato() { return stato; }
 
+    public Team getTeam() { return teamSegnalato; }
+
     public LocalDateTime getDataSegnalazione() { return dataSegnalazione; }
 
     // --- Metodi di Business per il cambio di stato ---
@@ -89,4 +94,18 @@ public class SegnalazioneViolazione {
     public void respingi() {
         this.stato = StatoSegnalazione.RESPINTA;
     }
+
+    public void setProvvedimento(StatoSegnalazione esito, String motivazione) {
+        if (this.stato != StatoSegnalazione.APERTA) {
+            throw new IllegalStateException("La segnalazione è già stata gestita.");
+        }
+        this.stato = esito;
+        this.motivazioneOrganizzatore = motivazione;
+    }
+    public void squalificaTeam() {
+        // Deleghiamo al Team il compito di squalificarsi
+        this.teamSegnalato.setSqualificato(true);
+    }
+
+
 }

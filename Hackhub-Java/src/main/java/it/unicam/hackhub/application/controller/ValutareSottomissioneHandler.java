@@ -1,8 +1,8 @@
 package it.unicam.hackhub.application.controller;
 import it.unicam.hackhub.application.context.Sessione;
-import it.unicam.hackhub.domain.model.Hackathon;
+import it.unicam.hackhub.domain.model.hackathon.Hackathon;
 import it.unicam.hackhub.domain.model.Sottomissione;
-import it.unicam.hackhub.domain.model.StatoInValutazione;
+import it.unicam.hackhub.domain.model.hackathon.state.StatoInValutazione;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import org.springframework.stereotype.Service;

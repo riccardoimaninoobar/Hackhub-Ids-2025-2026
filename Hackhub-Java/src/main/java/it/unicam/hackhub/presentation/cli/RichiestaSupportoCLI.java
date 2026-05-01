@@ -1,7 +1,7 @@
 package it.unicam.hackhub.presentation.cli;
 
 import it.unicam.hackhub.application.controller.RichiestaSupportoHandler;
-import it.unicam.hackhub.domain.model.Hackathon;
+import it.unicam.hackhub.domain.model.hackathon.Hackathon;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

@@ -2,7 +2,7 @@ package it.unicam.hackhub.presentation.api;
 
 import it.unicam.hackhub.application.controller.AccettazioneInvitoHandler;
 import it.unicam.hackhub.application.controller.GestioneInvitiHandler;
-import it.unicam.hackhub.domain.model.Invito;
+import it.unicam.hackhub.domain.model.invito.Invito;
 import it.unicam.hackhub.presentation.dto.InvioInvitoRequest;
 import it.unicam.hackhub.presentation.dto.InvitoResponse;
 import org.springframework.http.ResponseEntity;

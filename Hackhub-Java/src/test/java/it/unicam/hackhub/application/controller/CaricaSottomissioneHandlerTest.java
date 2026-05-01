@@ -1,5 +1,9 @@
 package it.unicam.hackhub.application.controller;
 
+import it.unicam.hackhub.domain.model.hackathon.Hackathon;
+import it.unicam.hackhub.domain.model.hackathon.HackathonBuilder;
+import it.unicam.hackhub.domain.model.hackathon.state.StatoInCorso;
+import it.unicam.hackhub.domain.model.hackathon.state.StatoInValutazione;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import it.unicam.hackhub.presentation.CliRunner;
 

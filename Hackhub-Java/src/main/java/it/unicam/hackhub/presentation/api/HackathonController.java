@@ -61,7 +61,8 @@ public class HackathonController {
                 return ResponseEntity.badRequest().body("Creazione fallita: L'utente indicato come giudice non esiste.");
             }
 
-            return ResponseEntity.ok("Hackathon '" + request.nome() + "' creato con successo!");
+            return ResponseEntity.ok("Bozza dell'Hackathon '" + request.nome() + "' creato con successo! " +
+                    "Per completare la creazione bisogna aggiungere almeno un mentore ");
 
         } catch (IllegalStateException | IllegalArgumentException e) {
             // Cattura errori come "Devi effettuare il login" o "Hackathon già esistente"

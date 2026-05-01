@@ -1,7 +1,7 @@
 package it.unicam.hackhub.presentation.cli;
 
 import it.unicam.hackhub.application.controller.AccettazioneInvitoHandler;
-import it.unicam.hackhub.domain.model.Invito;
+import it.unicam.hackhub.domain.model.invito.Invito;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

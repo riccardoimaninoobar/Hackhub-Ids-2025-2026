@@ -1,6 +1,6 @@
 package it.unicam.hackhub.presentation.api;
 import it.unicam.hackhub.application.controller.ValutareSottomissioneHandler;
-import it.unicam.hackhub.domain.model.Hackathon;
+import it.unicam.hackhub.domain.model.hackathon.Hackathon;
 import it.unicam.hackhub.presentation.dto.SottomissioneResponse;
 import it.unicam.hackhub.presentation.dto.ValutazioneRequest;
 import org.springframework.http.ResponseEntity;

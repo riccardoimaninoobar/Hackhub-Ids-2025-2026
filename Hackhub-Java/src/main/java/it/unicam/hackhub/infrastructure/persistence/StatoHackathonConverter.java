@@ -1,6 +1,6 @@
 package it.unicam.hackhub.infrastructure.persistence;
 
-import it.unicam.hackhub.domain.model.*;
+import it.unicam.hackhub.domain.model.hackathon.state.*;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
@@ -10,7 +10,7 @@ public class StatoHackathonConverter implements AttributeConverter<StatoHackatho
     // Da Java a Database (Quando fai save)
     @Override
     public String convertToDatabaseColumn(StatoHackathon stato) {
-        if (stato == null) return "IN_ISCRIZIONE";
+        if (stato == null || stato instanceof StatoInCreazione) return "IN_CREAZIONE";
         if (stato instanceof StatoInIscrizione) return "IN_ISCRIZIONE";
         if (stato instanceof StatoInCorso) return "IN_CORSO";
         if (stato instanceof StatoInValutazione) return "IN_VALUTAZIONE";

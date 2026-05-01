@@ -1,5 +1,7 @@
 package it.unicam.hackhub.domain.model;
 
+import it.unicam.hackhub.domain.model.hackathon.Hackathon;
+import it.unicam.hackhub.domain.model.hackathon.state.StatoInCorso;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
@@ -19,6 +21,7 @@ public class Team {
     @ManyToMany(mappedBy = "teamPartecipanti", fetch = FetchType.LAZY)
     private Set<Hackathon> hackathons;
     private String datiBancari;
+    private boolean squalificato = false;
 
     protected Team() {}
     public Team(String name) {
@@ -84,6 +87,14 @@ public class Team {
 
     public void addHackathon(Hackathon hackathon) {
         this.hackathons.add(hackathon);
+    }
+
+    public void setSqualificato(boolean squalificato) {
+        this.squalificato = squalificato;
+    }
+
+    public boolean isSqualificato() {
+        return squalificato;
     }
 
 }

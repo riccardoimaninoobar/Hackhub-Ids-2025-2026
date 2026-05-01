@@ -1,8 +1,8 @@
 package it.unicam.hackhub.application.controller;
 
 import it.unicam.hackhub.application.context.Sessione;
-import it.unicam.hackhub.domain.model.Hackathon;
-import it.unicam.hackhub.domain.model.HackathonBuilder;
+import it.unicam.hackhub.domain.model.hackathon.Hackathon;
+import it.unicam.hackhub.domain.model.hackathon.HackathonBuilder;
 import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
@@ -123,7 +123,7 @@ class IscrizioneTeamHandlerTest {
     }
 
     private Hackathon creaHackathonInIscrizione(String nome) {
-        return new HackathonBuilder()
+        Hackathon h = new HackathonBuilder()
                 .assegnaNome(nome)
                 .assegnaRegolamento("Regolamento " + nome)
                 .assegnaScadenza(LocalDate.now().plusDays(10))
@@ -136,10 +136,12 @@ class IscrizioneTeamHandlerTest {
                 .assegnaGiudice(giudice)
                 .assegnaMentore(mentore)
                 .build();
+        h.aggiornaStato();
+        return h;
     }
 
     private Hackathon creaHackathonScaduto(String nome) {
-        return new HackathonBuilder()
+        Hackathon h = new HackathonBuilder()
                 .assegnaNome(nome)
                 .assegnaRegolamento("Regolamento " + nome)
                 .assegnaScadenza(LocalDate.now().minusDays(10))
@@ -152,5 +154,7 @@ class IscrizioneTeamHandlerTest {
                 .assegnaGiudice(giudice)
                 .assegnaMentore(mentore)
                 .build();
+        h.aggiornaStato();
+        return h;
     }
 }

@@ -1,7 +1,7 @@
 package it.unicam.hackhub.presentation;
 
 import it.unicam.hackhub.application.context.Sessione;
-import it.unicam.hackhub.domain.model.HackathonBuilder;
+import it.unicam.hackhub.domain.model.hackathon.HackathonBuilder;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Scanner;
 
 @Component
 public class CliRunner implements CommandLineRunner {

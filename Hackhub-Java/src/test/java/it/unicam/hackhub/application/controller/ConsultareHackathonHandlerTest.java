@@ -1,19 +1,16 @@
 package it.unicam.hackhub.application.controller;
 
-import it.unicam.hackhub.domain.model.Hackathon;
-import it.unicam.hackhub.domain.model.HackathonBuilder;
+import it.unicam.hackhub.domain.model.hackathon.Hackathon;
+import it.unicam.hackhub.domain.model.hackathon.HackathonBuilder;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
 import it.unicam.hackhub.presentation.CliRunner;
 import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

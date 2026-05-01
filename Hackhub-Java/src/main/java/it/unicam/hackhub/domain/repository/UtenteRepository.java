@@ -1,6 +1,5 @@
 package it.unicam.hackhub.domain.repository;
 
-import it.unicam.hackhub.domain.model.Hackathon;
 import it.unicam.hackhub.domain.model.Utente;
 import org.springframework.data.jpa.repository.JpaRepository;
 

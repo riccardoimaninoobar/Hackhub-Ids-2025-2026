@@ -1,7 +1,7 @@
 package it.unicam.hackhub.presentation.api;
 
 import it.unicam.hackhub.application.controller.CaricaSottomissioneHandler;
-import it.unicam.hackhub.domain.model.Hackathon;
+import it.unicam.hackhub.domain.model.hackathon.Hackathon;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.presentation.dto.HackathonDisponibileResponse;
 import it.unicam.hackhub.presentation.dto.SottomissioneRequest;

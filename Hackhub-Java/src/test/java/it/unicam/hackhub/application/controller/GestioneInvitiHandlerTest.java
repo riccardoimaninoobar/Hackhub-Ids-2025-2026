@@ -1,7 +1,7 @@
 package it.unicam.hackhub.application.controller;
 
 import it.unicam.hackhub.application.context.Sessione;
-import it.unicam.hackhub.domain.model.StatoPendente;
+import it.unicam.hackhub.domain.model.invito.state.StatoPendente;
 import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.InvitoRepository;
@@ -11,7 +11,6 @@ import it.unicam.hackhub.presentation.CliRunner;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;

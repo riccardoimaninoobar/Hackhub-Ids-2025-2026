@@ -2,6 +2,9 @@ package it.unicam.hackhub.application.controller;
 
 import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.*;
+import it.unicam.hackhub.domain.model.hackathon.Hackathon;
+import it.unicam.hackhub.domain.model.hackathon.HackathonBuilder;
+import it.unicam.hackhub.domain.model.hackathon.state.StatoInCorso;
 import it.unicam.hackhub.domain.repository.*;
 import it.unicam.hackhub.presentation.CliRunner;
 import org.junit.jupiter.api.BeforeEach;

@@ -2,7 +2,7 @@ package it.unicam.hackhub.presentation.cli;
 
 import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.application.controller.IscrizioneTeamHandler;
-import it.unicam.hackhub.domain.model.Hackathon;
+import it.unicam.hackhub.domain.model.hackathon.Hackathon;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
