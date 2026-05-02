@@ -18,16 +18,14 @@ public class Team {
     private String nome;
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Utente> members;
-    @ManyToMany(mappedBy = "teamPartecipanti", fetch = FetchType.LAZY)
-    private Set<Hackathon> hackathons;
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<Partecipazione> partecipazioni = new HashSet<>();
     private String datiBancari;
-    private boolean squalificato = false;
 
     protected Team() {}
     public Team(String name) {
         this.nome = name;
         this.members = new HashSet<>();
-        this. hackathons = new HashSet<>();
     }
 
     public Long getId() { return id; }
@@ -76,25 +74,21 @@ public class Team {
         return this.members.contains(u);
     }
     public Set<Hackathon> getHackathons() {
-        return new HashSet<>(hackathons); // Copia difensiva
+        return partecipazioni.stream()
+                .map(Partecipazione::getHackathon)
+                .collect(Collectors.toSet());
     }
 
     public Set<Hackathon> getHackathonInCorso() {
-        return this.hackathons.stream()
+        return partecipazioni.stream()
+                .map(Partecipazione::getHackathon)
                 .filter(h -> h.getStato() instanceof StatoInCorso)
                 .collect(Collectors.toSet());
     }
 
-    public void addHackathon(Hackathon hackathon) {
-        this.hackathons.add(hackathon);
-    }
-
-    public void setSqualificato(boolean squalificato) {
-        this.squalificato = squalificato;
-    }
-
-    public boolean isSqualificato() {
-        return squalificato;
+    // NUOVO METODO (sostituisce addHackathon)
+    public void addPartecipazione(Partecipazione p) {
+        this.partecipazioni.add(p);
     }
 
 }

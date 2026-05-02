@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name ="hackathons")
@@ -42,13 +43,8 @@ public class Hackathon {
     @Column(name = "stato")
     private StatoHackathon stato;
     private BigDecimal premioImporto;
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "hackathon_team", // Crea la tabella ponte
-            joinColumns = @JoinColumn(name = "hackathon_id"),
-            inverseJoinColumns = @JoinColumn(name = "team_id")
-    )
-    private Set<Team> teamPartecipanti = new HashSet<>();
+    @OneToMany(mappedBy = "hackathon", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Partecipazione> partecipazioni = new HashSet<>();
     @OneToMany(mappedBy = "hackathon", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Sottomissione> sottomissioni = new HashSet<>();
     @ManyToOne(fetch = FetchType.LAZY)
@@ -137,8 +133,8 @@ public class Hackathon {
         if(u == null) {
             throw new IllegalArgumentException("utente nullo");
         }
-        for(Team t : teamPartecipanti) {
-            if(t.isMembro(u)) {
+        for(Partecipazione p : partecipazioni) {
+            if(p.getTeam().isMembro(u)) {
                 return true;
             }
         }
@@ -167,15 +163,25 @@ public class Hackathon {
         if (team == null) {
             throw new IllegalArgumentException("team nullo");
         }
-        this.teamPartecipanti.add(team);
-        team.addHackathon(this);
+        // Creiamo il ponte e lo aggiungiamo ad entrambi
+        Partecipazione p = new Partecipazione(team, this);
+        this.partecipazioni.add(p);
+        team.addPartecipazione(p);
     }
 
-    // In Hackathon.java
     public void aggiungiSottomissione(Sottomissione sottomissione) {
-        if (sottomissione == null || !teamPartecipanti.contains(sottomissione.getTeam())) {
-            throw new IllegalArgumentException("Sottomissione non valida per questo hackathon");
+        if (sottomissione == null || sottomissione.getTeam() == null) {
+            throw new IllegalArgumentException("Sottomissione o team mancante");
         }
+
+        // Verifichiamo se il team è iscritto a questo hackathon E non è stato squalificato
+        boolean puoPartecipare = this.partecipazioni.stream()
+                .anyMatch(p -> p.getTeam().equals(sottomissione.getTeam()) && !p.isSqualificato());
+
+        if (!puoPartecipare) {
+            throw new IllegalArgumentException("Sottomissione non valida: il team non partecipa o è stato squalificato.");
+        }
+
         this.sottomissioni.add(sottomissione);
         sottomissione.setHackathon(this);
     }
@@ -183,7 +189,6 @@ public class Hackathon {
     /**
      * Verifica le scadenze temporali e aggiorna lo stato dell'Hackathon se necessario.
      */
-    // In Hackathon.java
     public void aggiornaStato() {
         LocalDate oggi = LocalDate.now();
         if (this.stato instanceof StatoInCreazione && !this.mentori.isEmpty()) {
@@ -212,6 +217,17 @@ public class Hackathon {
     public LocalDate getDataInizio() { return dataInizio; }
     public LocalDate getDataFine() { return dataFine; }
     public LocalDate getScadenzaIscrizioni() { return scadenzaIscrizioni; }
-    public Set<Team> getTeamPartecipanti() { return teamPartecipanti; }
+    public Set<Team> getTeamPartecipanti() {
+        return partecipazioni.stream()
+                .map(Partecipazione::getTeam)
+                .collect(Collectors.toSet());
+    }
+
+    public void squalificaTeam(Team team) {
+        this.partecipazioni.stream()
+                .filter(p -> p.getTeam().equals(team))
+                .findFirst()
+                .ifPresent(p -> p.setSqualificato(true));
+    }
 
 }

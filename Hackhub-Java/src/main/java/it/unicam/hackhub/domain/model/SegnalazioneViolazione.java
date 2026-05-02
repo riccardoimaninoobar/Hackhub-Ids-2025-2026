@@ -36,7 +36,7 @@ public class SegnalazioneViolazione {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private StatoSegnalazione stato;
+    private EsitoSegnalazione stato;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime dataSegnalazione;
@@ -61,7 +61,7 @@ public class SegnalazioneViolazione {
         this.descrizione = descrizione;
 
         // Impostazioni automatiche alla creazione
-        this.stato = StatoSegnalazione.APERTA;
+        this.stato = EsitoSegnalazione.APERTA;
         this.dataSegnalazione = LocalDateTime.now();
     }
 
@@ -78,7 +78,7 @@ public class SegnalazioneViolazione {
 
     public String getDescrizione() { return descrizione; }
 
-    public StatoSegnalazione getStato() { return stato; }
+    public EsitoSegnalazione getStato() { return stato; }
 
     public Team getTeam() { return teamSegnalato; }
 
@@ -88,24 +88,36 @@ public class SegnalazioneViolazione {
 
 
     public void accogli() {
-        this.stato = StatoSegnalazione.ACCOLTA;
+        this.stato = EsitoSegnalazione.ACCOLTA;
     }
 
     public void respingi() {
-        this.stato = StatoSegnalazione.RESPINTA;
+        this.stato = EsitoSegnalazione.RESPINTA;
     }
 
-    public void setProvvedimento(StatoSegnalazione esito, String motivazione) {
-        if (this.stato != StatoSegnalazione.APERTA) {
+    public void setProvvedimento(EsitoSegnalazione esito, String motivazione) {
+        if (this.stato != EsitoSegnalazione.APERTA) {
             throw new IllegalStateException("La segnalazione è già stata gestita.");
         }
         this.stato = esito;
         this.motivazioneOrganizzatore = motivazione;
+        if(this.stato == EsitoSegnalazione.ACCOLTA){
+            this.squalificaTeam();
+        }
     }
     public void squalificaTeam() {
-        // Deleghiamo al Team il compito di squalificarsi
-        this.teamSegnalato.setSqualificato(true);
+        // Ora deleghiamo la squalifica all'Hackathon (che cercher  la partecipazione giusta)
+        this.hackathon.squalificaTeam(this.teamSegnalato);
     }
 
+    public void setStato(EsitoSegnalazione stato) {
+        if (this.stato != EsitoSegnalazione.APERTA) {
+            this.stato = stato;
+        }
+    }
+
+    public String getNomeHackathon() {
+        return this.hackathon.getNome();
+    }
 
 }
