@@ -4,6 +4,8 @@ import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.invito.state.StatoPendente;
 import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
+import it.unicam.hackhub.domain.model.eventi.NotificaEvent;
+import it.unicam.hackhub.domain.model.invito.Invito;
 import it.unicam.hackhub.domain.repository.InvitoRepository;
 import it.unicam.hackhub.domain.repository.TeamRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
@@ -14,10 +16,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 
 import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @Transactional
+@RecordApplicationEvents
 class GestioneInvitiHandlerTest {
     @MockitoBean
     private CliRunner cliRunner;
@@ -32,6 +37,9 @@ class GestioneInvitiHandlerTest {
 
     @Autowired
     private TeamRepository teamRepo;
+    
+    @Autowired
+    private ApplicationEvents applicationEvents;
 
     private Utente utenteMittente;
     private Utente utenteDaInvitare;
@@ -40,6 +48,8 @@ class GestioneInvitiHandlerTest {
 
     @BeforeEach
     void setUp() {
+        sessione.setUtenteCorrente(null); // Assicura la pulizia dello stato tra un test e l'altro
+        
         utenteMittente = new Utente("leader", "leader@mail.com", "pass");
         teamTest = new Team("Team Alpha");
         teamTest.aggiungiMembro(utenteMittente);
@@ -62,10 +72,14 @@ class GestioneInvitiHandlerTest {
         // Assert
         assertTrue(invitoRepo.existsByInvitatoAndTeamMittenteAndStato(utenteDaInvitare, teamTest, new StatoPendente()),
                 "L'invito dovrebbe essere salvato con stato IN_ATTESA nel repository");
+                
+        // Verifica pubblicazione evento
+        long countEventi = applicationEvents.stream(NotificaEvent.class).count();
+        assertEquals(1, countEventi, "Dovrebbe essere stato pubblicato esattamente un NotificaEvent");
     }
 
     @Test
-    void elaboraInvito_FallisceSeUtenteNonEsiste() {
+    void elaboraInvito_FallisceSeUtenteInesistente() {
         sessione.setUtenteCorrente(utenteMittente);
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
@@ -91,5 +105,19 @@ class GestioneInvitiHandlerTest {
             handler.elaboraInvito("targetUser");
         });
         assertEquals("L'utente è già in un team", ex.getMessage());
+    }
+
+    @Test
+    void elaboraInvito_FallisceSeInvitoGiaInAttesa() {
+        sessione.setUtenteCorrente(utenteMittente);
+
+        // Salviamo preventivamente un invito in stato pendente per simulare l'attesa
+        Invito invitoPendente = new Invito(utenteDaInvitare, teamTest);
+        invitoRepo.save(invitoPendente);
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+            handler.elaboraInvito("targetUser");
+        });
+        assertEquals("Un invito per questo utente è già in attesa di risposta", ex.getMessage());
     }
 }

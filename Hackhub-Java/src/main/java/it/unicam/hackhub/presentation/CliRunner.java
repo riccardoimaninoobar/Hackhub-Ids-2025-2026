@@ -28,7 +28,6 @@ public class CliRunner implements CommandLineRunner {
     private final ConsultareHackathonCLI consultareHackathonCLI;
     private final IscrizioneTeamCLI iscrizioneTeamCLI;
     private final CaricaSottomissioneCLI caricaSottomissioneCLI;
-    private final GestioneInvitiCLI invitiCli;
     private final AccettazioneInvitoCLI accettazioneInvitoCLI;
     private final RichiestaSupportoCLI richiestaSupportoCLI;
     private final GRichiestaSupportoCLI gRichiestaSupportoCLI;
@@ -40,8 +39,8 @@ public class CliRunner implements CommandLineRunner {
     public CliRunner(Sessione sessioneApp, HackathonRepository hackathonRepo, UtenteRepository utenteRepo,
                      CreazioneTeamCLI teamCli, CreazioneHackathonCLI hackathonCli, RegistrazioneCLI regCli,
                      AggiungiMentoreCLI aggMentoreCli, LoginCLI loginCli, ConsultareHackathonCLI consultareHackathonCLI,
-                     IscrizioneTeamCLI iscrizioneTeamCLI, CaricaSottomissioneCLI caricaSottomissioneCLI,
-                     GestioneInvitiCLI invitiCli, AccettazioneInvitoCLI accettazioneInvitoCLI,
+                     IscrizioneTeamCLI iscrizioneTeamCLI, CaricaSottomissioneCLI caricaSottomissioneCLI, 
+                     AccettazioneInvitoCLI accettazioneInvitoCLI,
                      RichiestaSupportoCLI richiestaSupportoCLI, GRichiestaSupportoCLI gRichiestaSupportoCLI,
                      LogoutCLI logoutCLI, ProclamaVincitoreCLI proclamaVincitoreCLI,  
                      ConsultareSottomissioniCLI consultareSottomissioniCLI, 
@@ -57,7 +56,6 @@ public class CliRunner implements CommandLineRunner {
         this.consultareHackathonCLI = consultareHackathonCLI;
         this.iscrizioneTeamCLI = iscrizioneTeamCLI;
         this.caricaSottomissioneCLI = caricaSottomissioneCLI;
-        this.invitiCli = invitiCli;
         this.accettazioneInvitoCLI = accettazioneInvitoCLI;
         this.richiestaSupportoCLI = richiestaSupportoCLI;
         this.gRichiestaSupportoCLI = gRichiestaSupportoCLI;
@@ -150,7 +148,6 @@ public class CliRunner implements CommandLineRunner {
                     case "6": consultareHackathonCLI.consultaHackathon(); break;
                     case "7": iscrizioneTeamCLI.richiediIscrizioneTeam(); break;
                     case "8": caricaSottomissioneCLI.richiediCaricamentoSottomissione(); break;
-                    case "9": invitiCli.run(); break;
                     case "10": accettazioneInvitoCLI.avviaGestioneInviti(); break;
                     case "11": richiestaSupportoCLI.avviaRichiestaSupporto(); break;
                     case "12": gRichiestaSupportoCLI.gestisciRichieste(); break;
