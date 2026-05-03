@@ -15,7 +15,9 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/valutazioni")
 public class ValutaSottomissioneController {
+
     private final ValutareSottomissioneHandler handler;
+
     public ValutaSottomissioneController(ValutareSottomissioneHandler handler) {
         this.handler = handler;
     }

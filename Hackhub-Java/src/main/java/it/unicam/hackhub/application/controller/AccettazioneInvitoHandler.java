@@ -19,7 +19,7 @@ public class AccettazioneInvitoHandler {
         this.sessione = sessione;
     }
 
-    // Corrisponde a getInvitiPendenti()[cite: 1]
+    // Corrisponde a getInvitiPendenti()
     public List<Invito> getInvitiPendenti() {
         // Chiama getUtenteCorrente() sulla Sessione[cite: 1]
         Utente utente = sessione.getUtenteCorrente();
@@ -27,7 +27,7 @@ public class AccettazioneInvitoHandler {
         return invitoRepo.findByInvitatoAndStato(utente, new StatoPendente());
     }
 
-    // Corrisponde a accettaInvito(invito)[cite: 1]
+    // Corrisponde a accettaInvito(invito)
     public void accettaInvito(Invito invito) {
         // Chiama accetta() sull'oggetto Invito[cite: 1]
         invito.accetta();

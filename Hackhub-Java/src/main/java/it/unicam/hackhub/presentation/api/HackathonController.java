@@ -5,7 +5,7 @@ import it.unicam.hackhub.application.controller.CreazioneHackathonHandler;
 import it.unicam.hackhub.application.controller.IscrizioneTeamHandler;
 import it.unicam.hackhub.presentation.dto.AggiungiMentoreRequest;
 import it.unicam.hackhub.presentation.dto.CreazioneHackathonRequest;
-import it.unicam.hackhub.presentation.dto.HackathonResponse;
+import it.unicam.hackhub.presentation.dto.HackathonDettagliatoResponse;
 import it.unicam.hackhub.presentation.dto.IscrizioneTeamRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -71,20 +71,20 @@ public class HackathonController {
     }
 
     @GetMapping("/consultazione")
-    public ResponseEntity<List<HackathonResponse>> visualizzaTutti() {
+    public ResponseEntity<List<HackathonDettagliatoResponse>> visualizzaTutti() {
         // Recuperiamo la lista grezza dal database tramite l'handler
         var listaHackathon = consultareHandler.getListaHackathon();
 
-        // Trasformiamo ogni Hackathon in un HackathonResponse (DTO)
-        List<HackathonResponse> response = listaHackathon.stream()
-                .map(h -> new HackathonResponse(
+        // Trasformiamo ogni Hackathon in un HackathonDettagliatoResponse (DTO)
+        List<HackathonDettagliatoResponse> response = listaHackathon.stream()
+                .map(h -> new HackathonDettagliatoResponse(
                         h.getNome(),
                         h.getLuogo(),
                         h.getDataInizio(),
                         h.getDataFine(),
                         h.getScadenzaIscrizioni(),
                         h.getOrganizzatore().getUsername(),
-                        h.getStato().toString()
+                        h.getStato().getNomeStato()
                 ))
                 .collect(Collectors.toList());
 
@@ -110,11 +110,11 @@ public class HackathonController {
 
     // ENDPOINT 1 per UC iscrizione team: Restituisce solo gli Hackathon attualmente in fase di iscrizione
     @GetMapping("/in-iscrizione")
-    public ResponseEntity<List<HackathonResponse>> visualizzaIscrivibili() {
+    public ResponseEntity<List<HackathonDettagliatoResponse>> visualizzaIscrivibili() {
         var listaHackathon = iscrizioneTeamHandler.getHackathonInIscrizione();
 
-        List<HackathonResponse> response = listaHackathon.stream()
-                .map(h -> new HackathonResponse(
+        List<HackathonDettagliatoResponse> response = listaHackathon.stream()
+                .map(h -> new HackathonDettagliatoResponse(
                         h.getNome(),
                         h.getLuogo(),
                         h.getDataInizio(),

@@ -4,8 +4,6 @@ import it.unicam.hackhub.domain.model.hackathon.Hackathon;
 import it.unicam.hackhub.domain.model.hackathon.HackathonBuilder;
 import it.unicam.hackhub.domain.model.hackathon.state.StatoInCorso;
 import it.unicam.hackhub.domain.model.hackathon.state.StatoInValutazione;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import it.unicam.hackhub.presentation.CliRunner;
 
 import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.*;
@@ -28,8 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class CaricaSottomissioneHandlerTest {
 
     // Disabilita l'interfaccia a riga di comando durante il test
-    @MockitoBean
-    private CliRunner cliRunner;
+
 
     @Autowired
     private HackathonRepository hackathonRepo;

@@ -6,7 +6,7 @@ import it.unicam.hackhub.domain.model.eventi.ViolazioneSegnalataEvent;
 import it.unicam.hackhub.domain.model.hackathon.Hackathon;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.SegnalazioneRepository;
-import it.unicam.hackhub.presentation.dto.HackathonSupportoResponse;
+import it.unicam.hackhub.presentation.dto.HackathonResponse;
 import it.unicam.hackhub.presentation.dto.SegnalazioneRequest;
 import it.unicam.hackhub.presentation.dto.TeamResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,7 @@ public class SegnalaViolazioneHandler {
     /**
      * Recupera la lista di hackathon a cui il mentore corrente è assegnato.
      */
-    public List<HackathonSupportoResponse> getHackathonsAssegnati() {
+    public List<HackathonResponse> getHackathonsAssegnati() {
         Utente mentore = sessione.getUtenteCorrente();
         if (mentore == null) {
             throw new IllegalStateException("Accesso negato: nessun utente in sessione.");
@@ -49,7 +49,7 @@ public class SegnalaViolazioneHandler {
         List<Hackathon> hackathons = hackathonRepo.findAttiviByMentore(mentore.getUsername());
 
         return hackathons.stream()
-                .map(h -> new HackathonSupportoResponse(h.getId(), h.getNome()))
+                .map(h -> new HackathonResponse(h.getId(), h.getNome()))
                 .collect(Collectors.toList());
     }
 

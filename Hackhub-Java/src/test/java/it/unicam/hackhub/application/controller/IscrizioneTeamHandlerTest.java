@@ -8,12 +8,10 @@ import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.TeamRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
-import it.unicam.hackhub.presentation.CliRunner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -27,8 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class IscrizioneTeamHandlerTest {
 
     // Blocca l'avvio della console
-    @MockitoBean
-    private CliRunner cliRunner;
+
 
     @Autowired
     private HackathonRepository hackathonRepository;

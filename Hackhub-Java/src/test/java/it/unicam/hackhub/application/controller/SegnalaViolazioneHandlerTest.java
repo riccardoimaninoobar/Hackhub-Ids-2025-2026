@@ -11,15 +11,13 @@ import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.SegnalazioneRepository;
 import it.unicam.hackhub.domain.repository.TeamRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
-import it.unicam.hackhub.presentation.CliRunner;
-import it.unicam.hackhub.presentation.dto.HackathonSupportoResponse;
+import it.unicam.hackhub.presentation.dto.HackathonResponse;
 import it.unicam.hackhub.presentation.dto.SegnalazioneRequest;
 import it.unicam.hackhub.presentation.dto.TeamResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -31,8 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional
 class SegnalaViolazioneHandlerTest {
 
-    @MockitoBean
-    private CliRunner cliRunner;
+
 
     @Autowired
     private SegnalaViolazioneHandler handler;
@@ -93,7 +90,7 @@ class SegnalaViolazioneHandlerTest {
     void getHackathonsAssegnati_RestituisceListaCorrettaPerIlMentore() {
         sessione.setUtenteCorrente(mentore);
 
-        List<HackathonSupportoResponse> risultato = handler.getHackathonsAssegnati();
+        List<HackathonResponse> risultato = handler.getHackathonsAssegnati();
 
         assertNotNull(risultato);
         assertEquals(1, risultato.size());

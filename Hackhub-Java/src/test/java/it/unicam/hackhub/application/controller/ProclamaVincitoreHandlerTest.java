@@ -9,7 +9,6 @@ import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.TeamRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
 import it.unicam.hackhub.domain.service.SistemaPagamentoAdapter;
-import it.unicam.hackhub.presentation.CliRunner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -27,8 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional
 class ProclamaVincitoreHandlerTest {
 
-    @MockitoBean
-    private CliRunner cliRunner;
+
 
     // Usiamo un mock per l'adapter di pagamento così possiamo decidere se deve fallire o meno
     @MockitoBean

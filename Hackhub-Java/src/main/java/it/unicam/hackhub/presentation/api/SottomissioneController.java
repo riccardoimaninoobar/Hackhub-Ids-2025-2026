@@ -3,7 +3,7 @@ package it.unicam.hackhub.presentation.api;
 import it.unicam.hackhub.application.controller.CaricaSottomissioneHandler;
 import it.unicam.hackhub.domain.model.hackathon.Hackathon;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
-import it.unicam.hackhub.presentation.dto.HackathonDisponibileResponse;
+import it.unicam.hackhub.presentation.dto.HackathonResponse;
 import it.unicam.hackhub.presentation.dto.SottomissioneRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,8 +34,8 @@ public class SottomissioneController {
                 return ResponseEntity.ok("Nessun Hackathon in corso disponibile per il caricamento.");
             }
 
-            List<HackathonDisponibileResponse> response = hs.stream()
-                    .map(h -> new HackathonDisponibileResponse(h.getId(), h.getNome()))
+            List<HackathonResponse> response = hs.stream()
+                    .map(h -> new HackathonResponse(h.getId(), h.getNome()))
                     .collect(Collectors.toList());
 
             return ResponseEntity.ok(response);

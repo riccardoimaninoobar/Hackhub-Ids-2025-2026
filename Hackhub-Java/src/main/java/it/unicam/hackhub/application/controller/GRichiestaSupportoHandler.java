@@ -4,10 +4,11 @@ import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.RichiestaSupporto;
 import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
-import it.unicam.hackhub.domain.model.eventi.NotificaEvent;
+import it.unicam.hackhub.domain.model.eventi.RichiestaSupportoGestitaEvent;
 import it.unicam.hackhub.domain.model.hackathon.Hackathon;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.RichiestaSupportoRepository;
+import it.unicam.hackhub.domain.repository.UtenteRepository;
 import it.unicam.hackhub.domain.service.CalendarService;
 import jakarta.transaction.Transactional;
 import org.springframework.context.ApplicationEventPublisher;
@@ -26,23 +27,26 @@ public class GRichiestaSupportoHandler {
     private final HackathonRepository hackathonRepo;
     private final CalendarService calendarService;
     private final ApplicationEventPublisher eventPublisher;
+    private final UtenteRepository utenteRepo;
 
     public GRichiestaSupportoHandler(Sessione sessione,
                                      RichiestaSupportoRepository richiestaRepo,
                                      HackathonRepository hackathonRepo,
                                      CalendarService calendarService,
-                                     ApplicationEventPublisher eventPublisher) {
+                                     ApplicationEventPublisher eventPublisher,
+                                     UtenteRepository utenteRepo) {
         this.sessione = sessione;
         this.richiestaRepo = richiestaRepo;
         this.hackathonRepo = hackathonRepo;
         this.calendarService = calendarService;
         this.eventPublisher = eventPublisher;
+        this.utenteRepo = utenteRepo;
     }
 
     public List<RichiestaSupporto> getRichiesteSupporto() {
-        Utente corrente = getMentoreAutenticato();
+        Utente mentoreFresco = getMentoreAutenticato(); // Ottiene l'utente sincronizzato
         List<RichiestaSupporto> richieste = richiestaRepo.findAll().stream()
-                .filter(r -> r.isAperta() && r.getHackathon().isMentore(corrente))
+                .filter(r -> r.isAperta() && r.getHackathon().isMentore(mentoreFresco))
                 .collect(Collectors.toList());
 
         if (richieste.isEmpty()) {
@@ -51,14 +55,17 @@ public class GRichiestaSupportoHandler {
         return richieste;
     }
 
-    public List<RichiestaSupporto> ottieniRichiestePerMentore(Utente mentore) {
+    public List<RichiestaSupporto> ottieniRichiestePerMentore(Utente mentoreSessione) {
+        if (mentoreSessione == null) return List.of();
+
+        Utente mentoreFresco = utenteRepo.findById(mentoreSessione.getId())
+                .orElseThrow(() -> new IllegalStateException("Utente non trovato."));
+
         return richiestaRepo.findAll().stream()
                 .filter(r -> r.getStato() != null &&
                         ("APERTA".equalsIgnoreCase(r.getStato().toString())
-                                || "PENDENTE".equalsIgnoreCase(r.getStato().toString())
-                                || "RISPOSTA_INSERITA".equalsIgnoreCase(r.getStato().toString())
-                                || "RISPOSTAINSERITA".equalsIgnoreCase(r.getStato().toString())))
-                .filter(r -> r.getHackathon().isMentore(mentore))
+                                || "RISPOSTA_INSERITA".equalsIgnoreCase(r.getStato().toString())))
+                .filter(r -> r.getHackathon().isMentore(mentoreFresco)) // CORRETTO: Usa mentoreFresco
                 .collect(Collectors.toList());
     }
 
@@ -83,12 +90,12 @@ public class GRichiestaSupportoHandler {
     }
 
     public void gestisciRichiesta(RichiestaSupporto richiesta, String risposta, LocalDate data, LocalTime ora) {
-        Utente mentore = getMentoreAutenticato();
+        Utente mentoreFresco = getMentoreAutenticato(); // CORRETTO: Usa l'utente sincronizzato
         if (richiesta == null) {
             throw new IllegalArgumentException("Richiesta di supporto non valida.");
         }
         Hackathon hackathon = richiesta.getHackathon();
-        if (hackathon == null || !hackathon.isMentore(mentore)) {
+        if (hackathon == null || !hackathon.isMentore(mentoreFresco)) {
             throw new IllegalStateException("Non sei autorizzato a gestire questa richiesta di supporto.");
         }
         rispondiRichiesta(richiesta, risposta);
@@ -101,29 +108,39 @@ public class GRichiestaSupportoHandler {
         if (team == null || team.getMembers() == null || team.getMembers().isEmpty()) {
             return;
         }
-        String titolo = "Richiesta di supporto gestita";
+
         String messaggio = "La tua richiesta di supporto per l'hackathon "
                 + richiesta.getHackathon().getNome()
                 + " è stata gestita dal mentore. "
                 + "Risposta: " + risposta.trim()
                 + ". Slot prenotato per il "
                 + data + " alle " + ora + ".";
+
         for (Utente membro : team.getMembers()) {
-            eventPublisher.publishEvent(new NotificaEvent(membro, titolo, messaggio));
+            // Passiamo la variabile 'messaggio' al posto dell'oggetto 'richiesta'
+            eventPublisher.publishEvent(new RichiestaSupportoGestitaEvent(this, membro, richiesta));
         }
     }
 
     private Utente getMentoreAutenticato() {
-        Utente corrente = sessione.getUtenteCorrente();
-        if (corrente == null) {
+        Utente sessioneUser = sessione.getUtenteCorrente();
+        if (sessioneUser == null) {
             throw new IllegalStateException("Devi effettuare il login.");
         }
+
+        // CORRETTO: Carica l'entità dal DB e assegnala a una variabile
+        Utente u = utenteRepo.findById(sessioneUser.getId())
+                .orElseThrow(() -> new IllegalStateException("Utente non più valido nel DB."));
+
+        // CORRETTO: Usa l'entità 'u' (fresh) per il filtro
         List<Hackathon> hackathons = hackathonRepo.findAll().stream()
-                .filter(h -> h.isMentore(corrente))
+                .filter(h -> h.isMentore(u))
                 .collect(Collectors.toList());
+
         if (hackathons.isEmpty()) {
             throw new IllegalStateException("Non sei autorizzato a gestire richieste di supporto.");
         }
-        return corrente;
+
+        return u; // CORRETTO: Ritorna l'entità fresh[cite: 2]
     }
 }

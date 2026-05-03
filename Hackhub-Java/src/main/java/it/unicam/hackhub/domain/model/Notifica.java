@@ -1,6 +1,8 @@
 package it.unicam.hackhub.domain.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,6 +22,7 @@ public class Notifica {
     @Column(nullable = false, length = 1000)
     private String messaggio;
 
+    @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime dataCreazione;
 

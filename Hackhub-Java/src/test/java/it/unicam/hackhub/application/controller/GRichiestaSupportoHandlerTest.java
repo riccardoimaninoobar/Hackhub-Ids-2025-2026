@@ -4,7 +4,7 @@ import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.RichiestaSupporto;
 import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
-import it.unicam.hackhub.domain.model.eventi.NotificaEvent;
+import it.unicam.hackhub.domain.model.eventi.RichiestaSupportoGestitaEvent;
 import it.unicam.hackhub.domain.model.hackathon.Hackathon;
 import it.unicam.hackhub.domain.model.hackathon.HackathonBuilder;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
@@ -12,14 +12,13 @@ import it.unicam.hackhub.domain.repository.RichiestaSupportoRepository;
 import it.unicam.hackhub.domain.repository.TeamRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
 import it.unicam.hackhub.domain.service.CalendarService;
-import it.unicam.hackhub.presentation.CliRunner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -32,16 +31,14 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @Transactional
+@RecordApplicationEvents // <-- Abilita la cattura degli eventi nativa di Spring
 class GRichiestaSupportoHandlerTest {
-
-    @MockitoBean
-    private CliRunner cliRunner;
 
     @MockitoBean
     private CalendarService calendarService;
 
-    @MockitoBean
-    private ApplicationEventPublisher eventPublisher;
+    @Autowired
+    private ApplicationEvents applicationEvents; // <-- Sostituisce il Mock dell'EventPublisher
 
     @Autowired
     private GRichiestaSupportoHandler handler;
@@ -88,10 +85,14 @@ class GRichiestaSupportoHandlerTest {
         utenteRepo.save(membroTeam1);
         utenteRepo.save(membroTeam2);
 
+        // Ordine di salvataggio sicuro per Hibernate
         teamAlpha = new Team("TeamAlpha");
+        teamRepo.save(teamAlpha);
+
         teamAlpha.aggiungiMembro(membroTeam1);
         teamAlpha.aggiungiMembro(membroTeam2);
-        teamRepo.save(teamAlpha);
+        utenteRepo.save(membroTeam1);
+        utenteRepo.save(membroTeam2);
 
         hackathonMentore = new HackathonBuilder()
                 .assegnaNome("HackathonMentore")
@@ -202,23 +203,20 @@ class GRichiestaSupportoHandlerTest {
 
         handler.gestisciRichiesta(richiestaApertaMentore, "Risposta del mentore", data, ora);
 
-        ArgumentCaptor<NotificaEvent> captor = ArgumentCaptor.forClass(NotificaEvent.class);
-        verify(eventPublisher, times(2)).publishEvent(captor.capture());
+        // Verifica che siano stati pubblicati esattamente due eventi del tipo corretto
+        long conteggioEventi = applicationEvents.stream(RichiestaSupportoGestitaEvent.class).count();
+        assertEquals(2, conteggioEventi, "Dovrebbero essere generate 2 notifiche (una per membro)");
 
-        List<NotificaEvent> eventi = captor.getAllValues();
-        assertEquals(2, eventi.size());
+        // Verifica il contenuto dell'evento per il primo membro
+        boolean notificaMembro1 = applicationEvents.stream(RichiestaSupportoGestitaEvent.class)
+                .anyMatch(e -> e.getDestinatarioNotifica().equals(membroTeam1) &&
+                        e.getTestoNotifica().contains("Risposta del mentore"));
+        assertTrue(notificaMembro1, "L'evento per il membro 1 non è stato generato o ha dati errati");
 
-        assertTrue(eventi.stream().anyMatch(e ->
-                e.destinatario().equals(membroTeam1) &&
-                e.titolo().equals("Richiesta di supporto gestita") &&
-                e.messaggio().contains("Risposta del mentore")
-        ));
-
-        assertTrue(eventi.stream().anyMatch(e ->
-                e.destinatario().equals(membroTeam2) &&
-                e.titolo().equals("Richiesta di supporto gestita") &&
-                e.messaggio().contains("Risposta del mentore")
-        ));
+        // Verifica il contenuto dell'evento per il secondo membro
+        boolean notificaMembro2 = applicationEvents.stream(RichiestaSupportoGestitaEvent.class)
+                .anyMatch(e -> e.getDestinatarioNotifica().equals(membroTeam2));
+        assertTrue(notificaMembro2, "L'evento per il membro 2 non è stato generato");
     }
 
     @Test

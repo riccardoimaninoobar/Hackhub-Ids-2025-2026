@@ -3,7 +3,7 @@ package it.unicam.hackhub.application.controller;
 import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
-import it.unicam.hackhub.domain.model.eventi.NotificaEvent;
+import it.unicam.hackhub.domain.model.eventi.InvitoInviatoEvent;
 import it.unicam.hackhub.domain.model.invito.Invito;
 import it.unicam.hackhub.domain.model.invito.state.StatoPendente;
 import it.unicam.hackhub.domain.repository.InvitoRepository;
@@ -57,10 +57,6 @@ public class GestioneInvitiHandler {
         Invito nuovoInvito = new Invito(invitato, teamMittente);
         invitoRepo.save(nuovoInvito);
 
-        eventPublisher.publishEvent(new NotificaEvent(
-                invitato,
-                "Nuovo Invito",
-                "Sei stato invitato a unirti al team: " + teamMittente.getNome()
-        ));
+        eventPublisher.publishEvent(new InvitoInviatoEvent(this, nuovoInvito));
     }
 }

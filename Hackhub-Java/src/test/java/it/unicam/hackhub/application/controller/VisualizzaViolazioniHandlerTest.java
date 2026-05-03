@@ -11,16 +11,13 @@ import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.SegnalazioneRepository;
 import it.unicam.hackhub.domain.repository.TeamRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
-import it.unicam.hackhub.presentation.CliRunner;
 import it.unicam.hackhub.presentation.dto.SegnalazioneResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,8 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional
 class VisualizzaViolazioniHandlerTest {
 
-    @MockitoBean
-    private CliRunner cliRunner;
+
 
     @Autowired
     private VisualizzaViolazioniHandler handler;

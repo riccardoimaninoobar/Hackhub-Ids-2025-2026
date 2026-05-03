@@ -3,7 +3,7 @@ package it.unicam.hackhub.presentation.api;
 import it.unicam.hackhub.application.controller.RichiestaSupportoHandler;
 import it.unicam.hackhub.domain.model.hackathon.Hackathon;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
-import it.unicam.hackhub.presentation.dto.HackathonSupportoResponse;
+import it.unicam.hackhub.presentation.dto.HackathonResponse;
 import it.unicam.hackhub.presentation.dto.InviaRichiestaSupportoRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,8 +26,8 @@ public class RichiestaSupportoController {
     @GetMapping("/hackathons")
     public ResponseEntity<?> ottieniHackathonDisponibili() {
         try {
-            List<HackathonSupportoResponse> response = handler.getHackathons().stream()
-                    .map(h -> new HackathonSupportoResponse(h.getId(), h.getNome()))
+            List<HackathonResponse> response = handler.getHackathons().stream()
+                    .map(h -> new HackathonResponse(h.getId(), h.getNome()))
                     .toList();
             return ResponseEntity.ok(response);
         } catch (IllegalStateException e) {

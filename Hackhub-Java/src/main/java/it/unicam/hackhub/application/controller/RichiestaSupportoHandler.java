@@ -1,12 +1,12 @@
 package it.unicam.hackhub.application.controller;
 
 import it.unicam.hackhub.application.context.Sessione;
+import it.unicam.hackhub.domain.model.eventi.RichiestaSupportoInviataEvent;
 import it.unicam.hackhub.domain.model.hackathon.Hackathon;
 import it.unicam.hackhub.domain.model.Notifica;
 import it.unicam.hackhub.domain.model.RichiestaSupporto;
 import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
-import it.unicam.hackhub.domain.model.NotificaEvent;
 import it.unicam.hackhub.domain.repository.RichiestaSupportoRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
 import jakarta.transaction.Transactional;
@@ -72,7 +72,7 @@ public class RichiestaSupportoHandler {
         for (Utente mentore : h.getMentori()) {
             Notifica notifica = new Notifica(mentore, "Nuova Richiesta di Supporto",
                     "Il team " + t.getNome() + " ha richiesto supporto: " + desc);
-            eventPublisher.publishEvent(new NotificaEvent(notifica));
+            eventPublisher.publishEvent(new RichiestaSupportoInviataEvent(this, mentore, richiesta));
         }
     }
 }

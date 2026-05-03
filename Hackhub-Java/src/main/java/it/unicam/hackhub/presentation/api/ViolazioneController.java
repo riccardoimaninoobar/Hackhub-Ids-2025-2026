@@ -23,8 +23,8 @@ public class ViolazioneController {
 
     // Freccia 1: getHackathonsAssegnati()
     @GetMapping("/hackathons-assegnati")
-    public ResponseEntity<List<HackathonSupportoResponse>> getHackathonsAssegnati() {
-        List<HackathonSupportoResponse> hackathons = segnalazioneHandler.getHackathonsAssegnati();
+    public ResponseEntity<List<HackathonResponse>> getHackathonsAssegnati() {
+        List<HackathonResponse> hackathons = segnalazioneHandler.getHackathonsAssegnati();
         return ResponseEntity.ok(hackathons);
     }
 

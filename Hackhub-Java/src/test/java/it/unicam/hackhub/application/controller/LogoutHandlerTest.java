@@ -3,12 +3,10 @@ package it.unicam.hackhub.application.controller;
 import it.unicam.hackhub.application.context.Sessione;
 import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
-import it.unicam.hackhub.presentation.CliRunner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,8 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class LogoutHandlerTest {
 
     // Blocchiamo l'interfaccia a riga di comando
-    @MockitoBean
-    private CliRunner cliRunner;
+
 
     // Lasciamo che Spring inietti i nostri componenti
     @Autowired
