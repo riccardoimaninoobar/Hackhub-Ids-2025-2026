@@ -15,10 +15,8 @@ import it.unicam.hackhub.domain.repository.UtenteRepository;
 import it.unicam.hackhub.presentation.CliRunner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.event.ApplicationEvents;
 import org.springframework.test.context.event.RecordApplicationEvents;
@@ -56,82 +54,108 @@ class GestisciViolazioneHandlerTest {
     private SegnalazioneRepository segnalazioneRepo;
 
     private Utente organizzatore;
-    private Utente hacker; // un utente che non c'entra niente
+    private Utente hacker;
+    private Utente mentore;
+    private Team teamBeta;
+    private Hackathon hackathon;
     private SegnalazioneViolazione segnalazioneAperta;
 
     @BeforeEach
     void setUp() {
         sessione.setUtenteCorrente(null);
 
-        organizzatore = new Utente("org1", "org1@mail.com", "pass");
-        hacker = new Utente("hacker", "hacker@mail.com", "pass");
-        Utente mentore = new Utente("mentore1", "m1@mail.com", "pass");
+        organizzatore = new Utente("org1", "org1mail.com", "pass");
+        hacker = new Utente("hacker", "hackermail.com", "pass");
+        mentore = new Utente("mentore1", "m1mail.com", "pass");
 
         utenteRepo.save(organizzatore);
         utenteRepo.save(hacker);
         utenteRepo.save(mentore);
 
-        Team teamBeta = new Team("Team Beta");
+        teamBeta = new Team("Team Beta");
         teamRepo.save(teamBeta);
 
-        Hackathon hackathon = new HackathonBuilder()
+        hackathon = new HackathonBuilder()
                 .assegnaNome("Hack Finale")
                 .assegnaOrganizzatore(organizzatore)
                 .build();
         hackathon.aggiungiTeam(teamBeta);
         hackathonRepo.save(hackathon);
 
-        segnalazioneAperta = new SegnalazioneViolazione(mentore, teamBeta, hackathon, "Violazione rilevata");
+        segnalazioneAperta = new SegnalazioneViolazione(
+                mentore,
+                teamBeta,
+                hackathon,
+                "Violazione rilevata"
+        );
         segnalazioneRepo.save(segnalazioneAperta);
     }
 
     @Test
-    void gestisciViolazione_SuccessoAggiornaStatoEPubblicaEvento() {
+    void gestisciViolazioneSuccessoAggiornaStatoEPubblicaEvento() {
         sessione.setUtenteCorrente(organizzatore);
 
         assertDoesNotThrow(() ->
-                handler.gestisciViolazione(segnalazioneAperta.getId(), EsitoSegnalazione.ACCOLTA, "Regolamento violato")
+                handler.gestisciViolazione(
+                        segnalazioneAperta.getId(),
+                        EsitoSegnalazione.ACCOLTA,
+                        "Regolamento violato"
+                )
         );
 
-        // 1. Verifichiamo il database
-        SegnalazioneViolazione salvata = segnalazioneRepo.findById(segnalazioneAperta.getId()).orElseThrow();
+        SegnalazioneViolazione salvata = segnalazioneRepo.findById(segnalazioneAperta.getId())
+                .orElseThrow();
+
         assertEquals(EsitoSegnalazione.ACCOLTA, salvata.getStato());
 
-        // 2. LA NUOVA VERIFICA DELL'EVENTO
         long conteggioEventi = applicationEvents.stream(ViolazioneGestitaEvent.class).count();
-        assertEquals(1, conteggioEventi, "Dovrebbe essere stato pubblicato esattamente un evento");
+        assertEquals(1, conteggioEventi,
+                "Dovrebbe essere stato pubblicato esattamente un evento");
     }
 
     @Test
-    void gestisciViolazione_FallisceSeNonLoggato() {
+    void gestisciViolazioneFallisceSeNonLoggato() {
         sessione.setUtenteCorrente(null);
 
         IllegalStateException ex = assertThrows(IllegalStateException.class, () ->
-                handler.gestisciViolazione(segnalazioneAperta.getId(), EsitoSegnalazione.RESPINTA, "Non rilevante")
+                handler.gestisciViolazione(
+                        segnalazioneAperta.getId(),
+                        EsitoSegnalazione.RESPINTA,
+                        "Non rilevante"
+                )
         );
         assertEquals("Nessun utente autenticato in sessione.", ex.getMessage());
 
-        // Verifica che in caso di errore, l'evento NON parta (il conteggio deve essere 0)
         long conteggioEventi = applicationEvents.stream(ViolazioneGestitaEvent.class).count();
-        assertEquals(0, conteggioEventi, "Nessun evento deve essere pubblicato in caso di errore");
+        assertEquals(0, conteggioEventi,
+                "Nessun evento deve essere pubblicato in caso di errore");
     }
 
     @Test
-    void gestisciViolazione_FallisceSeUtenteNonEOrganizzatoreDelHackathon() {
+    void gestisciViolazioneFallisceSeUtenteNonEOrganizzatoreDelHackathon() {
         sessione.setUtenteCorrente(hacker);
 
         IllegalStateException ex = assertThrows(IllegalStateException.class, () ->
-                handler.gestisciViolazione(segnalazioneAperta.getId(), EsitoSegnalazione.RESPINTA, "Non rilevante")
+                handler.gestisciViolazione(
+                        segnalazioneAperta.getId(),
+                        EsitoSegnalazione.RESPINTA,
+                        "Non rilevante"
+                )
         );
         assertEquals("Non sei autorizzato a gestire questa segnalazione.", ex.getMessage());
     }
 
     @Test
-    void gestisciViolazione_FallisceSeSegnalazioneNonEsiste() {
+    void gestisciViolazioneFallisceSeSegnalazioneNonEsiste() {
         sessione.setUtenteCorrente(organizzatore);
 
-        assertThrows(IllegalArgumentException.class, () ->
-                handler.gestisciViolazione(9999L, EsitoSegnalazione.ACCOLTA, "Test")
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                handler.gestisciViolazione(
+                        9999L,
+                        EsitoSegnalazione.ACCOLTA,
+                        "Test"
+                )
         );
+        assertEquals("Segnalazione non trovata.", ex.getMessage());
     }
 }

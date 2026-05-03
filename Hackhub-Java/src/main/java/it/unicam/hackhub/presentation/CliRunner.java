@@ -30,7 +30,6 @@ public class CliRunner implements CommandLineRunner {
     private final CaricaSottomissioneCLI caricaSottomissioneCLI;
     private final AccettazioneInvitoCLI accettazioneInvitoCLI;
     private final RichiestaSupportoCLI richiestaSupportoCLI;
-    private final GRichiestaSupportoCLI gRichiestaSupportoCLI;
     private final LogoutCLI logoutCLI;
     private final ProclamaVincitoreCLI proclamaVincitoreCLI;
     private final ConsultareSottomissioniCLI consultareSottomissioniCLI;
@@ -41,7 +40,7 @@ public class CliRunner implements CommandLineRunner {
                      AggiungiMentoreCLI aggMentoreCli, LoginCLI loginCli, ConsultareHackathonCLI consultareHackathonCLI,
                      IscrizioneTeamCLI iscrizioneTeamCLI, CaricaSottomissioneCLI caricaSottomissioneCLI, 
                      AccettazioneInvitoCLI accettazioneInvitoCLI,
-                     RichiestaSupportoCLI richiestaSupportoCLI, GRichiestaSupportoCLI gRichiestaSupportoCLI,
+                     RichiestaSupportoCLI richiestaSupportoCLI, 
                      LogoutCLI logoutCLI, ProclamaVincitoreCLI proclamaVincitoreCLI,  
                      ConsultareSottomissioniCLI consultareSottomissioniCLI, 
                      ValutareSottomissioneCLI valutareSottomissioneCLI) {
@@ -58,7 +57,6 @@ public class CliRunner implements CommandLineRunner {
         this.caricaSottomissioneCLI = caricaSottomissioneCLI;
         this.accettazioneInvitoCLI = accettazioneInvitoCLI;
         this.richiestaSupportoCLI = richiestaSupportoCLI;
-        this.gRichiestaSupportoCLI = gRichiestaSupportoCLI;
         this.logoutCLI = logoutCLI;
         this.proclamaVincitoreCLI = proclamaVincitoreCLI;
         this.consultareSottomissioniCLI = consultareSottomissioniCLI;
@@ -128,7 +126,6 @@ public class CliRunner implements CommandLineRunner {
             System.out.println("9 - Invitare a entrare nel team");
             System.out.println("10 - Accettare invito nel team");
             System.out.println("11 - Inviare richiesta di supporto");
-            System.out.println("12 - Gestire richieste di supporto");
             System.out.println("13 - Effettuare logout");
             System.out.println("14 - Proclama Team Vincitore (Include Erogazione Premio)");
             System.out.println("15 - Consultare sottomissioni");
@@ -150,7 +147,6 @@ public class CliRunner implements CommandLineRunner {
                     case "8": caricaSottomissioneCLI.richiediCaricamentoSottomissione(); break;
                     case "10": accettazioneInvitoCLI.avviaGestioneInviti(); break;
                     case "11": richiestaSupportoCLI.avviaRichiestaSupporto(); break;
-                    case "12": gRichiestaSupportoCLI.gestisciRichieste(); break;
                     case "13": logoutCLI.richiediLogout(); break;
                     case "14": proclamaVincitoreCLI.avviaMenu(); break;
                     case "15": consultareSottomissioniCLI.consultaSottomissioni(); break;
