@@ -89,15 +89,18 @@ public class GRichiestaSupportoHandler {
         richiestaRepo.save(richiesta);
     }
 
-    public void gestisciRichiesta(RichiestaSupporto richiesta, String risposta, LocalDate data, LocalTime ora) {
-        Utente mentoreFresco = getMentoreAutenticato(); // CORRETTO: Usa l'utente sincronizzato
-        if (richiesta == null) {
-            throw new IllegalArgumentException("Richiesta di supporto non valida.");
-        }
+    public void gestisciRichiesta(Long richiestaId, String risposta, LocalDate data, LocalTime ora) {
+        Utente mentoreFresco = getMentoreAutenticato();
+
+        // RECUPERA LA RICHIESTA QUI
+        RichiestaSupporto richiesta = richiestaRepo.findById(richiestaId)
+                .orElseThrow(() -> new IllegalArgumentException("Richiesta di supporto non trovata."));
+
         Hackathon hackathon = richiesta.getHackathon();
         if (hackathon == null || !hackathon.isMentore(mentoreFresco)) {
             throw new IllegalStateException("Non sei autorizzato a gestire questa richiesta di supporto.");
         }
+
         rispondiRichiesta(richiesta, risposta);
         prenotaSlotCalendar(richiesta, data, ora);
         pubblicaNotifichePerBacheca(richiesta, risposta, data, ora);
@@ -128,11 +131,9 @@ public class GRichiestaSupportoHandler {
             throw new IllegalStateException("Devi effettuare il login.");
         }
 
-        // CORRETTO: Carica l'entità dal DB e assegnala a una variabile
         Utente u = utenteRepo.findById(sessioneUser.getId())
                 .orElseThrow(() -> new IllegalStateException("Utente non più valido nel DB."));
 
-        // CORRETTO: Usa l'entità 'u' (fresh) per il filtro
         List<Hackathon> hackathons = hackathonRepo.findAll().stream()
                 .filter(h -> h.isMentore(u))
                 .collect(Collectors.toList());
@@ -141,6 +142,6 @@ public class GRichiestaSupportoHandler {
             throw new IllegalStateException("Non sei autorizzato a gestire richieste di supporto.");
         }
 
-        return u; // CORRETTO: Ritorna l'entità fresh[cite: 2]
+        return u;
     }
 }

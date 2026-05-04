@@ -7,6 +7,7 @@ import it.unicam.hackhub.domain.model.Notifica;
 import it.unicam.hackhub.domain.model.RichiestaSupporto;
 import it.unicam.hackhub.domain.model.Team;
 import it.unicam.hackhub.domain.model.Utente;
+import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.RichiestaSupportoRepository;
 import it.unicam.hackhub.domain.repository.UtenteRepository;
 import jakarta.transaction.Transactional;
@@ -22,13 +23,15 @@ public class RichiestaSupportoHandler {
     private final RichiestaSupportoRepository richiestaRepo;
     private final UtenteRepository utenteRepo;
     private final ApplicationEventPublisher eventPublisher;
+    private final HackathonRepository hackathonRepo;
 
     public RichiestaSupportoHandler(Sessione sessione, RichiestaSupportoRepository richiestaRepo,
-                                    UtenteRepository utenteRepo, ApplicationEventPublisher eventPublisher) {
+                                    UtenteRepository utenteRepo, ApplicationEventPublisher eventPublisher, HackathonRepository hackathonRepo) {
         this.sessione = sessione;
         this.richiestaRepo = richiestaRepo;
         this.utenteRepo = utenteRepo;
         this.eventPublisher = eventPublisher;
+        this.hackathonRepo = hackathonRepo;
     }
 
     // 1. Recupera la lista degli hackathon del team
@@ -58,7 +61,7 @@ public class RichiestaSupportoHandler {
     }
 
     // 3. Crea e salva la richiesta
-    public void registraRichiestaSupporto(Hackathon h, String desc) {
+    public void registraRichiestaSupporto(Long hackathonId, String desc) {
         // Validazione preventiva
         convalidaDescrizione(desc);
 
@@ -66,12 +69,13 @@ public class RichiestaSupportoHandler {
         Utente u = utenteRepo.findById(corrente.getId()).get();
         Team t = u.getTeam();
 
+        Hackathon h = hackathonRepo.findById(hackathonId)
+                .orElseThrow(() -> new IllegalArgumentException("Hackathon non trovato."));
+
         RichiestaSupporto richiesta = new RichiestaSupporto(t, h, desc);
         richiestaRepo.save(richiesta);
 
         for (Utente mentore : h.getMentori()) {
-            Notifica notifica = new Notifica(mentore, "Nuova Richiesta di Supporto",
-                    "Il team " + t.getNome() + " ha richiesto supporto: " + desc);
             eventPublisher.publishEvent(new RichiestaSupportoInviataEvent(this, mentore, richiesta));
         }
     }

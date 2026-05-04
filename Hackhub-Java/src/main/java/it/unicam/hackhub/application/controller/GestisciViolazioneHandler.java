@@ -16,10 +16,8 @@ public class GestisciViolazioneHandler {
 
     @Autowired
     private Sessione sessione;
-
     @Autowired
     private SegnalazioneRepository segnalazioneRepo;
-
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 

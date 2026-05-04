@@ -42,19 +42,18 @@ public class CaricaSottomissioneHandler {
         return t.getHackathonInCorso();
     }
 
-    public void caricaSottomissione(Hackathon h, String link) {
+    public void caricaSottomissione(Long hackathonId, String link) {
         Utente corrente = sessione.getUtenteCorrente();
-
-        // Ricarico l'utente fresco anche qui per evitare di salvare entità detached
         Utente u = utenteRepository.findById(corrente.getId())
                 .orElseThrow(() -> new IllegalStateException("Utente non più valido nel DB."));
-
         Team teamFresco = u.getTeam();
 
+        // SPOSATA QUI LA RICERCA DELL'HACKATHON
+        Hackathon h = hackathonRepo.findById(hackathonId)
+                .orElseThrow(() -> new IllegalArgumentException("Hackathon non trovato con ID: " + hackathonId));
+
         Sottomissione s = new Sottomissione("Sottomissione_" + h.getNome(), link, teamFresco);
-
         h.caricaSottomissione(s);
-
         hackathonRepo.save(h);
     }
 }

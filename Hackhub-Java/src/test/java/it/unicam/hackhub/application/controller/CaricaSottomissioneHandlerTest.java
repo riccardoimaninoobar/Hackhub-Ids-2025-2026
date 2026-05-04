@@ -87,7 +87,7 @@ class CaricaSottomissioneHandlerTest {
         String link = "https://github.com/user/repo";
 
         // Act
-        assertDoesNotThrow(() -> handler.caricaSottomissione(hackathonInCorso, link));
+        assertDoesNotThrow(() -> handler.caricaSottomissione(hackathonInCorso.getId(), link));
 
         // Sincronizziamo col DB per essere certi che la sottomissione sia persistita
         hackathonRepo.flush();
@@ -110,7 +110,7 @@ class CaricaSottomissioneHandlerTest {
 
         // Act & Assert
         IllegalStateException ex = assertThrows(IllegalStateException.class, () ->
-                handler.caricaSottomissione(hackathonInCorso, "link")
+                handler.caricaSottomissione(hackathonInCorso.getId(), "link")
         );
         // L'errore ora viene dal Pattern State (StatoHackathon.java)
         assertTrue(ex.getMessage().contains("non è attualmente in corso"));

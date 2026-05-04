@@ -201,7 +201,7 @@ class GRichiestaSupportoHandlerTest {
         when(calendarService.verificaDisponibilita(data, ora)).thenReturn(true);
         when(calendarService.prenotaSlot(data, ora)).thenReturn(true);
 
-        handler.gestisciRichiesta(richiestaApertaMentore, "Risposta del mentore", data, ora);
+        handler.gestisciRichiesta(richiestaApertaMentore.getId(), "Risposta del mentore", data, ora);
 
         // Verifica che siano stati pubblicati esattamente due eventi del tipo corretto
         long conteggioEventi = applicationEvents.stream(RichiestaSupportoGestitaEvent.class).count();
@@ -227,7 +227,7 @@ class GRichiestaSupportoHandlerTest {
         when(calendarService.verificaDisponibilita(data, ora)).thenReturn(true);
         when(calendarService.prenotaSlot(data, ora)).thenReturn(true);
 
-        handler.gestisciRichiesta(richiestaApertaMentore, "Risposta finale", data, ora);
+        handler.gestisciRichiesta(richiestaApertaMentore.getId(), "Risposta finale", data, ora);
 
         RichiestaSupporto salvata = richiestaRepo.findById(richiestaApertaMentore.getId()).orElseThrow();
 

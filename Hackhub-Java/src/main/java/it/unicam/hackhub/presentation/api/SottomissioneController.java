@@ -17,11 +17,9 @@ import java.util.stream.Collectors;
 public class SottomissioneController {
 
     private final CaricaSottomissioneHandler handler;
-    private final HackathonRepository hackathonRepo; // Necessario per convertire ID -> Oggetto
 
-    public SottomissioneController(CaricaSottomissioneHandler handler, HackathonRepository hackathonRepo) {
+    public SottomissioneController(CaricaSottomissioneHandler handler) {
         this.handler = handler;
-        this.hackathonRepo = hackathonRepo;
     }
 
     // Corrisponde alla prima parte della CLI: recupera gli hackathon "In corso" per il team
@@ -48,17 +46,10 @@ public class SottomissioneController {
     @PostMapping
     public ResponseEntity<String> caricaSottomissione(@RequestBody SottomissioneRequest request) {
         try {
-            // Recuperiamo l'oggetto Hackathon dal database usando l'ID del DTO
-            Hackathon hackathon = hackathonRepo.findById(request.hackathonId())
-                    .orElseThrow(() -> new IllegalArgumentException("Hackathon non trovato con ID: " + request.hackathonId()));
-
-            // Chiamata all'handler con l'oggetto recuperato, proprio come faceva la CLI
-            handler.caricaSottomissione(hackathon, request.link());
-
-            return ResponseEntity.ok("Sottomissione per l'hackathon '" + hackathon.getNome() + "' caricata correttamente!");
-
+            // Passa semplicemente l'ID all'handler
+            handler.caricaSottomissione(request.hackathonId(), request.link());
+            return ResponseEntity.ok("Sottomissione caricata correttamente!");
         } catch (IllegalStateException | IllegalArgumentException e) {
-            // Gestisce errori di login, di team o di stato dell'hackathon
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Errore interno: " + e.getMessage());

@@ -110,7 +110,7 @@ class RichiestaSupportoHandlerTest {
     void registraRichiestaSupporto_SalvaCorrettamenteNelDB() {
         String desc = "Richiesta di supporto tecnico per configurazione ambiente.";
 
-        handler.registraRichiestaSupporto(hackathonInCorso, desc);
+        handler.registraRichiestaSupporto(hackathonInCorso.getId(), desc);
 
         // Verifichiamo la persistenza interrogando la repository
         long count = richiestaRepo.count();

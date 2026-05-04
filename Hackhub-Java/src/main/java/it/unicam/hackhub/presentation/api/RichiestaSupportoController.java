@@ -15,11 +15,10 @@ import java.util.List;
 public class RichiestaSupportoController {
 
     private final RichiestaSupportoHandler handler;
-    private final HackathonRepository hackathonRepo;
 
-    public RichiestaSupportoController(RichiestaSupportoHandler handler, HackathonRepository hackathonRepo) {
+
+    public RichiestaSupportoController(RichiestaSupportoHandler handler) {
         this.handler = handler;
-        this.hackathonRepo = hackathonRepo;
     }
 
     // Endpoint per la selezione iniziale
@@ -40,11 +39,7 @@ public class RichiestaSupportoController {
     public ResponseEntity<String> inviaRichiesta(@RequestBody InviaRichiestaSupportoRequest request) {
         try {
             // Conversione ID -> Oggetto Hackathon
-            Hackathon h = hackathonRepo.findById(request.hackathonId())
-                    .orElseThrow(() -> new IllegalArgumentException("Hackathon non trovato."));
-
-            // Validazione e registrazione
-            handler.registraRichiestaSupporto(h, request.descrizione());
+            handler.registraRichiestaSupporto(request.hackathonId(), request.descrizione());
 
             return ResponseEntity.ok("Richiesta di supporto inviata correttamente!");
         } catch (IllegalArgumentException | IllegalStateException e) {

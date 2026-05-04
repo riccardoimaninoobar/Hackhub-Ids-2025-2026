@@ -17,12 +17,10 @@ import java.util.List;
 public class MentoreRichiesteController {
     private final GRichiestaSupportoHandler handler;
     private final Sessione sessione;
-    private final RichiestaSupportoRepository richiestaRepo; // <-- Aggiunto per recuperare l'ID
 
-    public MentoreRichiesteController(GRichiestaSupportoHandler handler, Sessione sessione, RichiestaSupportoRepository richiestaRepo) {
+    public MentoreRichiesteController(GRichiestaSupportoHandler handler, Sessione sessione) {
         this.handler = handler;
         this.sessione = sessione;
-        this.richiestaRepo = richiestaRepo;
     }
 
     // 1. Il Mentore visualizza le richieste (GIÀ FATTO DA TE)
@@ -48,13 +46,7 @@ public class MentoreRichiesteController {
             Utente corrente = sessione.getUtenteCorrente();
             if (corrente == null) return ResponseEntity.status(401).body("Devi effettuare il login per procedere.");
 
-            // Recupera la richiesta dal DB
-            RichiestaSupporto richiesta = richiestaRepo.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Richiesta di supporto non trovata."));
-
-            // Delega la logica di business all'handler
-            handler.gestisciRichiesta(richiesta, request.risposta(), request.data(), request.ora());
-
+            handler.gestisciRichiesta(id, request.risposta(), request.data(), request.ora());
             return ResponseEntity.ok("Richiesta gestita con successo. Slot prenotato per il " + request.data() + " alle " + request.ora());
 
         } catch (IllegalArgumentException | IllegalStateException e) {
