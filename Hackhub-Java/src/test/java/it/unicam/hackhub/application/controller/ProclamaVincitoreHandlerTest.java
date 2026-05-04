@@ -1,5 +1,6 @@
 package it.unicam.hackhub.application.controller;
 
+import it.unicam.hackhub.application.context.Sessione; // <-- IMPORTANTE
 import it.unicam.hackhub.domain.model.*;
 import it.unicam.hackhub.domain.model.hackathon.Hackathon;
 import it.unicam.hackhub.domain.model.hackathon.HackathonBuilder;
@@ -26,14 +27,14 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional
 class ProclamaVincitoreHandlerTest {
 
-
-
-    // Usiamo un mock per l'adapter di pagamento così possiamo decidere se deve fallire o meno
     @MockitoBean
     private SistemaPagamentoAdapter pagamentoAdapter;
 
     @Autowired
     private ProclamaVincitoreHandler handler;
+
+    @Autowired
+    private Sessione sessione; // <-- Aggiunta la sessione per i test di sicurezza
 
     @Autowired
     private HackathonRepository hackathonRepo;
@@ -47,11 +48,17 @@ class ProclamaVincitoreHandlerTest {
     private Hackathon hackathon;
     private Team teamVincitore;
 
+    // Promossi a variabili di istanza per usarli nei test
+    private Utente org;
+    private Utente giudice;
+
     @BeforeEach
     void setUp() {
+        sessione.setUtenteCorrente(null); // Assicura un ambiente pulito per ogni test
+
         // 1. Salvataggio Utenti
-        Utente org = new Utente("org", "org@mail.com", "pass");
-        Utente giudice = new Utente("giudice", "g@m.it", "p");
+        org = new Utente("org", "org@mail.com", "pass");
+        giudice = new Utente("giudice", "g@m.it", "p");
         utenteRepo.save(org);
         utenteRepo.save(giudice);
 
@@ -76,11 +83,11 @@ class ProclamaVincitoreHandlerTest {
 
     @Test
     void getValutazioniTeam_Successo() {
-        // Aggiunta sottomissione (essendo legata all'hackathon salvato, viene gestita dal DB)
+        // Aggiunta sottomissione
         Sottomissione s = new Sottomissione("progetto.zip", "http://github.com/win", teamVincitore);
         s.setPunteggio(95);
         hackathon.aggiungiSottomissione(s);
-        hackathonRepo.save(hackathon); // Aggiorniamo l'hackathon con la sottomissione
+        hackathonRepo.save(hackathon);
 
         List<String> valutazioni = handler.getValutazioniTeam("Hack Finale");
 
@@ -92,7 +99,8 @@ class ProclamaVincitoreHandlerTest {
 
     @Test
     void proclamaVincitore_Successo() {
-        // Simuliamo che il pagamento vada a buon fine
+        sessione.setUtenteCorrente(org); // <-- Simula il login dell'organizzatore autorizzato
+
         Mockito.when(pagamentoAdapter.erogaPagamento(Mockito.anyDouble(), Mockito.anyString()))
                 .thenReturn(true);
 
@@ -100,7 +108,6 @@ class ProclamaVincitoreHandlerTest {
 
         assertTrue(esito);
 
-        // Ricarichiamo l'hackathon dal DB per verificare lo stato aggiornato
         Hackathon aggiornato = hackathonRepo.findByNome("Hack Finale").orElseThrow();
         assertNotNull(aggiornato.getTeamVincente());
         assertEquals("Winners", aggiornato.getTeamVincente().getNome());
@@ -109,7 +116,8 @@ class ProclamaVincitoreHandlerTest {
 
     @Test
     void proclamaVincitore_FallimentoPerErrorePagamento() {
-        // Simuliamo un errore del sistema bancario
+        sessione.setUtenteCorrente(org); // <-- Simula il login
+
         Mockito.when(pagamentoAdapter.erogaPagamento(Mockito.anyDouble(), Mockito.anyString()))
                 .thenReturn(false);
 
@@ -123,8 +131,34 @@ class ProclamaVincitoreHandlerTest {
 
     @Test
     void proclamaVincitore_FallimentoPerHackathonInesistente() {
+        sessione.setUtenteCorrente(org); // <-- Simula il login
+
         assertThrows(IllegalArgumentException.class, () ->
                 handler.proclamaVincitore("Hackathon Finto", "Winners")
         );
+    }
+
+    // ==========================================================
+    // NUOVI TEST DI SICUREZZA
+    // ==========================================================
+
+    @Test
+    void proclamaVincitore_FallisceSeNonLoggato() {
+        sessione.setUtenteCorrente(null); // Nessuno in sessione
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () ->
+                handler.proclamaVincitore("Hack Finale", "Winners")
+        );
+        assertEquals("Operazione non autorizzata.", ex.getMessage());
+    }
+
+    @Test
+    void proclamaVincitore_FallisceSeNonOrganizzatore() {
+        sessione.setUtenteCorrente(giudice); // <-- Simula il login di un utente NON autorizzato (es. il giudice)
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () ->
+                handler.proclamaVincitore("Hack Finale", "Winners")
+        );
+        assertEquals("Solo l'organizzatore dell'Hackathon può proclamare il vincitore.", ex.getMessage());
     }
 }

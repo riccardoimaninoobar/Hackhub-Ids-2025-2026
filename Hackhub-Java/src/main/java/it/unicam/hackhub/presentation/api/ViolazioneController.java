@@ -21,21 +21,18 @@ public class ViolazioneController {
     @Autowired
     private GestisciViolazioneHandler gestisciHandler;
 
-    // Freccia 1: getHackathonsAssegnati()
     @GetMapping("/hackathons-assegnati")
     public ResponseEntity<List<HackathonResponse>> getHackathonsAssegnati() {
         List<HackathonResponse> hackathons = segnalazioneHandler.getHackathonsAssegnati();
         return ResponseEntity.ok(hackathons);
     }
 
-    // Freccia 2: getTeamPartecipanti(hackathonId)
     @GetMapping("/hackathons/{hackathonId}/teams")
     public ResponseEntity<List<TeamResponse>> getTeamPartecipanti(@PathVariable Long hackathonId) {
         List<TeamResponse> teams = segnalazioneHandler.getTeamPartecipanti(hackathonId);
         return ResponseEntity.ok(teams);
     }
 
-    // Freccia 3: inserisciSegnalazione(request)
     @PostMapping
     public ResponseEntity<String> inserisciSegnalazione(@RequestBody SegnalazioneRequest request) {
         segnalazioneHandler.inserisciSegnalazione(request);
@@ -48,7 +45,6 @@ public class ViolazioneController {
         return ResponseEntity.ok(violazioni);
     }
 
-    // --- Endpoint Gestisci Violazione (Nuovo) ---
     @PostMapping("/{violazioneId}/gestisci")
     public ResponseEntity<String> inserisciProvvedimento(
             @PathVariable Long violazioneId,
@@ -56,5 +52,17 @@ public class ViolazioneController {
 
         gestisciHandler.gestisciViolazione(violazioneId, request.esito(), request.motivazione());
         return ResponseEntity.ok("Violazione gestita correttamente");
+    }
+
+    // --- GESTIONE GLOBALE DELLE ECCEZIONI PER QUESTO CONTROLLER ---
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<String> handleIllegalStateException(IllegalStateException e) {
+        return ResponseEntity.status(403).body("Azione non consentita: " + e.getMessage());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body("Dati non validi: " + e.getMessage());
     }
 }

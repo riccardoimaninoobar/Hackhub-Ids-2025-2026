@@ -1,5 +1,7 @@
 package it.unicam.hackhub.application.controller;
 
+import it.unicam.hackhub.application.context.Sessione;
+import it.unicam.hackhub.domain.model.Utente;
 import it.unicam.hackhub.domain.model.hackathon.Hackathon;
 import it.unicam.hackhub.domain.model.Sottomissione;
 import it.unicam.hackhub.domain.model.hackathon.state.StatoConcluso;
@@ -22,13 +24,15 @@ public class ProclamaVincitoreHandler {
     private final HackathonRepository hackathonRepo;
     private final TeamRepository teamRepo;
     private final SistemaPagamentoAdapter sistemaPagamento;
+    private final Sessione sessione;
 
     public ProclamaVincitoreHandler(HackathonRepository hackathonRepo,
                                     TeamRepository teamRepo,
-                                    SistemaPagamentoAdapter sistemaPagamento) {
+                                    SistemaPagamentoAdapter sistemaPagamento, Sessione sessione) {
         this.hackathonRepo = hackathonRepo;
         this.teamRepo = teamRepo;
         this.sistemaPagamento = sistemaPagamento;
+        this.sessione = sessione;
     }
 
     public List<String> getValutazioniTeam(String nomeHackathon) {
@@ -54,8 +58,19 @@ public class ProclamaVincitoreHandler {
     }
 
     public boolean proclamaVincitore(String nomeHackathon, String nomeTeam) {
+        Utente utenteLoggato = sessione.getUtenteCorrente();
+        if (utenteLoggato == null) {
+            throw new IllegalStateException("Operazione non autorizzata.");
+        }
+
         Hackathon hackathon = hackathonRepo.findByNome(nomeHackathon)
                 .orElseThrow(() -> new IllegalArgumentException("Hackathon non trovato."));
+
+        // ---> NUOVO CONTROLLO: Solo l'organizzatore può proclamare il vincitore
+        if (!hackathon.isOrganizzatore(utenteLoggato)) {
+            throw new IllegalStateException("Solo l'organizzatore dell'Hackathon può proclamare il vincitore.");
+        }
+
         Team team = teamRepo.findByNome(nomeTeam)
                 .orElseThrow(() -> new IllegalArgumentException("Team non trovato."));
 
@@ -72,6 +87,7 @@ public class ProclamaVincitoreHandler {
         hackathon.setStato(new StatoConcluso());
         hackathonRepo.save(hackathon);
         System.out.println("NOTIFICA: Complimenti ai membri del team " + team.getNome() + ", avete vinto!");
+
         return true;
     }
 }

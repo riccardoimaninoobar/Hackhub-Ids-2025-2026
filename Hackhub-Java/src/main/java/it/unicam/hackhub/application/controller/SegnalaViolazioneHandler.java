@@ -6,6 +6,7 @@ import it.unicam.hackhub.domain.model.eventi.ViolazioneSegnalataEvent;
 import it.unicam.hackhub.domain.model.hackathon.Hackathon;
 import it.unicam.hackhub.domain.repository.HackathonRepository;
 import it.unicam.hackhub.domain.repository.SegnalazioneRepository;
+import it.unicam.hackhub.domain.repository.UtenteRepository;
 import it.unicam.hackhub.presentation.dto.HackathonResponse;
 import it.unicam.hackhub.presentation.dto.SegnalazioneRequest;
 import it.unicam.hackhub.presentation.dto.TeamResponse;
@@ -35,6 +36,9 @@ public class SegnalaViolazioneHandler {
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private UtenteRepository utenteRepo;
 
     /**
      * Recupera la lista di hackathon a cui il mentore corrente è assegnato.
@@ -70,14 +74,21 @@ public class SegnalaViolazioneHandler {
      */
     @Transactional
     public void inserisciSegnalazione(SegnalazioneRequest request) {
-        Utente mentore = sessione.getUtenteCorrente();
-        if (mentore == null) {
+        Utente utenteInSessione = sessione.getUtenteCorrente();
+        if (utenteInSessione == null) {
             throw new IllegalStateException("Operazione non autorizzata.");
         }
+
+        Utente mentore = utenteRepo.findById(utenteInSessione.getId())
+                .orElseThrow(() -> new IllegalStateException("Utente non più valido nel DB."));
 
         // 1. Validazione e recupero delle entità di dominio
         Hackathon hackathon = hackathonRepo.findById(request.hackathonId())
                 .orElseThrow(() -> new IllegalArgumentException("Hackathon di riferimento non trovato."));
+
+        if (!hackathon.isMentore(mentore)) {
+            throw new IllegalStateException("Solo i mentori assegnati a questo hackathon possono segnalare violazioni.");
+        }
 
         Team teamSegnalato = hackathon.getTeamPartecipanti().stream()
                 .filter(t -> t.getId().equals(request.teamId()))

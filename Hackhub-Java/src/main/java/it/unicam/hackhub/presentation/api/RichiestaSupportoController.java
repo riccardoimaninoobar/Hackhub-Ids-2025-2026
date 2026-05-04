@@ -16,12 +16,10 @@ public class RichiestaSupportoController {
 
     private final RichiestaSupportoHandler handler;
 
-
     public RichiestaSupportoController(RichiestaSupportoHandler handler) {
         this.handler = handler;
     }
 
-    // Endpoint per la selezione iniziale
     @GetMapping("/hackathons")
     public ResponseEntity<?> ottieniHackathonDisponibili() {
         try {
@@ -30,21 +28,19 @@ public class RichiestaSupportoController {
                     .toList();
             return ResponseEntity.ok(response);
         } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.status(403).body("Azione non consentita: " + e.getMessage());
         }
     }
 
-    // Endpoint per l'invio della richiesta
     @PostMapping
     public ResponseEntity<String> inviaRichiesta(@RequestBody InviaRichiestaSupportoRequest request) {
         try {
-            // Conversione ID -> Oggetto Hackathon
             handler.registraRichiestaSupporto(request.hackathonId(), request.descrizione());
-
             return ResponseEntity.ok("Richiesta di supporto inviata correttamente!");
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            // Gestisce descrizione breve, mancanza login o hackathon errato
-            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(403).body("Azione non consentita: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Dati non validi: " + e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Errore durante l'invio della richiesta.");
         }

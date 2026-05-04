@@ -79,4 +79,9 @@ public class Utente {
         Utente user = (Utente) o;
         return Objects.equals(username, user.username);
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username);
+    }
 }

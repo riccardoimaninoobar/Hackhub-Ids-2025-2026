@@ -72,6 +72,10 @@ public class RichiestaSupportoHandler {
         Hackathon h = hackathonRepo.findById(hackathonId)
                 .orElseThrow(() -> new IllegalArgumentException("Hackathon non trovato."));
 
+        if (!h.utentePartecipante(u)) {
+            throw new IllegalStateException("Il tuo team non partecipa a questo Hackathon.");
+        }
+
         RichiestaSupporto richiesta = new RichiestaSupporto(t, h, desc);
         richiestaRepo.save(richiesta);
 

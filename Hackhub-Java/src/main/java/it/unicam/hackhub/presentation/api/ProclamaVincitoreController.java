@@ -21,8 +21,6 @@ public class ProclamaVincitoreController {
         this.sessioneApp = sessioneApp;
     }
 
-    // 1. Endpoint per vedere i punteggi/valutazioni (corrisponde al passo 1 e 2 della CLI)
-    // Usiamo @PathVariable per passare il nome dell'hackathon direttamente nell'URL
     @GetMapping("/valutazioni/{nomeHackathon}")
     public ResponseEntity<?> visualizzaValutazioni(@PathVariable String nomeHackathon) {
         Utente utenteLoggato = sessioneApp.getUtenteCorrente();
@@ -33,15 +31,15 @@ public class ProclamaVincitoreController {
         try {
             List<String> valutazioni = handler.getValutazioniTeam(nomeHackathon);
             return ResponseEntity.ok(valutazioni);
-        } catch (IllegalStateException | IllegalArgumentException e) {
-            // Gestisce hackathon non trovato o non in stato di valutazione
-            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(403).body("Accesso Negato: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Richiesta non valida: " + e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Errore interno: " + e.getMessage());
         }
     }
 
-    // 2. Endpoint per proclamare il vincitore (corrisponde ai passi da 3 a 8 della CLI)
     @PostMapping("/proclama")
     public ResponseEntity<String> proclamaVincitore(@RequestBody ProclamaVincitoreRequest request) {
         Utente utenteLoggato = sessioneApp.getUtenteCorrente();
@@ -58,9 +56,10 @@ public class ProclamaVincitoreController {
                 return ResponseEntity.status(500).body("Errore nell'erogazione del premio. La proclamazione è stata annullata.");
             }
 
-        } catch (IllegalStateException | IllegalArgumentException e) {
-            // Gestisce errori logici (es. team inesistente, stato errato)
-            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(403).body("Accesso Negato: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Richiesta non valida: " + e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Errore interno: " + e.getMessage());
         }

@@ -1,4 +1,4 @@
-### Per test
+### db
 -----------------------
 connessione console H2
 
@@ -9,3 +9,10 @@ JDBC URL: jdbc:h2:file:./data/hackhubdb
 User Name: sa
 Password: <blank>
 -----------------------
+### yaml
+http://localhost:8080/swagger-ui.html
+http://localhost:8080/api-docs.yaml
+
+
+
+
