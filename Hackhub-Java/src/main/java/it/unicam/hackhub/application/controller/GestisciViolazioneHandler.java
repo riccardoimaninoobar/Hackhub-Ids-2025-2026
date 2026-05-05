@@ -44,8 +44,7 @@ public class GestisciViolazioneHandler {
 
         ViolazioneGestitaEvent evento = new ViolazioneGestitaEvent(
                 this,
-                segnalazione.getHackathon().getNome(),
-                segnalazione.getMentore()
+                segnalazione
         );
 
         eventPublisher.publishEvent(evento);

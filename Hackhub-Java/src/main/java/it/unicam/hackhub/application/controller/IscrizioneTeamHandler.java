@@ -34,7 +34,6 @@ public class IscrizioneTeamHandler {
                 .collect(Collectors.toSet());
     }
 
-    // PER IL REST
     @Transactional
     public void iscriviTeam(String nomeHackathon) {
         Utente utenteCorrente = sessione.getUtenteCorrente();
